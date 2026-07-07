@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#3B2245"/>
+  <!-- Diya flame outline -->
+  <path d="M16 4 C16 4 10 10 10 17 C10 20.3 12.7 23 16 23 C19.3 23 22 20.3 22 17 C22 10 16 4 16 4 Z"
+    fill="none" stroke="#C99A4E" stroke-width="1.2"/>
+  <!-- Inner flame -->
+  <path d="M16 9 C16 9 13 13 13 17 C13 18.7 14.3 20 16 20 C17.7 20 19 18.7 19 17 C19 13 16 9 16 9 Z"
+    fill="none" stroke="#C99A4E" stroke-width="0.8" opacity="0.6"/>
+  <!-- Base ellipse (diya lamp) -->
+  <ellipse cx="16" cy="24" rx="7" ry="1.5" fill="none" stroke="#C99A4E" stroke-width="1"/>
+</svg>

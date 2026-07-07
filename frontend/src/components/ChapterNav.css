@@ -1,0 +1,145 @@
+/* ChapterNav — book-edge tab strip */
+
+.chapter-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 52px;
+  min-height: 100%;
+  border-right: var(--hairline);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.chapter-nav__label {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: var(--space-6) 0;
+  border-bottom: var(--hairline-faint);
+  width: 100%;
+  text-align: center;
+}
+
+.chapter-nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+}
+
+.chapter-nav__item {
+  flex: 1;
+  display: flex;
+}
+
+.chapter-nav__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  text-decoration: none;
+  border-bottom: var(--hairline-faint);
+  color: var(--text-muted);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+  position: relative;
+}
+
+.chapter-nav__tab:hover {
+  background: color-mix(in srgb, var(--marigold) 8%, transparent);
+  color: var(--accent);
+}
+
+.chapter-nav__tab--active {
+  background: color-mix(in srgb, var(--marigold) 12%, transparent);
+  color: var(--accent);
+}
+
+/* Active marker — the "thread" pulling the current chapter forward */
+.chapter-nav__tab--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--marigold);
+}
+
+.chapter-nav__num {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+}
+
+/* ── Compact variant (horizontal, for mobile overlay) ─────────────────── */
+.chapter-nav--compact {
+  flex-direction: row;
+  width: 100%;
+  min-height: auto;
+  height: 48px;
+  border-right: none;
+  border-bottom: var(--hairline);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chapter-nav--compact::-webkit-scrollbar {
+  display: none;
+}
+
+.chapter-nav--compact .chapter-nav__label {
+  writing-mode: horizontal-tb;
+  transform: none;
+  white-space: nowrap;
+  padding: 0 var(--space-4);
+  border-bottom: none;
+  border-right: var(--hairline-faint);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  width: auto;
+}
+
+.chapter-nav--compact .chapter-nav__list {
+  flex-direction: row;
+  height: 100%;
+  overflow-x: auto;
+}
+
+.chapter-nav--compact .chapter-nav__item {
+  flex: none;
+}
+
+.chapter-nav--compact .chapter-nav__tab {
+  border-bottom: none;
+  border-right: var(--hairline-faint);
+  width: 44px;
+  height: 48px;
+}
+
+.chapter-nav--compact .chapter-nav__tab--active::before {
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.chapter-nav--compact .chapter-nav__num {
+  writing-mode: horizontal-tb;
+  transform: none;
+}

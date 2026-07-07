@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: gyansutra-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: node src/app.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: GEMINI_API_KEY
+        sync: false   # Set manually in Render dashboard — never committed
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false   # Paste the entire service account JSON here
+      - key: ALLOWED_ORIGINS
+        sync: false   # Set to your Cloudflare Pages URL e.g. https://gyansutra.pages.dev
+      - key: GEMINI_EMBEDDING_MODEL
+        value: text-embedding-004
+      - key: GEMINI_GENERATION_MODEL
+        value: gemini-2.0-flash
+      - key: RAG_SIMILARITY_THRESHOLD
+        value: "0.72"
+      - key: RAG_TOP_K
+        value: "8"
+      - key: ASK_RATE_LIMIT_MAX
+        value: "20"

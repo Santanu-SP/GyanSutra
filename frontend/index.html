@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta -->
+    <title>Gyan Sutra — Thread of Knowledge from the Bhagavad Gita</title>
+    <meta name="description" content="Read the Bhagavad Gita verse by verse in Sanskrit, Hindi, and English. Search by meaning. Ask questions grounded in scripture — every answer cites a specific chapter and verse." />
+    <meta name="keywords" content="Bhagavad Gita, Sanskrit, scripture, Gita, Hindu, verses, chapter, karma, dharma, atman" />
+    <meta name="author" content="Gyan Sutra" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3B2245" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Gyan Sutra" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Gyan Sutra — Thread of Knowledge" />
+    <meta property="og:description" content="Read the Bhagavad Gita. Ask questions grounded in scripture." />
+    <meta property="og:image" content="/icons/icon-512.png" />
+
+    <!-- Prevent flash of wrong theme — apply before first paint -->
+    <script>
+      (function() {
+        var stored = localStorage.getItem('gyansutra-theme');
+        var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
