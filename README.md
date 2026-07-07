@@ -1,8 +1,10 @@
 # ज्ञान सूत्र — Gyan Sutra
 
-> *Thread of knowledge from the Bhagavad Gita*
+> *Thread of knowledge from Indian Scriptures*
 
-A production-grade scripture knowledge platform. Read the Bhagavad Gita verse by verse in Sanskrit, Hindi, and English. Ask questions that are answered only from the text — with citations — never from the model's general knowledge.
+Gyan Sutra is a digital knowledge platform designed to host the most authentic scriptural and mythological texts. The platform is launching with the **Bhagavad Gita** and the **Ramayana**, with a flexible data model and schema architecture designed to allow any subsequent holy texts, epics, and commentaries to be ingested without requiring frontend modifications. 
+
+Users can read texts chapter by chapter, perform semantic search queries, and ask natural-language questions which are answered using strict retrieval-grounded AI generation with direct citations.
 
 ---
 
