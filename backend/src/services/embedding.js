@@ -22,7 +22,7 @@ function getEmbeddingModel() {
     }
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     embeddingModel = genAI.getGenerativeModel({
-      model: process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004',
+      model: process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001',
     });
   }
   return embeddingModel;
