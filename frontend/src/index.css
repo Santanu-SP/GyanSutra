@@ -1,18 +1,16 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   Gyan Sutra — Global Styles
-   Imports design tokens and sets document-level defaults.
-   ═══════════════════════════════════════════════════════════════════════ */
-
+@import "tailwindcss";
 @import './design-system/tokens.css';
 
-/* ── Box Model & Reset ────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  color-scheme: dark;
 }
 
-/* ── Document ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;
@@ -20,45 +18,47 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: var(--leading-normal);
-  color: var(--text-primary);
-  background-color: var(--bg);
-  transition: background-color var(--transition-slow), color var(--transition-slow);
   min-height: 100dvh;
   overflow-x: hidden;
+  background: #1a1a1f;
+  color: #f5f5f4;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  line-height: 1.6;
 }
 
-/* ── Typography Defaults ──────────────────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: var(--leading-tight);
-  color: var(--text-primary);
+#root {
+  min-height: 100dvh;
 }
 
-h1 { font-size: var(--text-xl); }
-h2 { font-size: var(--text-lg); }
-h3 { font-size: var(--text-md); }
-h4 { font-size: var(--text-base); }
-
-p {
-  color: var(--text-secondary);
-  line-height: var(--leading-normal);
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
 }
 
 a {
-  color: var(--accent);
+  color: inherit;
   text-decoration: none;
-  transition: color var(--transition-fast);
 }
 
-a:hover {
-  color: var(--accent-hover);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
 }
 
-/* ── Devanagari Text Class ─────────────────────────────────────────────── */
+p {
+  color: var(--text-secondary);
+}
+
 .devanagari {
   font-family: var(--font-devanagari);
   line-height: var(--leading-devanagari);
@@ -77,21 +77,18 @@ a:hover {
   font-weight: 400;
 }
 
-/* ── Gold Hairline Divider ────────────────────────────────────────────── */
 .gold-rule {
+  margin: var(--space-6) 0;
   border: none;
   border-top: var(--hairline);
-  margin: var(--space-6) 0;
 }
 
-/* ── Focus Ring — Accessibility ───────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: var(--radius-sm);
+  border-radius: 0.375rem;
 }
 
-/* ── Scrollbar Styling ────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -103,27 +100,21 @@ a:hover {
 
 ::-webkit-scrollbar-thumb {
   background: var(--gold-thread);
-  border-radius: 3px;
-  opacity: 0.6;
+  border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  opacity: 1;
-}
-
-/* ── Tags / Chips ─────────────────────────────────────────────────────── */
 .tag {
   display: inline-block;
+  border: 1px solid color-mix(in srgb, var(--marigold) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--marigold) 15%, transparent);
+  padding: 2px var(--space-3);
+  color: var(--indigo);
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--indigo);
-  background: color-mix(in srgb, var(--marigold) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--marigold) 30%, transparent);
-  border-radius: 100px;
-  padding: 2px var(--space-3);
 }
 
 [data-theme="dark"] .tag {
@@ -132,7 +123,6 @@ a:hover {
   border-color: color-mix(in srgb, var(--marigold) 25%, transparent);
 }
 
-/* ── Utility Classes ──────────────────────────────────────────────────── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -145,16 +135,24 @@ a:hover {
   border: 0;
 }
 
-.text-center { text-align: center; }
-.text-muted   { color: var(--text-muted); }
-.text-accent  { color: var(--accent); }
+.text-center {
+  text-align: center;
+}
 
-/* ── Page Turn Animation ──────────────────────────────────────────────── */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
 @keyframes pageTurnIn {
   from {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -166,6 +164,7 @@ a:hover {
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-12px);
@@ -180,20 +179,33 @@ a:hover {
   animation: pageTurnOut var(--page-turn-duration) var(--page-turn-easing) forwards;
 }
 
-/* ── Diya Flicker — loading state ─────────────────────────────────────── */
 @keyframes diyaFlicker {
-  0%, 100% { opacity: 1; }
-  20%       { opacity: 0.88; }
-  40%       { opacity: 0.96; }
-  60%       { opacity: 0.82; }
-  80%       { opacity: 0.94; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  20% {
+    opacity: 0.88;
+  }
+
+  40% {
+    opacity: 0.96;
+  }
+
+  60% {
+    opacity: 0.82;
+  }
+
+  80% {
+    opacity: 0.94;
+  }
 }
 
 .diya-flicker {
   animation: diyaFlicker var(--diya-flicker-duration) ease-in-out infinite;
 }
 
-/* ── Layout helpers ───────────────────────────────────────────────────── */
 .container {
   width: 100%;
   max-width: var(--max-width-wide);
@@ -207,9 +219,13 @@ a:hover {
   padding-inline: var(--space-6);
 }
 
-/* ── Responsive breakpoints ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  html { font-size: 15px; }
-  .container { padding-inline: var(--space-4); }
-  .container--prose { padding-inline: var(--space-4); }
+  html {
+    font-size: 15px;
+  }
+
+  .container,
+  .container--prose {
+    padding-inline: var(--space-4);
+  }
 }
