@@ -26,6 +26,10 @@ export const getAllChapters = () => request('/chapters');
 export const getChapter    = (id) => request(`/chapters/${id}`);
 export const getChapterVerses = (id) => request(`/chapters/${id}/verses`);
 
+// ── Sources ───────────────────────────────────────────────────────────────────
+export const getSources = () => request('/sources');
+export const getSourceVerses = (sourceId) => request(`/verses/${sourceId}`);
+
 // ── Verses ────────────────────────────────────────────────────────────────────
 export const getVerse = (id) => request(`/verses/${id}`);
 

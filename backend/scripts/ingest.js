@@ -24,11 +24,19 @@ const path = require('path');
 const fs = require('fs');
 const { batchWrite, collections } = require('../src/services/firestore');
 const { batchEmbedTexts, buildVerseEmbeddingText } = require('../src/services/embedding');
+const { SOURCES } = require('../src/data/sources');
 const admin = require('firebase-admin');
 
 // ── CLI flags ─────────────────────────────────────────────────────────────────
 const DRY_RUN = process.argv.includes('--dry-run');
 const SKIP_EMBED = process.argv.includes('--skip-embed');
+const SOURCE_ID_ARG = process.argv.find(arg => arg.startsWith('--source_id=') || arg.startsWith('--source-id='));
+const SOURCE_ID = SOURCE_ID_ARG ? SOURCE_ID_ARG.split('=')[1] : 'bhagavad-gita';
+const SOURCE = SOURCES.find((item) => item.id === SOURCE_ID) || {
+  id: SOURCE_ID,
+  title: SOURCE_ID,
+  description: '',
+};
 
 // ── Bhagavad Gita data (bundled inline) ──────────────────────────────────────
 // We embed the full dataset directly so no external download is required.
@@ -132,6 +140,7 @@ async function main() {
   console.log('╚══════════════════════════════════════════════╝');
   if (DRY_RUN) console.log('[MODE] Dry run — no Firestore writes will occur.');
   if (SKIP_EMBED) console.log('[MODE] Skip embed — storing text data only.');
+  console.log(`[SOURCE] ${SOURCE.id}`);
 
   // ── 1. Ingest chapters ─────────────────────────────────────────────────────
   console.log('\n[Step 1/3] Ingesting chapters…');
@@ -139,7 +148,7 @@ async function main() {
     id: `chapter_${ch.number}`,
     data: {
       ...ch,
-      sourceText: 'Bhagavad Gita', // Ramayana-ready field
+      sourceText: SOURCE.title,
     },
   }));
 
@@ -172,8 +181,9 @@ async function main() {
   const verseItems = rawVerses.map((v, i) => {
     const docId = `${v.chapterNumber}_${v.verseNumber}`;
     return {
-      id: docId,
+      id: `${SOURCE_ID}_${docId}`,
       data: {
+        source_id: SOURCE_ID,
         chapterNumber: v.chapterNumber,
         verseNumber: v.verseNumber,
         sanskrit: v.sanskrit || '',
@@ -182,7 +192,7 @@ async function main() {
         translationHindi: v.translationHindi || '',
         translationEnglish: v.translationEnglish || '',
         sourceCommentary: v.sourceCommentary || '',
-        sourceText: 'Bhagavad Gita',
+        sourceText: SOURCE.title,
         tags: v.tags || [],
         embedding: admin.firestore.FieldValue.vector(embeddings[i]),
       },

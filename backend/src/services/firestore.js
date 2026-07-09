@@ -17,12 +17,13 @@ function initFirestore() {
 
   let credential;
 
-  // Prefer the inline JSON env var (Render production)
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
     credential = admin.credential.cert(serviceAccount);
-  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-    // Fall back to file path (local dev)
+  } else if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+  ) {
     const serviceAccount = require(
       require('path').resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)
     );

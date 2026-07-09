@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 const chaptersRouter = require('./routes/chapters');
+const sourcesRouter = require('./routes/sources');
 const versesRouter = require('./routes/verses');
 const searchRouter = require('./routes/search');
 const askRouter = require('./routes/ask');
@@ -20,16 +21,15 @@ app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
-  .split(',')
-  .map(o => o.trim());
+const allowedOrigin = process.env.CORS_ORIGIN;
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, mobile apps, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin ${origin} not allowed`));
+    if (!allowedOrigin) {
+      return callback(new Error('CORS_ORIGIN is not configured.'));
+    }
+    if (origin === allowedOrigin) return callback(null, true);
+    return callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -63,6 +63,7 @@ app.use('/api/ask', askLimiter);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/chapters', chaptersRouter);
+app.use('/api/sources', sourcesRouter);
 app.use('/api/verses', versesRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/ask', askRouter);
