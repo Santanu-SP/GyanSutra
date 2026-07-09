@@ -9,6 +9,7 @@
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const EMBEDDING_DIMENSIONS = 768;
 
 // Lazy-initialise so we don't crash during test imports with no API key
 let genAI;
@@ -27,6 +28,13 @@ function getEmbeddingModel() {
   return embeddingModel;
 }
 
+function normalizeEmbeddingValues(values) {
+  if (!Array.isArray(values)) {
+    throw new Error('Embedding response did not contain a valid values array.');
+  }
+  return values.slice(0, EMBEDDING_DIMENSIONS);
+}
+
 /**
  * Generate a single embedding vector for a text string.
  * Returns a number[] of length 768.
@@ -39,8 +47,9 @@ async function embedText(text, taskType = 'RETRIEVAL_DOCUMENT') {
   const result = await model.embedContent({
     content: { parts: [{ text }], role: 'user' },
     taskType,
+    outputDimensionality: EMBEDDING_DIMENSIONS,
   });
-  return result.embedding.values;
+  return normalizeEmbeddingValues(result.embedding.values);
 }
 
 /**
