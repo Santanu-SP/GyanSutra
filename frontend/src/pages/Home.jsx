@@ -1,18 +1,26 @@
-/**
- * Home — "Today's Verse" landing page.
- *
- * The homepage opens directly on today's verse as a full illuminated card.
- * No hero banner with buttons. No marketing copy.
- * "Today's verse" is deterministic: (day_index % total_verse_count).
- *
- * Below the verse: chapter navigation and a brief app description.
- */
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getSources } from '../services/api';
 
-export default function Home() {
+const SOURCE_STYLES = {
+  'bhagavad-gita': {
+    accent: 'from-amber-500/20 via-transparent to-transparent',
+    glyph: 'गीता',
+    label: 'Song of the Divine',
+  },
+  upanishads: {
+    accent: 'from-indigo-500/20 via-transparent to-transparent',
+    glyph: 'श्रुति',
+    label: 'Whispers of the Self',
+  },
+  ramayana: {
+    accent: 'from-orange-500/20 via-transparent to-transparent',
+    glyph: 'राम',
+    label: 'Epic of Dharma',
+  },
+};
+
+export default function Home({ onAskPrompt = () => {} }) {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,44 +33,191 @@ export default function Home() {
   }, []);
 
   return (
-    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 16px' }}>
-      <header style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Gyan Sutra</h1>
-        <p style={{ marginTop: 8 }}>Choose a text from the library.</p>
-      </header>
+    <main className="relative overflow-hidden">
+      <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
-      {error ? <p>{error}</p> : null}
+      <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-24 lg:pt-12">
+        <header className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
+          <div className="space-y-6">
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
+              <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.55)]" />
+              Sacred Archive
+            </p>
 
-      <section
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 16,
-        }}
-      >
-        {loading
-          ? Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                style={{ border: '1px solid #ddd', borderRadius: 12, minHeight: 140, padding: 16 }}
-              />
-            ))
-          : sources.map((source) => (
-              <Link
-                key={source.id}
-                to={`/${source.id}`}
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 12,
-                  padding: 16,
-                  color: 'inherit',
-                  textDecoration: 'none',
+            <div className="space-y-4">
+              <h1 className="max-w-4xl font-serif text-4xl leading-tight text-stone-50 sm:text-5xl lg:text-7xl">
+                Eternal Wisdom of Sanatan Dharma
+              </h1>
+              <p className="max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
+                Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => {
+                  const librarySection = document.getElementById('text-library');
+                  librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
+                className="inline-flex items-center justify-center rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:text-white"
               >
-                <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: '1.1rem' }}>{source.title}</h2>
-                <p style={{ margin: 0 }}>{source.description}</p>
-              </Link>
-            ))}
+                Enter the Library
+              </button>
+              <button
+                type="button"
+                onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
+                className="inline-flex items-center justify-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-6 py-3 text-sm font-medium text-stone-200 transition hover:border-amber-500/40 hover:text-amber-100"
+              >
+                Seek Divine Guidance
+              </button>
+            </div>
+          </div>
+
+          <aside className="relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-gradient-to-br from-white/[0.05] via-white/[0.03] to-transparent p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
+            <div className="relative space-y-5">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-stone-500">
+                <span>Daily Darshan</span>
+                <span className="text-amber-400">Featured Sutra</span>
+              </div>
+
+              <div className="space-y-4 rounded-[1.75rem] border border-amber-700/20 bg-[#141419]/80 p-6">
+                <p className="font-serif text-2xl leading-relaxed text-stone-100">
+                  “Within stillness, the eternal thread of knowledge reveals itself.”
+                </p>
+                <p className="text-sm leading-7 text-stone-400">
+                  Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom.
+                </p>
+                <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  Contemplation for Today
+                </div>
+              </div>
+            </div>
+          </aside>
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+          <article className="rounded-[2rem] border border-amber-700/20 bg-[#141419]/75 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
+                  Curated Journey
+                </p>
+                <h2 className="mt-3 font-serif text-3xl text-stone-50">
+                  A Living Sanctuary of Texts
+                </h2>
+              </div>
+              <p className="max-w-md text-sm leading-7 text-stone-400">
+                Move from dialogue to revelation, from epic action to inward inquiry, through a library shaped for reverence and study.
+              </p>
+            </div>
+          </article>
+
+          <article className="rounded-[2rem] border border-indigo-500/15 bg-indigo-500/10 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
+            <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
+              Invoke the Guide
+            </p>
+            <h3 className="mt-3 font-serif text-2xl text-stone-50">
+              Bring your questions into reflection
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-stone-300">
+              Ask about karma, detachment, devotion, or interpretation and receive responses rooted in your sacred library.
+            </p>
+            <button
+              type="button"
+              onClick={() => onAskPrompt('How should I understand karma without attachment?')}
+              className="mt-5 inline-flex items-center rounded-full border border-amber-500/30 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:bg-amber-500/10"
+            >
+              Open Divine Guide
+            </button>
+          </article>
+        </section>
+
+        <section id="text-library" className="space-y-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
+                Text Library
+              </p>
+              <h2 className="mt-3 font-serif text-3xl text-stone-50 sm:text-4xl">
+                Sacred Manuscripts
+              </h2>
+            </div>
+            <p className="max-w-2xl text-sm leading-7 text-stone-400">
+              Explore each text through an immersive reading experience designed with quiet depth, ceremonial restraint, and precise modern craft.
+            </p>
+          </div>
+
+          {error ? (
+            <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-200">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {loading
+              ? Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="min-h-[320px] animate-pulse rounded-[2rem] border border-amber-700/10 bg-white/[0.03]"
+                  />
+                ))
+              : sources.map((source) => {
+                  const style = SOURCE_STYLES[source.id] || {
+                    accent: 'from-amber-500/15 via-transparent to-transparent',
+                    glyph: 'ॐ',
+                    label: 'Sacred Text',
+                  };
+
+                  return (
+                    <Link
+                      key={source.id}
+                      to={`/${source.id}`}
+                      className="group relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-[#141419]/85 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
+                      <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
+
+                      <div className="relative flex h-full min-h-[320px] flex-col justify-between">
+                        <div className="space-y-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <span className="text-xs uppercase tracking-[0.35em] text-amber-400/85">
+                              {style.label}
+                            </span>
+                            <span className="font-serif text-3xl text-amber-200/90">
+                              {style.glyph}
+                            </span>
+                          </div>
+
+                          <div className="space-y-3">
+                            <h3 className="font-serif text-3xl text-stone-50">
+                              {source.title}
+                            </h3>
+                            <p className="text-sm leading-7 text-stone-300">
+                              {source.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="h-px w-full bg-gradient-to-r from-amber-500/40 via-amber-500/10 to-transparent" />
+                          <div className="flex items-center justify-between text-sm text-stone-300">
+                            <span className="uppercase tracking-[0.28em] text-stone-500">
+                              Open Manuscript
+                            </span>
+                            <span className="rounded-full border border-amber-500/25 px-3 py-1 text-amber-100 transition group-hover:border-amber-400/60">
+                              Enter
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+          </div>
+        </section>
       </section>
     </main>
   );
