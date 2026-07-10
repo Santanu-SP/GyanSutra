@@ -56,19 +56,18 @@ In Firebase Console → Firestore → Indexes → Vector indexes:
 
 ### 3. Data ingestion
 
-The bundled dataset contains representative verses from all 18 chapters:
+Run the local download script to compile the complete Gita database from verified source repositories:
+
+```bash
+node download.js
+```
+
+Then run the ingestion script to compute vector embeddings and populate Firestore:
 
 ```bash
 npm run ingest
 ```
 
-For the full ~700-verse dataset:
-```bash
-# Download the open-licensed gita-api dataset
-curl -L https://raw.githubusercontent.com/gita/BhagavadGita/master/data/bhagavad_gita.json \
-  -o data/gita.json
-npm run ingest
-```
 
 Flags:
 - `--dry-run` — validate without writing to Firestore
