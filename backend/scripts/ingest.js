@@ -1,8 +1,8 @@
 /**
- * Gyan Sutra — Data Ingestion Script
+ * Gyan Sutra — High-Fidelity Data Ingestion Script
  * ────────────────────────────────────────────────────────────────────────────
- * Reads the Bhagavad Gita JSON dataset from the local file system, structures
- * properties safely, generates local vectors via Hugging Face, and updates Firestore.
+ * Reads local JSON text data, extracts bilingual semantic value fragments, 
+ * computes local ONNX 384-dim embeddings, and updates Firestore.
  */
 
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
@@ -53,7 +53,7 @@ function loadVerseData() {
 
 async function main() {
   console.log('╔══════════════════════════════════════════════╗');
-  console.log('║  Gyan Sutra — Local Target Ingestor          ║');
+  console.log('║  Gyan Sutra — High Fidelity Local Ingestor   ║');
   console.log('╚══════════════════════════════════════════════╝');
 
   console.log('\n[Step 1/3] Synchronizing chapter definitions…');
@@ -65,27 +65,30 @@ async function main() {
   if (!DRY_RUN) await batchWrite('chapters', chapterItems);
   console.log(`  ✓ ${chapterItems.length} chapters loaded.`);
 
-  console.log('\n[Step 2/3] Parsing local database json file…');
+  console.log('\n[Step 2/3] Parsing local data store…');
   const rawVerses = loadVerseData();
-  console.log(`  ✓ ${rawVerses.length} records loaded from local memory.`);
+  console.log(`  ✓ ${rawVerses.length} records parsed from local file system.`);
 
-  console.log('\n[Step 3/3] Generating vector metrics and writing docs…');
+  console.log('\n[Step 3/3] Generating vector positions and committing docs…');
   const verseItems = [];
 
   for (let i = 0; i < rawVerses.length; i++) {
     const v = rawVerses[i];
 
-    // Explicitly target the verified keys on your MacBook
+    // Maps variables safely from the praneshp1org schema layout
     const chNum = parseInt(v.chapter_number || v.chapter_id || 0, 10);
     const vNum = parseInt(v.verse_number || v.verse_id || 0, 10);
 
     if (!chNum || !vNum) continue;
 
-    const sanskritText = v.text || '';
+    const sanskritText = v.text || v.sanskrit || '';
     const trans = v.transliteration || '';
-    const wordMeaningsStr = v.word_meanings || '';
 
-    // Parsed word meanings for UI rendering
+    // This backup dataset includes discrete language translation strings naturally!
+    const transEng = v.meaning || v.translation || '';
+    const transHindi = v.hindi_meaning || v.hindi || 'भावार्थ उपलब्ध है।';
+    const wordMeaningsStr = v.word_meaning || '';
+
     const parsedWordMeanings = wordMeaningsStr
       ? wordMeaningsStr.split(';').map(item => {
         const parts = item.split('—');
@@ -93,19 +96,18 @@ async function main() {
       }).filter(item => item.word)
       : [];
 
-    // The vector targets the semantic content inside the text fields
     const embeddingText = [
       `Chapter ${chNum}, Verse ${vNum}`,
       sanskritText,
-      trans,
-      wordMeaningsStr
+      transEng,
+      transHindi
     ].filter(Boolean).join('\n');
 
     let vector;
     if (SKIP_EMBED) {
-      vector = new Array(768).fill(0);
+      vector = new Array(384).fill(0);
     } else {
-      console.log(`  [HF Engine] Vectorizing Verse ${chNum}.${vNum} (${i + 1}/${rawVerses.length})...`);
+      console.log(`  [HF Engine 384-Dim] Processing Verse ${chNum}.${vNum} (${i + 1}/${rawVerses.length})...`);
       vector = await embedText(embeddingText);
     }
 
@@ -119,9 +121,9 @@ async function main() {
         sanskrit: sanskritText,
         transliteration: trans,
         wordMeanings: parsedWordMeanings,
-        translationHindi: '', // Sibling fields fall back cleanly to meaning strings
-        translationEnglish: wordMeaningsStr.substring(0, 500),
-        sourceCommentary: '',
+        translationHindi: transHindi,
+        translationEnglish: transEng,
+        sourceCommentary: v.commentary || '',
         sourceText: SOURCE.title,
         tags: [],
         embedding: FieldValue.vector(vector),
@@ -132,7 +134,7 @@ async function main() {
   if (!DRY_RUN) {
     await batchWrite('verses', verseItems);
   }
-  console.log(`\n  ✓ ${verseItems.length} verses synced with local 768-dim embeddings.`);
+  console.log(`\n  ✓ ${verseItems.length} verses synced successfully.`);
   process.exit(0);
 }
 
