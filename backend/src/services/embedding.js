@@ -1,7 +1,7 @@
 /**
  * Embedding Service — Runs a state-of-the-art transformer model locally.
  * 100% Free, Unlimited, 0ms Network Latency, and requires NO API Keys.
- * Outputs native 768-dimensional vectors matching your Firestore setup.
+ * Outputs native 384-dimensional vectors matching your Firestore setup.
  */
 
 let pipelineInstance = null;
@@ -14,7 +14,7 @@ async function getPipeline() {
     // Dynamically import the transformers library
     const { pipeline } = await import('@xenova/transformers');
 
-    console.log('[Embedding] Loading local 768-dim GTE model into memory...');
+    console.log('[Embedding] Loading local 384-dim GTE model into memory...');
     pipelineInstance = await pipeline('feature-extraction', 'Xenova/gte-small');
     console.log('[Embedding] Local model successfully initialized.');
   }
@@ -24,7 +24,7 @@ async function getPipeline() {
 /**
  * Generates a text embedding vector array locally.
  * @param {string} text - The input query or verse string to vectorize
- * @returns {Promise<number[]>} - Returns a numerical vector array (768 dimensions)
+ * @returns {Promise<number[]>} - Returns a numerical vector array (384 dimensions)
  */
 async function embedText(text) {
   try {

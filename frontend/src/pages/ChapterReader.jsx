@@ -11,6 +11,7 @@ import { getChapter, getChapterVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import RecommendationsRail from '../components/RecommendationsRail';
 import { usePWAInstall } from '../hooks/usePWAInstall';
+import { filterVerses } from '../utils/verseUtils';
 import './ChapterReader.css';
 
 export default function ChapterReader() {

@@ -260,3 +260,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+.verse-card__commentary {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(214, 175, 55, 0.15);
+  padding-top: 0.85rem;
+}
+
+.verse-card__commentary summary {
+  cursor: pointer;
+  color: #d4af37;
+  font-weight: 500;
+  font-size: 0.95rem;
+  outline: none;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.verse-card__commentary summary:hover {
+  color: #f3e5ab;
+}
+
+.verse-card__commentary .commentary-text {
+  margin-top: 0.65rem;
+  color: #b3b3b3;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  text-align: justify;
+}

@@ -81,6 +81,7 @@ export default function IlluminatedVerseCard({
     transliteration,
     translationEnglish,
     translationHindi,
+    sourceCommentary,
     wordMeanings = [],
     tags = [],
   } = verse;
@@ -185,6 +186,15 @@ export default function IlluminatedVerseCard({
               </div>
             ))}
           </dl>
+        </details>
+      )}
+
+      {variant === 'full' && sourceCommentary && (
+        <details className="verse-card__commentary">
+          <summary>Authentic Commentary & Analysis</summary>
+          <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`}>
+            {sourceCommentary}
+          </p>
         </details>
       )}
 
