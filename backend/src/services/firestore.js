@@ -100,12 +100,10 @@ async function batchWrite(collectionName, items) {
  *
  * Requires a vector index on `verses.embedding` — create it in Firebase Console or via CLI:
  *   firebase firestore:indexes
- * The index is created automatically on first `findNearest` call in some SDK versions,
- * but it's safer to create it manually before running ingest.
  *
  * @param {number[]} queryVector - 768-dimensional embedding
  * @param {number} topK - how many results to retrieve
- * @returns {Array<{id, similarity, ...verseFields}>}
+ * @returns {Promise<Array<{id, similarity, chapterNumber, verseNumber, sanskrit, transliteration, translationEnglish, translationHindi, wordMeanings, tags}>>}
  */
 async function findNearestVerses(queryVector, topK = 8) {
   const versesCol = collections.verses();
@@ -115,18 +113,30 @@ async function findNearestVerses(queryVector, topK = 8) {
     queryVector: admin.firestore.FieldValue.vector(queryVector),
     limit: topK,
     distanceMeasure: 'COSINE',
-    distanceResultField: '_distance', // Firestore adds this field to each result
+    distanceResultField: '_distance', // Firestore tracks cosine distance here
   });
 
   const snap = await vectorQuery.get();
+
   return snap.docs.map(doc => {
     const data = doc.data();
-    const distance = data._distance ?? 1;
-    // Convert COSINE distance to similarity: similarity = 1 - distance
-    const similarity = 1 - distance;
-    delete data._distance;
-    delete data.embedding; // Don't send 768 floats to the client
-    return { id: doc.id, similarity, ...data };
+
+    // Convert Cosine Distance to Cosine Similarity score (0 to 1)
+    const distance = data._distance !== undefined ? data._distance : 1;
+    const similarityScore = Math.max(0, Math.min(1, 1 - distance));
+
+    return {
+      id: doc.id,
+      similarity: similarityScore,
+      chapterNumber: data.chapterNumber,
+      verseNumber: data.verseNumber,
+      sanskrit: data.sanskrit || '',
+      transliteration: data.transliteration || '',
+      translationEnglish: data.translationEnglish || '',
+      translationHindi: data.translationHindi || '',
+      wordMeanings: data.wordMeanings || [],
+      tags: data.tags || []
+    };
   });
 }
 

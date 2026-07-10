@@ -1,21 +1,9 @@
 /**
  * RAG Service — Retrieve-Augment-Generate pipeline
- *
- * This module enforces the hard contract from the product spec:
- *
- *   1. Embed the user's question.
- *   2. Retrieve the top-K nearest verses via Firestore KNN.
- *   3. Check: does ANY retrieved verse meet the similarity threshold?
- *      → NO:  return a refusal object. THE LLM IS NEVER CALLED.
- *      → YES: build a grounded context and call Gemini Flash.
- *   4. The system prompt for generation is a hard instruction — not a suggestion.
- *      The LLM is told: cite chapter/verse, never speculate, never editorialize.
- *
- * The threshold check is in CODE, not in a prompt. A model that ignores its own
- * refusal instruction cannot bypass this — the function returns before the API call.
+ * Integrated with OpenRouter Free Tier Multi-Model Architecture
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { OpenAI } = require('openai');
 const { embedText } = require('./embedding');
 const { findNearestVerses, collections } = require('./firestore');
 
@@ -23,29 +11,25 @@ const { findNearestVerses, collections } = require('./firestore');
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.72');
 const TOP_K = parseInt(process.env.RAG_TOP_K || '8', 10);
 
-// The refusal string the client will display in the empty state.
-// Phrased calmly — not as an error, just as an honest limitation.
 const REFUSAL_ANSWER =
   "Gyan Sutra doesn't have a grounded answer for this yet. " +
   "The verses in the current database don't contain a clear teaching on this question. " +
   "Try rephrasing, or explore the chapters directly.";
 
-// ── Generation Model ──────────────────────────────────────────────────────────
-let generativeModel;
-function getGenerativeModel() {
-  if (!generativeModel) {
-    if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not set.');
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    generativeModel = genAI.getGenerativeModel({
-      model: process.env.GEMINI_GENERATION_MODEL || 'gemini-2.0-flash',
+// ── OpenRouter Client Initialization ──────────────────────────────────────────
+let openaiClient;
+function getOpenRouterClient() {
+  if (!openaiClient) {
+    if (!process.env.GEMINI_API_KEY) throw new Error('API Key missing inside .env configurations.');
+    openaiClient = new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.GEMINI_API_KEY,
     });
   }
-  return generativeModel;
+  return openaiClient;
 }
 
 // ── System Prompt ─────────────────────────────────────────────────────────────
-// This is a hard instruction string, embedded in code as specified in the product brief.
-// It is NOT a comment; it is the actual system prompt sent to the model every call.
 const SYSTEM_PROMPT = `You are Gyan Sutra's scripture guide. Your role is strictly limited:
 
 RULES — follow these without exception:
@@ -71,13 +55,13 @@ Retrieved context follows:`;
  * }>}
  */
 async function askRag(question) {
-  // Step 1: Embed the question (RETRIEVAL_QUERY task type for better accuracy)
+  // Step 1: Embed the question
   const queryVector = await embedText(question, 'RETRIEVAL_QUERY');
 
   // Step 2: Retrieve top-K nearest verses from Firestore
   const retrieved = await findNearestVerses(queryVector, TOP_K);
 
-  // Step 3: Threshold gate — if nothing is close enough, SKIP THE LLM ENTIRELY
+  // Step 3: Threshold gate
   const topSimilarity = retrieved.length > 0 ? retrieved[0].similarity : 0;
   const passedThreshold = retrieved.filter(v => v.similarity >= SIMILARITY_THRESHOLD);
 
@@ -90,7 +74,7 @@ async function askRag(question) {
     };
   }
 
-  // Step 4: Build grounded context string from retrieved verses
+  // Step 4: Build grounded context string
   const contextLines = passedThreshold.map((v, i) => {
     const wordMeanings = Array.isArray(v.wordMeanings)
       ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
@@ -108,13 +92,54 @@ async function askRag(question) {
   }).join('\n\n---\n\n');
 
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nQuestion: ${question}`;
+  const openai = getOpenRouterClient();
+  let answer = "";
 
-  // Step 5: Call Gemini Flash with the grounded context
-  const model = getGenerativeModel();
-  const result = await model.generateContent(fullPrompt);
-  const answer = result.response.text().trim();
+  // Check if the user is explicitly requesting a multi-model comparison view
+  const isCompareMode = question.toLowerCase().trim().startsWith('[compare]');
 
-  // Step 6: Return answer + citations (without the embedding vector)
+  if (isCompareMode) {
+    // ── APPROACH B: Simultaneous Multi-Model Comparison Execution ──
+    const cleanQuestion = question.replace(/^\[compare\]/i, '').trim();
+    const specificPrompt = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nQuestion: ${cleanQuestion}`;
+
+    const targetModels = [
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'google/gemma-2-9b-it:free',
+      'openai/gpt-oss-120b:free'
+    ];
+
+    console.log(`[RAG] Running Approach B: Parallel generation over ${targetModels.length} models.`);
+
+    const requests = targetModels.map(modelId =>
+      openai.chat.completions.create({
+        model: modelId,
+        messages: [{ role: 'user', content: specificPrompt }],
+      }).then(res => ({
+        name: modelId.split('/')[1].split(':')[0].toUpperCase(),
+        text: res.choices[0].message.content.trim()
+      })).catch(err => ({
+        name: modelId.split('/')[1].split(':')[0].toUpperCase(),
+        text: `Failed to load response: ${err.message}`
+      }))
+    );
+
+    const responses = await Promise.all(requests);
+
+    // Stitch the comparison data nicely with Markdown headers
+    answer = responses.map(r => `## 🤖 Response from ${r.name}\n${r.text}`).join('\n\n---\n\n');
+
+  } else {
+    // ── APPROACH A: High-Reliability Single Free-Model Router ──
+    console.log('[RAG] Running Approach A: Smart Free-Routing Path.');
+    const response = await openai.chat.completions.create({
+      model: 'openrouter/free',
+      messages: [{ role: 'user', content: fullPrompt }],
+    });
+    answer = response.choices[0].message.content.trim();
+  }
+
+  // Step 6: Map Citations back safely
   const citations = passedThreshold.map(v => ({
     id: v.id,
     chapterNumber: v.chapterNumber,
@@ -132,7 +157,6 @@ async function askRag(question) {
 
 /**
  * Log every /ask call to Firestore for offline review.
- * Runs fire-and-forget — don't await in the request handler.
  */
 async function logQaCall({ question, retrievedVerseIds, wasAnswered }) {
   try {
@@ -143,7 +167,6 @@ async function logQaCall({ question, retrievedVerseIds, wasAnswered }) {
       timestamp: new Date(),
     });
   } catch (e) {
-    // Non-fatal — log but don't surface to client
     console.error('[qaLog] Failed to write log:', e.message);
   }
 }
