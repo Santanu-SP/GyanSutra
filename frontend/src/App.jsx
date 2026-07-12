@@ -77,9 +77,11 @@ export default function App() {
             to="/"
             className="group inline-flex items-center gap-3 rounded-full border border-amber-700/20 bg-white/[0.03] px-3 py-2 transition hover:border-amber-500/40 hover:bg-white/[0.05]"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-600/30 bg-gradient-to-br from-amber-500/20 to-indigo-500/20 text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              ॐ
-            </span>
+            <img
+              src="/icons/logo.svg"
+              alt="Gyan Sutra Logo"
+              className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-105"
+            />
             <span className="flex flex-col">
               <span className="font-serif text-xl tracking-[0.16em] text-stone-50">
                 Gyan Sutra
