@@ -1,6 +1,6 @@
 const express = require('express');
 const { collections } = require('../services/firestore');
-const gitaData = require('../data/gita.json');
+const gitaData = require('../../data/gita.json');
 
 const router = express.Router();
 
