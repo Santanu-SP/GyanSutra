@@ -45,10 +45,10 @@ export default function Home({ onAskPrompt = () => {} }) {
             </p>
 
             <div className="space-y-4">
-              <h1 className="max-w-4xl font-serif text-4xl leading-tight text-stone-50 sm:text-5xl lg:text-7xl">
+              <h1 className="max-w-4xl font-serif text-4xl leading-tight text-[color:var(--text-primary)] sm:text-5xl lg:text-7xl">
                 Eternal Wisdom of Sanatan Dharma
               </h1>
-              <p className="max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
+              <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
               </p>
             </div>
@@ -60,33 +60,33 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:text-white"
+                className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
               >
                 Enter the Library
               </button>
               <button
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/8 px-6 py-3 text-sm font-medium text-stone-200 transition hover:border-amber-400/60 hover:text-amber-100"
+                className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/8 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--accent)]"
               >
                 Consult Saarthi
               </button>
             </div>
           </div>
 
-          <aside className="relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-gradient-to-br from-white/[0.05] via-white/[0.03] to-transparent p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
+          <aside className="relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-stone-500">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
                 <span>Daily Darshan</span>
                 <span className="text-amber-400">Featured Sutra</span>
               </div>
 
-              <div className="space-y-4 rounded-[1.75rem] border border-amber-700/20 bg-[#141419]/80 p-6">
-                <p className="font-serif text-2xl leading-relaxed text-stone-100">
+              <div className="space-y-4 rounded-[1.75rem] border border-amber-700/20 bg-[color:var(--bg)] p-6">
+                <p className="font-serif text-2xl leading-relaxed text-[color:var(--text-primary)]">
                   “Within stillness, the eternal thread of knowledge reveals itself.”
                 </p>
-                <p className="text-sm leading-7 text-stone-400">
+                <p className="text-sm leading-7 text-[color:var(--text-muted)]">
                   Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom.
                 </p>
                 <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
@@ -99,36 +99,36 @@ export default function Home({ onAskPrompt = () => {} }) {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-          <article className="rounded-[2rem] border border-amber-700/20 bg-[#141419]/75 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
+          <article className="rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
                   Curated Journey
                 </p>
-                <h2 className="mt-3 font-serif text-3xl text-stone-50">
+                <h2 className="mt-3 font-serif text-3xl text-[color:var(--text-primary)]">
                   A Living Sanctuary of Texts
                 </h2>
               </div>
-              <p className="max-w-md text-sm leading-7 text-stone-400">
+              <p className="max-w-md text-sm leading-7 text-[color:var(--text-muted)]">
                 Move from dialogue to revelation, from epic action to inward inquiry, through a library shaped for reverence and study.
               </p>
             </div>
           </article>
 
-          <article className="rounded-xl border border-indigo-500/15 bg-indigo-500/10 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
+          <article className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
               Your Companion
             </p>
-            <h3 className="mt-3 font-serif text-2xl text-stone-50">
+            <h3 className="mt-3 font-serif text-2xl text-[color:var(--text-primary)]">
               Saarthi — सारथी
             </h3>
-            <p className="mt-3 text-sm leading-7 text-stone-300">
+            <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
               Ask about karma, detachment, devotion, or interpretation — and receive responses rooted in your sacred library.
             </p>
             <button
               type="button"
               onClick={() => onAskPrompt('How should I understand karma without attachment?')}
-              className="mt-5 inline-flex items-center rounded border border-amber-500/30 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:bg-amber-500/10"
+              className="mt-5 inline-flex items-center rounded border border-amber-500/30 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:bg-amber-500/10"
             >
               Open Saarthi
             </button>
@@ -141,11 +141,11 @@ export default function Home({ onAskPrompt = () => {} }) {
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
                 Text Library
               </p>
-              <h2 className="mt-3 font-serif text-3xl text-stone-50 sm:text-4xl">
+              <h2 className="mt-3 font-serif text-3xl text-[color:var(--text-primary)] sm:text-4xl">
                 Sacred Manuscripts
               </h2>
             </div>
-            <p className="max-w-2xl text-sm leading-7 text-stone-400">
+            <p className="max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
               Explore each text through an immersive reading experience designed with quiet depth, ceremonial restraint, and precise modern craft.
             </p>
           </div>
@@ -175,7 +175,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                     <Link
                       key={source.id}
                       to={`/${source.id}`}
-                      className="group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[#141419]/85 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
+                      className="group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
                     >
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
@@ -192,10 +192,10 @@ export default function Home({ onAskPrompt = () => {} }) {
                           </div>
 
                           <div className="space-y-3">
-                            <h3 className="font-serif text-3xl text-stone-50">
+                            <h3 className="font-serif text-3xl text-[color:var(--text-primary)]">
                               {source.title}
                             </h3>
-                            <p className="text-sm leading-7 text-stone-300">
+                            <p className="text-sm leading-7 text-[color:var(--text-secondary)]">
                               {source.description}
                             </p>
                           </div>
@@ -203,8 +203,8 @@ export default function Home({ onAskPrompt = () => {} }) {
 
                         <div className="space-y-4">
                           <div className="h-px w-full bg-gradient-to-r from-amber-500/40 via-amber-500/10 to-transparent" />
-                          <div className="flex items-center justify-between text-sm text-stone-300">
-                            <span className="uppercase tracking-[0.28em] text-stone-500">
+                          <div className="flex items-center justify-between text-sm text-[color:var(--text-secondary)]">
+                            <span className="uppercase tracking-[0.28em] text-[color:var(--text-muted)]">
                               Open Manuscript
                             </span>
                             <span className="rounded-full border border-amber-500/25 px-3 py-1 text-amber-100 transition group-hover:border-amber-400/60">
