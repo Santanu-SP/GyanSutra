@@ -10,7 +10,7 @@
  * Saarthi state lives here — SaarthiPanel is presentation only.
  */
 
-import { useState, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
@@ -77,6 +77,17 @@ export default function App() {
         'I am here to illuminate what the scripture holds. Ask anything from the verses you are reading.',
     },
   ]);
+
+  useEffect(() => {
+    const handleOpenSaarthi = (e) => {
+      if (e.detail?.prompt) {
+        setQuestion(e.detail.prompt);
+      }
+      setIsSaarthiOpen(true);
+    };
+    window.addEventListener('open-saarthi', handleOpenSaarthi);
+    return () => window.removeEventListener('open-saarthi', handleOpenSaarthi);
+  }, []);
 
   async function handleAsk(event) {
     event.preventDefault();

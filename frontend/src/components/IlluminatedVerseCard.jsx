@@ -147,85 +147,120 @@ export default function IlluminatedVerseCard({
       {/* Gold hairline divider */}
       <hr className="verse-card__rule gold-rule" />
 
-      {/* Language toggle — not two parallel columns */}
-      <div className="verse-card__translation-area">
-        {translationHindi && translationEnglish && (
-          <div className="verse-card__lang-toggle" role="group" aria-label="Translation language">
-            <button
-              className={`verse-card__lang-btn ${lang === 'english' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setLang('english'); }}
-              aria-pressed={lang === 'english'}
-              id={`lang-toggle-en-${id}`}
-            >
-              English
-            </button>
-            <button
-              className={`verse-card__lang-btn ${lang === 'hindi' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setLang('hindi'); }}
-              aria-pressed={lang === 'hindi'}
-              id={`lang-toggle-hi-${id}`}
-            >
-              हिन्दी
-            </button>
+      <div className="verse-card__content-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '1rem 0' }}>
+        
+        {/* 1. SIMPLE MEANING */}
+        <section className="verse-section">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9 }}>
+              {lang === 'hindi' ? 'सरल अर्थ' : 'Simple Meaning'}
+            </h3>
+            {translationHindi && translationEnglish && (
+              <div className="verse-card__lang-toggle" role="group" aria-label="Translation language" style={{ margin: 0 }}>
+                <button
+                  className={`verse-card__lang-btn ${lang === 'english' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); setLang('english'); }}
+                >
+                  English
+                </button>
+                <button
+                  className={`verse-card__lang-btn ${lang === 'hindi' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); setLang('hindi'); }}
+                >
+                  हिन्दी
+                </button>
+              </div>
+            )}
           </div>
+          <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1.7, fontWeight: 500 }}>
+            {lang === 'hindi' ? translationHindi : translationEnglish}
+          </p>
+        </section>
+
+        {/* 2. AUTHENTIC COMMENTARY */}
+        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary) && (
+          <section className="verse-section">
+            <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9, marginBottom: '1rem' }}>
+              {lang === 'hindi' ? 'प्रमाणिक व्याख्या' : 'Authentic Commentary'}
+            </h3>
+            
+            <div className="commentary-list">
+              {detailedExplanations.length > 0 ? (
+                detailedExplanations.map((exp, idx) => (
+                  <div key={idx} className="commentary-item" style={{ marginBottom: '2rem' }}>
+                    <h4 className="commentary-author" style={{ 
+                      color: 'var(--text-secondary)', 
+                      fontSize: '0.85rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
+                      {exp.author}
+                    </h4>
+                    <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                      {exp.explanation}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
+                  {sourceCommentary}
+                </p>
+              )}
+            </div>
+          </section>
         )}
 
-        <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`}>
-          {lang === 'hindi' ? translationHindi : translationEnglish}
-        </p>
+        {/* 3. KEY TEACHINGS (Word Meanings) */}
+        {variant === 'full' && wordMeanings.length > 0 && (
+          <details className="verse-card__word-meanings" style={{ borderTop: '1px solid var(--hairline)', paddingTop: '1.5rem', marginTop: '1rem' }}>
+            <summary style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>
+              {lang === 'hindi' ? 'मुख्य शब्दार्थ' : 'Key Vocabulary'}
+            </summary>
+            <ul style={{ marginTop: '1rem', listStyleType: 'none', padding: 0, display: 'grid', gap: '0.75rem' }}>
+              {wordMeanings.map((wm, i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                  <span style={{ color: 'var(--amber-500)', fontSize: '0.8rem' }}>❖</span>
+                  <span className="devanagari" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{wm.word}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>—</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{wm.meaning}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+
+        {/* 4 & 5. PRACTICAL LIFE LESSON & REFLECTION (AI On-Demand) */}
+        {variant === 'full' && (
+          <section className="verse-section" style={{ borderTop: '1px solid var(--hairline)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.25rem', maxWidth: '400px' }}>
+              {lang === 'hindi' 
+                ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथी से गहन मनन और जीवन-सूत्र प्राप्त करें।'
+                : 'How does this verse apply to modern life? Ask Saarthi for practical life lessons and personal reflections.'}
+            </p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('open-saarthi', { 
+                  detail: { prompt: `What are the practical life lessons and reflection questions for Chapter ${chapterNumber} Verse ${verseNumber}?` } 
+                }));
+              }}
+              className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/10 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--amber-500)]"
+              style={{ gap: '0.5rem', cursor: 'pointer' }}
+            >
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
+                <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
+              </svg>
+              {lang === 'hindi' ? 'सारथी के साथ मनन करें' : 'Reflect with Saarthi'}
+            </button>
+          </section>
+        )}
+
       </div>
-
-      {/* Word meanings — only on full variant */}
-      {variant === 'full' && wordMeanings.length > 0 && (
-        <details className="verse-card__word-meanings">
-          <summary>Word meanings</summary>
-          <dl className="verse-card__word-list">
-            {wordMeanings.map((wm, i) => (
-              <div key={i} className="verse-card__word-item">
-                <dt className="devanagari">{wm.word}</dt>
-                <dd>{wm.meaning}</dd>
-              </div>
-            ))}
-          </dl>
-        </details>
-      )}
-
-      {/* Detailed Explanations / Commentaries (from new dataset) */}
-      {variant === 'full' && detailedExplanations.length > 0 && (
-        <details className="verse-card__commentary" open>
-          <summary>Authentic Commentary & Analysis</summary>
-          <div className="commentary-list">
-            {detailedExplanations.map((exp, idx) => (
-              <div key={idx} className="commentary-item" style={{ marginBottom: '1.5rem' }}>
-                <h4 className="commentary-author" style={{ 
-                  color: 'var(--primary)', 
-                  fontSize: '0.9rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '0.5rem',
-                  borderBottom: '1px solid var(--hairline)',
-                  paddingBottom: '0.25rem'
-                }}>
-                  {exp.author} <span style={{ opacity: 0.6, fontSize: '0.8em', textTransform: 'none' }}>({exp.language})</span>
-                </h4>
-                <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
-                  {exp.explanation}
-                </p>
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
-
-      {/* Fallback to old sourceCommentary if no detailed explanations exist */}
-      {variant === 'full' && detailedExplanations.length === 0 && sourceCommentary && (
-        <details className="verse-card__commentary">
-          <summary>Authentic Commentary & Analysis</summary>
-          <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`}>
-            {sourceCommentary}
-          </p>
-        </details>
-      )}
 
       {/* Tags */}
       {tags.length > 0 && variant === 'full' && (
