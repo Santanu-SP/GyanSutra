@@ -12,7 +12,12 @@ let pipelineInstance = null;
 async function getPipeline() {
   if (!pipelineInstance) {
     // Dynamically import the transformers library
-    const { pipeline } = await import('@xenova/transformers');
+    const { pipeline, env } = await import('@xenova/transformers');
+    
+    // Configure transformers to strictly use the local offline model
+    // This prevents 403 Forbidden errors from Hugging Face on cloud providers
+    env.allowRemoteModels = false;
+    env.localModelPath = require('path').resolve(__dirname, '../../models');
 
     console.log('[Embedding] Loading local 384-dim GTE model into memory...');
     pipelineInstance = await pipeline('feature-extraction', 'Xenova/gte-small');
