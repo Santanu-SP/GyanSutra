@@ -82,6 +82,7 @@ export default function IlluminatedVerseCard({
     translationEnglish,
     translationHindi,
     sourceCommentary,
+    detailedExplanations = [],
     wordMeanings = [],
     tags = [],
   } = verse;
@@ -189,7 +190,35 @@ export default function IlluminatedVerseCard({
         </details>
       )}
 
-      {variant === 'full' && sourceCommentary && (
+      {/* Detailed Explanations / Commentaries (from new dataset) */}
+      {variant === 'full' && detailedExplanations.length > 0 && (
+        <details className="verse-card__commentary" open>
+          <summary>Authentic Commentary & Analysis</summary>
+          <div className="commentary-list">
+            {detailedExplanations.map((exp, idx) => (
+              <div key={idx} className="commentary-item" style={{ marginBottom: '1.5rem' }}>
+                <h4 className="commentary-author" style={{ 
+                  color: 'var(--primary)', 
+                  fontSize: '0.9rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '0.5rem',
+                  borderBottom: '1px solid var(--hairline)',
+                  paddingBottom: '0.25rem'
+                }}>
+                  {exp.author} <span style={{ opacity: 0.6, fontSize: '0.8em', textTransform: 'none' }}>({exp.language})</span>
+                </h4>
+                <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
+                  {exp.explanation}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
+      {/* Fallback to old sourceCommentary if no detailed explanations exist */}
+      {variant === 'full' && detailedExplanations.length === 0 && sourceCommentary && (
         <details className="verse-card__commentary">
           <summary>Authentic Commentary & Analysis</summary>
           <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`}>
@@ -199,7 +228,7 @@ export default function IlluminatedVerseCard({
       )}
 
       {/* Tags */}
-      {tags.length > 0 && (
+      {tags.length > 0 && variant === 'full' && (
         <div className="verse-card__tags">
           {tags.slice(0, variant === 'compact' ? 2 : 5).map(tag => (
             <span key={tag} className="tag">{tag}</span>

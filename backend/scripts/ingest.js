@@ -11,6 +11,7 @@ const { batchWrite } = require('../src/services/firestore');
 const { embedText } = require('../src/services/embedding');
 const { SOURCES } = require('../src/data/sources');
 const { FieldValue } = require('firebase-admin/firestore');
+const gitaData = require('../data/gita.json');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const SKIP_EMBED = process.argv.includes('--skip-embed');
@@ -59,22 +60,23 @@ async function main() {
 
     for (let vNum = 1; vNum <= ch.verseCount; vNum++) {
       try {
-        // Pull down pure JSON response data directly from the active static API mirror
-        const res = await fetch(`https://vedicscriptures.github.io/slok/${ch.number}/${vNum}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        // Find the enriched verse locally from our dataset
+        const localVerse = gitaData.find(v => v.chapter_number === ch.number && v.verse_number === vNum);
+        if (!localVerse) {
+          throw new Error(`Verse ${ch.number}.${vNum} not found in local gita.json`);
+        }
 
-        const data = await res.json();
-
-        const sanskritText = data.slok || '';
-        const trans = data.transliteration || '';
-
-        // Target explicit language properties directly from verified Sivananda/Tejomayananda keys
-        const transEng = data.siva?.et || '';
-        const transHindi = data.tej?.ht || '';
-        const rawWordMeanings = data.siva?.ec || '';
-
-        const parsedWordMeanings = rawWordMeanings
-          ? rawWordMeanings.split('?').map(item => {
+        const sanskritText = localVerse.sanskrit || '';
+        const trans = localVerse.transliteration || '';
+        const transEng = localVerse.english || '';
+        const transHindi = localVerse.hindi || '';
+        
+        // Use existing word meanings (we don't need to re-parse unless it's the raw format)
+        // Since the previous script parsed rawWordMeanings from API, and our local gita.json
+        // has word_meanings as a string, let's parse it if needed, or just store it as string
+        const wordMeaningsStr = localVerse.word_meanings || '';
+        const parsedWordMeanings = wordMeaningsStr
+          ? wordMeaningsStr.split('?').map(item => {
             const parts = item.split(' ');
             return { word: parts[0]?.trim() || '', meaning: parts.slice(1).join(' ')?.trim() || '' };
           }).filter(item => item.word && !item.word.includes('Commentary'))
@@ -100,7 +102,7 @@ async function main() {
             wordMeanings: parsedWordMeanings,
             translationHindi: transHindi,
             translationEnglish: transEng,
-            sourceCommentary: data.siva?.commentary || '',
+            detailedExplanations: localVerse.detailed_explanations || [], // <--- Injecting the new rich explanations here!
             sourceText: SOURCE.title,
             tags: [],
             embedding: FieldValue.vector(vector),
