@@ -5,7 +5,7 @@
 
 const { OpenAI } = require('openai');
 const { embedText } = require('./embedding');
-const { findNearestVerses, collections } = require('./firestore');
+const { findNearestVerses, collections, getDoc } = require('./firestore');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.72');
@@ -59,7 +59,38 @@ async function askRag(question) {
   const queryVector = await embedText(question, 'RETRIEVAL_QUERY');
 
   // Step 2: Retrieve top-K nearest verses from Firestore
-  const retrieved = await findNearestVerses(queryVector, TOP_K);
+  let retrieved = await findNearestVerses(queryVector, TOP_K);
+
+  // Step 2.5: Explicit Chapter/Verse Match override
+  // If the user explicitly asks for "Chapter X Verse Y", vector search might fail semantically.
+  // We intercept this and forcefully fetch the exact document.
+  const explicitMatch = question.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
+  if (explicitMatch) {
+    const ch = parseInt(explicitMatch[1], 10);
+    const vNum = parseInt(explicitMatch[2], 10);
+    const exactDoc = await getDoc(collections.verses().doc(`bhagavad-gita_${ch}_${vNum}`));
+    
+    if (exactDoc) {
+      const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
+      if (existingIdx > -1) {
+        retrieved.splice(existingIdx, 1);
+      }
+      // Force it to the top with a guaranteed similarity of 1.0
+      retrieved.unshift({
+        id: exactDoc.id,
+        similarity: 1.0,
+        chapterNumber: exactDoc.chapterNumber,
+        verseNumber: exactDoc.verseNumber,
+        sanskrit: exactDoc.sanskrit,
+        transliteration: exactDoc.transliteration,
+        translationEnglish: exactDoc.translationEnglish,
+        translationHindi: exactDoc.translationHindi,
+        wordMeanings: exactDoc.wordMeanings,
+        detailedExplanations: exactDoc.detailedExplanations,
+        tags: exactDoc.tags
+      });
+    }
+  }
 
   // Step 3: Threshold gate
   const topSimilarity = retrieved.length > 0 ? retrieved[0].similarity : 0;
