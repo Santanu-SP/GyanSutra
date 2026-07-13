@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   app.css — App-level layout, header, and global button/trigger styles.
+   These styles sit above the component layer but below the token layer.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── App root ───────────────────────────────────────────────────────── */
+.gs-app {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.gs-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.gs-header__nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .gs-header__nav {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+}
+
+/* ── Brand / logo ───────────────────────────────────────────────────── */
+.gs-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.gs-header__logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  transition: transform var(--transition-base);
+}
+
+.gs-header__brand:hover .gs-header__logo {
+  transform: scale(1.06);
+}
+
+.gs-header__brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.gs-header__name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.gs-header__tagline {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .gs-header__tagline { display: none; }
+}
+
+/* ── Search area in header ─────────────────────────────────────────── */
+.gs-header__search-wrap {
+  flex: 1;
+  max-width: 380px;
+}
+
+@media (max-width: 680px) {
+  .gs-header__search-wrap { display: none; }
+}
+
+/* ── Right actions ──────────────────────────────────────────────────── */
+.gs-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* ── Saarthi trigger button ─────────────────────────────────────────── */
+.saarthi-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.875rem;
+  background: transparent;
+  color: var(--marigold);
+  border: 1px solid color-mix(in srgb, var(--marigold) 38%, transparent);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.saarthi-trigger:hover {
+  background: color-mix(in srgb, var(--marigold) 8%, transparent);
+  border-color: var(--marigold);
+}
+
+.saarthi-trigger__icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+/* Hide label on very small screens — icon only */
+@media (max-width: 440px) {
+  .saarthi-trigger__label { display: none; }
+  .saarthi-trigger { padding: 0.45rem 0.6rem; }
+}
+
+/* ── App body ───────────────────────────────────────────────────────── */
+.gs-body {
+  flex: 1;
+  transition: padding-right var(--transition-slow);
+}
+
+/* When Saarthi is open on desktop, nudge content left */
+@media (min-width: 1024px) {
+  .gs-body--saarthi-open {
+    padding-right: 380px;
+  }
+}
+
+/* ── Page loader (Suspense fallback) ─────────────────────────────────── */
+.gs-page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50dvh;
+  color: var(--marigold);
+}
+
+.gs-page-loader__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: loaderPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-body { transition: none; }
+  .gs-page-loader__dot { animation: none; opacity: 1; }
+}

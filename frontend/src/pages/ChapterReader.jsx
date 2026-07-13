@@ -3,6 +3,11 @@
  * Shows one verse at a time with prev/next navigation.
  * Page-turn animation between verses.
  * Triggers PWA install prompt after the last verse.
+ *
+ * Additions (non-breaking, UI only):
+ *   - Compact chapter strip at the top — quick jump between chapters
+ *   - Verse jump dropdown in the nav bar — jump to any verse directly
+ *   - Back link navigates to the source (bhagavad-gita) not just /
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -14,15 +19,18 @@ import { usePWAInstall } from '../hooks/usePWAInstall';
 import { filterVerses } from '../utils/verseUtils';
 import './ChapterReader.css';
 
+// All 18 chapter numbers for the strip
+const CHAPTERS = Array.from({ length: 18 }, (_, i) => i + 1);
+
 export default function ChapterReader() {
   const { id } = useParams();
-  const [chapter, setChapter] = useState(null);
-  const [verses, setVerses] = useState([]);
+  const [chapter, setChapter]           = useState(null);
+  const [verses, setVerses]             = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [animClass, setAnimClass] = useState('');
-  const { canInstall, triggerInstall } = usePWAInstall();
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [animClass, setAnimClass]       = useState('');
+  const { canInstall, triggerInstall }  = usePWAInstall();
 
   useEffect(() => {
     setLoading(true);
@@ -53,32 +61,40 @@ export default function ChapterReader() {
     if (currentIndex < verses.length - 1) {
       goTo(currentIndex + 1);
     } else if (canInstall) {
-      // Finished the chapter — natural moment to offer install
       triggerInstall();
     }
   };
 
-  const isLastVerse = currentIndex === verses.length - 1;
-  const currentVerse = verses[currentIndex];
+  const isLastVerse   = currentIndex === verses.length - 1;
+  const currentVerse  = verses[currentIndex];
 
   if (error) return (
     <main className="chapter-reader chapter-reader--error">
-      <Link to="/" className="chapter-reader__back">← Home</Link>
+      <Link to="/bhagavad-gita" className="chapter-reader__back">← Chapters</Link>
       <p>Could not load chapter: {error}</p>
     </main>
   );
 
   return (
     <main className="chapter-reader">
-      {/* Chapter header */}
+
+      {/* ── Chapter header ────────────────────────────────────────── */}
       {chapter && !loading && (
         <header className="chapter-reader__header">
-          <Link to="/" className="chapter-reader__back" id="back-to-home-link">← Gyan Sutra</Link>
+          <Link
+            to="/bhagavad-gita"
+            className="chapter-reader__back"
+            id="back-to-home-link"
+          >
+            ← All Chapters
+          </Link>
           <div className="chapter-reader__title-block">
             <span className="chapter-reader__chapter-num">
               Chapter {chapter.number}
             </span>
-            <h1 className="chapter-reader__title devanagari">{chapter.titleSanskrit}</h1>
+            <h1 className="chapter-reader__title devanagari">
+              {chapter.titleSanskrit}
+            </h1>
             <p className="chapter-reader__title-en">{chapter.titleEnglish}</p>
           </div>
           <hr className="gold-rule" />
@@ -89,7 +105,28 @@ export default function ChapterReader() {
         </header>
       )}
 
-      {/* Verse navigation — progress + verse counter */}
+      {/* ── Compact chapter strip — quick jump to any chapter ─────── */}
+      {!loading && (
+        <nav
+          className="chapter-strip"
+          aria-label="Jump to chapter"
+        >
+          {CHAPTERS.map((num) => (
+            <Link
+              key={num}
+              to={`/chapters/chapter_${num}`}
+              className={`chapter-strip__tab${chapter?.number === num ? ' chapter-strip__tab--active' : ''}`}
+              aria-label={`Chapter ${num}`}
+              aria-current={chapter?.number === num ? 'page' : undefined}
+              id={`chapter-strip-tab-${num}`}
+            >
+              {num}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {/* ── Progress bar ──────────────────────────────────────────── */}
       {!loading && verses.length > 0 && (
         <div className="chapter-reader__progress">
           <div
@@ -103,7 +140,7 @@ export default function ChapterReader() {
         </div>
       )}
 
-      {/* Current verse */}
+      {/* ── Current verse ─────────────────────────────────────────── */}
       <div className="chapter-reader__verse-area">
         {loading ? (
           <div className="chapter-reader__skeleton" aria-hidden="true">
@@ -118,7 +155,7 @@ export default function ChapterReader() {
         )}
       </div>
 
-      {/* Prev / Next navigation */}
+      {/* ── Verse navigation: prev / verse-jump select / next ─────── */}
       {!loading && verses.length > 0 && (
         <nav className="chapter-reader__nav" aria-label="Verse navigation">
           <button
@@ -130,42 +167,74 @@ export default function ChapterReader() {
           >
             ← Previous
           </button>
-          <span className="chapter-reader__nav-label">
-            {currentIndex + 1} / {verses.length}
-          </span>
+
+          {/* Verse jump dropdown */}
+          <div className="chapter-reader__jump-wrap">
+            <label htmlFor="verse-jump-select" className="sr-only">
+              Jump to verse
+            </label>
+            <select
+              id="verse-jump-select"
+              className="chapter-reader__verse-select"
+              value={currentIndex}
+              onChange={(e) => goTo(Number(e.target.value))}
+              aria-label="Jump to verse"
+            >
+              {verses.map((v, idx) => (
+                <option key={v.id} value={idx}>
+                  Verse {v.verseNumber}
+                </option>
+              ))}
+            </select>
+            <span className="chapter-reader__verse-total">
+              / {verses.length}
+            </span>
+          </div>
+
           <button
-            className={`chapter-reader__nav-btn chapter-reader__nav-btn--next ${isLastVerse ? 'chapter-reader__nav-btn--finish' : ''}`}
+            className={`chapter-reader__nav-btn chapter-reader__nav-btn--next${isLastVerse ? ' chapter-reader__nav-btn--finish' : ''}`}
             onClick={handleNext}
             id="next-verse-btn"
             aria-label={isLastVerse ? 'Finish chapter' : 'Next verse'}
           >
-            {isLastVerse ? (canInstall ? 'Finish & Install App ✦' : 'Chapter Complete ✦') : 'Next →'}
+            {isLastVerse
+              ? (canInstall ? 'Finish & Install ✦' : 'Chapter Complete ✦')
+              : 'Next →'}
           </button>
         </nav>
       )}
 
-      {/* Recommendations — shown at chapter end */}
+      {/* ── Recommendations — shown at chapter end ─────────────────── */}
       {!loading && isLastVerse && currentVerse && (
         <div className="chapter-reader__recos">
           <RecommendationsRail contentId={currentVerse.id} type="verse" />
         </div>
       )}
 
-      {/* Chapter quick-jump */}
+      {/* ── Prev / Next chapter links ──────────────────────────────── */}
       {!loading && chapter && (
         <div className="chapter-reader__chapter-links">
           <hr className="gold-rule" />
           <div className="chapter-reader__chapter-links-grid">
             {chapter.number > 1 && (
-              <Link to={`/chapters/chapter_${chapter.number - 1}`} className="chapter-reader__chapter-link">
+              <Link
+                to={`/chapters/chapter_${chapter.number - 1}`}
+                className="chapter-reader__chapter-link"
+              >
                 ← Chapter {chapter.number - 1}
               </Link>
             )}
-            <Link to="/" className="chapter-reader__chapter-link chapter-reader__chapter-link--home">
+            <Link
+              to="/bhagavad-gita"
+              className="chapter-reader__chapter-link chapter-reader__chapter-link--home"
+            >
               All Chapters
             </Link>
             {chapter.number < 18 && (
-              <Link to={`/chapters/chapter_${chapter.number + 1}`} className="chapter-reader__chapter-link">
+              <Link
+                to={`/chapters/chapter_${chapter.number + 1}`}
+                className="chapter-reader__chapter-link"
+              >
                 Chapter {chapter.number + 1} →
               </Link>
             )}

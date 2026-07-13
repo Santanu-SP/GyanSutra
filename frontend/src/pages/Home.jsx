@@ -60,16 +60,16 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="inline-flex items-center justify-center rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:text-white"
+                className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:text-white"
               >
                 Enter the Library
               </button>
               <button
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="inline-flex items-center justify-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-6 py-3 text-sm font-medium text-stone-200 transition hover:border-amber-500/40 hover:text-amber-100"
+                className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/8 px-6 py-3 text-sm font-medium text-stone-200 transition hover:border-amber-400/60 hover:text-amber-100"
               >
-                Seek Divine Guidance
+                Consult Saarthi
               </button>
             </div>
           </div>
@@ -115,22 +115,22 @@ export default function Home({ onAskPrompt = () => {} }) {
             </div>
           </article>
 
-          <article className="rounded-[2rem] border border-indigo-500/15 bg-indigo-500/10 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
+          <article className="rounded-xl border border-indigo-500/15 bg-indigo-500/10 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
-              Invoke the Guide
+              Your Companion
             </p>
             <h3 className="mt-3 font-serif text-2xl text-stone-50">
-              Bring your questions into reflection
+              Saarthi — सारथी
             </h3>
             <p className="mt-3 text-sm leading-7 text-stone-300">
-              Ask about karma, detachment, devotion, or interpretation and receive responses rooted in your sacred library.
+              Ask about karma, detachment, devotion, or interpretation — and receive responses rooted in your sacred library.
             </p>
             <button
               type="button"
               onClick={() => onAskPrompt('How should I understand karma without attachment?')}
-              className="mt-5 inline-flex items-center rounded-full border border-amber-500/30 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:bg-amber-500/10"
+              className="mt-5 inline-flex items-center rounded border border-amber-500/30 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:bg-amber-500/10"
             >
-              Open Divine Guide
+              Open Saarthi
             </button>
           </article>
         </section>
@@ -175,7 +175,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                     <Link
                       key={source.id}
                       to={`/${source.id}`}
-                      className="group relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-[#141419]/85 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
+                      className="group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[#141419]/85 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
                     >
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />

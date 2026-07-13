@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SplashScreen — meditative entry experience
+   Pure CSS animations. Respects prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Splash overlay ─────────────────────────────────────────────────── */
+.gs-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--night, #1C1420);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 500ms ease;
+}
+
+.gs-splash--fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Center content ─────────────────────────────────────────────────── */
+.gs-splash__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ── Logo ───────────────────────────────────────────────────────────── */
+.gs-splash__logo {
+  width: 80px;
+  height: 80px;
+  opacity: 0;
+  animation: splashLogoIn 700ms cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards;
+}
+
+@keyframes splashLogoIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Text block ─────────────────────────────────────────────────────── */
+.gs-splash__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  opacity: 0;
+  animation: splashFadeIn 500ms ease 650ms forwards;
+}
+
+.gs-splash__name {
+  font-family: 'Martel', Georgia, serif;
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #EFE8F5;
+  line-height: 1;
+}
+
+.gs-splash__devanagari {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1rem;
+  color: #E8A33D;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+/* ── Pulse line ─────────────────────────────────────────────────────── */
+.gs-splash__line {
+  width: 120px;
+  height: 1px;
+  background: rgba(201, 154, 78, 0.2);
+  border-radius: 1px;
+  overflow: hidden;
+  opacity: 0;
+  animation: splashFadeIn 300ms ease 1000ms forwards;
+}
+
+.gs-splash__line-fill {
+  height: 100%;
+  background: #C99A4E;
+  transform-origin: left center;
+  animation: splashPulse 1.3s ease 1050ms infinite;
+}
+
+@keyframes splashFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes splashPulse {
+  0%   { transform: scaleX(0); opacity: 1; }
+  55%  { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(0); opacity: 0.2; }
+}
+
+/* ── App fade-in ────────────────────────────────────────────────────── */
+.gs-app-fade {
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.gs-app-fade--in {
+  opacity: 1;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .gs-splash__logo,
+  .gs-splash__text,
+  .gs-splash__line {
+    animation: none;
+    opacity: 1;
+  }
+
+  .gs-splash__line-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .gs-splash--fading {
+    transition: none;
+  }
+
+  .gs-app-fade {
+    transition: none;
+    opacity: 1;
+  }
+}

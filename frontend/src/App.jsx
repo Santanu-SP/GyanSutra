@@ -1,60 +1,112 @@
-import { useState } from 'react';
+/**
+ * App.jsx — Gyan Sutra application root.
+ *
+ * Layout:
+ *   - Sticky header with brand, search, ThemeToggle, Saarthi trigger
+ *   - App body shifts right on desktop when Saarthi is open
+ *   - SaarthiPanel: desktop side panel / mobile bottom sheet (non-blocking)
+ *   - Routes: all pages including previously unconnected ones
+ *
+ * Saarthi state lives here — SaarthiPanel is presentation only.
+ */
+
+import { useState, lazy, Suspense } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
+import SearchBar from './components/SearchBar';
+import ThemeToggle from './components/ThemeToggle';
+import SaarthiPanel from './components/SaarthiPanel';
+import './app.css';
 
-const SUGGESTED_PROMPTS = [
+// Lazy-load heavier pages to keep initial bundle small
+const ChapterReader = lazy(() => import('./pages/ChapterReader'));
+const Search        = lazy(() => import('./pages/Search'));
+const VerseDetail   = lazy(() => import('./pages/VerseDetail'));
+
+// Suggested conversation starters — shown when panel is first opened
+const SAARTHI_PROMPTS = [
   'What does the Gita teach about duty?',
   'Explain detachment in simple words.',
   'How does Sanatan wisdom guide daily life?',
 ];
 
+// Minimal loading state for lazy pages
+function PageLoader() {
+  return (
+    <div className="gs-page-loader" aria-label="Loading" role="status">
+      <span className="gs-page-loader__dot" aria-hidden="true" />
+    </div>
+  );
+}
+
+// Flame icon used in the Saarthi trigger button
+function TriggerFlame() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      className="saarthi-trigger__icon"
+      aria-hidden="true"
+    >
+      <path
+        d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z"
+        fill="currentColor"
+        opacity="0.85"
+      />
+      <path
+        d="M10 7C10 7 8 9.5 8 12C8 13.105 8.895 14 10 14C11.105 14 12 13.105 12 12C12 9.5 10 7 10 7Z"
+        fill="white"
+        opacity="0.5"
+      />
+      <ellipse cx="10" cy="18" rx="5" ry="1.25" fill="currentColor" opacity="0.2" />
+    </svg>
+  );
+}
+
 export default function App() {
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [question, setQuestion] = useState('');
-  const [messages, setMessages] = useState([
+  const [isSaarthiOpen, setIsSaarthiOpen] = useState(false);
+  const [question, setQuestion]           = useState('');
+  const [isLoading, setIsLoading]         = useState(false);
+  const [messages, setMessages]           = useState([
     {
       id: 'welcome',
-      role: 'guide',
+      role: 'saarthi',
       content:
-        'Ask for insight on dharma, karma, devotion, or any verse in the library.',
+        'I am here to illuminate what the scripture holds. Ask anything from the verses you are reading.',
     },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
 
   async function handleAsk(event) {
     event.preventDefault();
-    const trimmedQuestion = question.trim();
-    if (!trimmedQuestion || isLoading) return;
+    const trimmed = question.trim();
+    if (!trimmed || isLoading) return;
 
-    const userMessage = {
-      id: `${Date.now()}-user`,
-      role: 'user',
-      content: trimmedQuestion,
-    };
-
-    setMessages((current) => [...current, userMessage]);
+    setMessages((cur) => [
+      ...cur,
+      { id: `${Date.now()}-user`, role: 'user', content: trimmed },
+    ]);
     setQuestion('');
     setIsLoading(true);
 
     try {
-      const result = await askQuestion(trimmedQuestion);
-      setMessages((current) => [
-        ...current,
+      const result = await askQuestion(trimmed);
+      setMessages((cur) => [
+        ...cur,
         {
-          id: `${Date.now()}-guide`,
-          role: 'guide',
+          id: `${Date.now()}-saarthi`,
+          role: 'saarthi',
           content: result.answer || 'No answer was returned.',
         },
       ]);
     } catch (error) {
-      setMessages((current) => [
-        ...current,
+      setMessages((cur) => [
+        ...cur,
         {
           id: `${Date.now()}-error`,
-          role: 'guide',
-          content: error.message || 'The guide could not respond right now.',
+          role: 'saarthi',
+          content: error.message || 'Saarthi could not respond right now.',
         },
       ]);
     } finally {
@@ -62,165 +114,85 @@ export default function App() {
     }
   }
 
+  // Called from Home page prompt buttons — pre-fills question and opens panel
   function handlePromptSelect(prompt) {
     setQuestion(prompt);
-    setIsGuideOpen(true);
+    setIsSaarthiOpen(true);
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1f] text-stone-100">
-      <div className="fixed inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_top,rgba(180,83,9,0.18),transparent_42%),radial-gradient(circle_at_20%_20%,rgba(49,46,129,0.22),transparent_30%)]" />
-
-      <header className="sticky top-0 z-40 border-b border-amber-700/20 bg-[#141419]/80 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="group inline-flex items-center gap-3 rounded-full border border-amber-700/20 bg-white/[0.03] px-3 py-2 transition hover:border-amber-500/40 hover:bg-white/[0.05]"
-          >
+    <div className="gs-app">
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <header className="gs-header">
+        <nav className="gs-header__nav">
+          {/* Brand */}
+          <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra — Home">
             <img
               src="/icons/logo.svg"
-              alt="Gyan Sutra Logo"
-              className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-105"
+              alt="Gyan Sutra"
+              className="gs-header__logo"
             />
-            <span className="flex flex-col">
-              <span className="font-serif text-xl tracking-[0.16em] text-stone-50">
-                Gyan Sutra
-              </span>
-              <span className="text-[0.65rem] uppercase tracking-[0.35em] text-stone-400">
-                Sacred Library
-              </span>
+            <span className="gs-header__brand-text">
+              <span className="gs-header__name">Gyan Sutra</span>
+              <span className="gs-header__tagline">Sacred Library</span>
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Global search — hidden on small mobile */}
+          <div className="gs-header__search-wrap">
+            <SearchBar placeholder="Search scripture… (⌘K)" />
+          </div>
+
+          {/* Right actions */}
+          <div className="gs-header__actions">
+            <ThemeToggle />
             <button
               type="button"
-              onClick={() => setIsGuideOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-indigo-500/15 px-4 py-2.5 text-sm font-medium text-amber-100 shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_10px_30px_rgba(120,53,15,0.18)] transition duration-300 hover:border-amber-400/60 hover:from-amber-500/25 hover:to-indigo-500/25 hover:shadow-amber-900/20"
+              className="saarthi-trigger"
+              onClick={() => setIsSaarthiOpen(true)}
+              aria-label="Open Saarthi — your spiritual companion"
+              aria-expanded={isSaarthiOpen}
+              aria-controls="saarthi-panel"
+              id="open-saarthi-btn"
             >
-              <span className="text-amber-400">✦</span>
-              Ask AI
+              <TriggerFlame />
+              <span className="saarthi-trigger__label">Saarthi</span>
             </button>
           </div>
         </nav>
       </header>
 
-      <div className="relative">
-        <Routes>
-          <Route path="/" element={<Home onAskPrompt={handlePromptSelect} />} />
-          <Route path="/:source_id" element={<TextReader />} />
-        </Routes>
+      {/* ── App body — shifts right on desktop when Saarthi is open ── */}
+      <div className={`gs-body${isSaarthiOpen ? ' gs-body--saarthi-open' : ''}`}>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route
+              path="/"
+              element={<Home onAskPrompt={handlePromptSelect} />}
+            />
+            {/* Bhagavad Gita chapter navigator */}
+            <Route path="/chapters/:id" element={<ChapterReader />} />
+            {/* Source pages (Bhagavad Gita, Ramayana, etc.) */}
+            <Route path="/:source_id" element={<TextReader />} />
+            {/* Search */}
+            <Route path="/search" element={<Search />} />
+            {/* Individual verse */}
+            <Route path="/verses/:id" element={<VerseDetail />} />
+          </Routes>
+        </Suspense>
       </div>
 
-      {isGuideOpen ? (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-sm">
-          <button
-            type="button"
-            aria-label="Close Divine Guide"
-            className="h-full flex-1 cursor-default"
-            onClick={() => setIsGuideOpen(false)}
-          />
-
-          <aside className="flex h-full w-full max-w-xl flex-col border-l border-amber-700/20 bg-[#141419] shadow-[0_0_60px_rgba(0,0,0,0.55)]">
-            <div className="border-b border-amber-700/20 px-5 py-5 sm:px-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
-                    Sacred Counsel
-                  </p>
-                  <h2 className="mt-2 font-serif text-2xl text-stone-50">
-                    Divine Guide
-                  </h2>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-stone-400">
-                    Reflect on scripture, meaning, and practice through a calm conversational guide.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsGuideOpen(false)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-700/20 bg-white/[0.03] text-stone-300 transition hover:border-amber-500/40 hover:text-stone-50"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <div className="border-b border-amber-700/10 px-5 py-4 sm:px-6">
-              <div className="flex flex-wrap gap-2">
-                {SUGGESTED_PROMPTS.map((prompt) => (
-                  <button
-                    key={prompt}
-                    type="button"
-                    onClick={() => setQuestion(prompt)}
-                    className="rounded-full border border-amber-700/20 bg-white/[0.03] px-3 py-1.5 text-xs text-stone-300 transition hover:border-amber-500/40 hover:text-amber-100"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <article
-                    key={message.id}
-                    className={`max-w-[92%] rounded-3xl px-4 py-3 ${message.role === 'user'
-                        ? 'ml-auto border border-indigo-500/20 bg-indigo-500/10 text-stone-100'
-                        : 'border border-amber-700/20 bg-white/[0.03] text-stone-300'
-                      }`}
-                  >
-                    <p className="mb-2 text-[0.65rem] uppercase tracking-[0.3em] text-amber-400/80">
-                      {message.role === 'user' ? 'Seeker' : 'Divine Guide'}
-                    </p>
-                    <p className="text-sm leading-7">{message.content}</p>
-                  </article>
-                ))}
-
-                {isLoading ? (
-                  <div className="max-w-[92%] rounded-3xl border border-amber-700/20 bg-white/[0.03] px-4 py-3 text-sm text-stone-400">
-                    <p className="mb-2 text-[0.65rem] uppercase tracking-[0.3em] text-amber-400/80">
-                      Divine Guide
-                    </p>
-                    <p>Contemplating the thread of wisdom...</p>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="border-t border-amber-700/20 px-5 py-5 sm:px-6">
-              <form onSubmit={handleAsk} className="space-y-3">
-                <label className="block">
-                  <span className="mb-2 block text-xs uppercase tracking-[0.3em] text-stone-500">
-                    Your reflection
-                  </span>
-                  <textarea
-                    value={question}
-                    onChange={(event) => setQuestion(event.target.value)}
-                    rows={4}
-                    placeholder="Ask about dharma, devotion, karma, or a verse in the library..."
-                    className="w-full rounded-3xl border border-amber-700/20 bg-[#1a1a1f] px-4 py-3 text-sm leading-7 text-stone-100 placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/10"
-                  />
-                </label>
-
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs leading-6 text-stone-500">
-                    Responses are grounded in your current scripture library.
-                  </p>
-                  <button
-                    type="submit"
-                    disabled={isLoading || !question.trim()}
-                    className="inline-flex items-center justify-center rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 px-5 py-2.5 text-sm font-medium text-amber-100 transition hover:border-amber-400/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Offer Question
-                  </button>
-                </div>
-              </form>
-            </div>
-          </aside>
-        </div>
-      ) : null}
+      {/* ── Saarthi companion — side panel on desktop, sheet on mobile ── */}
+      <SaarthiPanel
+        isOpen={isSaarthiOpen}
+        onClose={() => setIsSaarthiOpen(false)}
+        messages={messages}
+        question={question}
+        setQuestion={setQuestion}
+        onAsk={handleAsk}
+        isLoading={isLoading}
+        suggestedPrompts={SAARTHI_PROMPTS}
+      />
     </div>
   );
 }

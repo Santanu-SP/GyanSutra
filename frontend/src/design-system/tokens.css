@@ -1,11 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Martel:wght@300;400;600;700;900&family=Hind:wght@300;400;500;600&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
+
 /* ═══════════════════════════════════════════════════════════════════════
    Gyan Sutra — Design System Tokens
    This file is the single source of truth for all visual constants.
    Every CSS rule in the app must use these tokens — never raw hex values.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ── Google Fonts ─────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Martel:wght@300;400;600;700;900&family=Hind:wght@300;400;500;600&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
+/* ── Color scheme tracks data-theme ──────────────────────────────────── */
+[data-theme="dark"]  { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
 
 /* ── Color Tokens ─────────────────────────────────────────────────────── */
 :root {
