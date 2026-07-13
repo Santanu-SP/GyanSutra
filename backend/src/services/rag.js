@@ -79,6 +79,11 @@ async function askRag(question) {
     const wordMeanings = Array.isArray(v.wordMeanings)
       ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
       : '';
+      
+    const explanations = Array.isArray(v.detailedExplanations) && v.detailedExplanations.length > 0
+      ? v.detailedExplanations.map(exp => `[Commentary by ${exp.author}]: ${exp.explanation}`).join('\n')
+      : '';
+
     return [
       `[${i + 1}] Chapter ${v.chapterNumber}, Verse ${v.verseNumber} (similarity: ${v.similarity.toFixed(3)})`,
       `Sanskrit: ${v.sanskrit || ''}`,
@@ -86,6 +91,7 @@ async function askRag(question) {
       `English: ${v.translationEnglish || ''}`,
       `Hindi: ${v.translationHindi || ''}`,
       wordMeanings ? `Word meanings: ${wordMeanings}` : '',
+      explanations ? `Detailed Explanations:\n${explanations}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -148,6 +154,7 @@ async function askRag(question) {
     transliteration: v.transliteration,
     translationEnglish: v.translationEnglish,
     translationHindi: v.translationHindi,
+    detailedExplanations: v.detailedExplanations || [],
     similarity: v.similarity,
     tags: v.tags || [],
   }));
