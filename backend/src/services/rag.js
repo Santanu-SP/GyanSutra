@@ -171,7 +171,7 @@ async function askRag(question) {
     // ── APPROACH A: High-Reliability Single Free-Model Router ──
     console.log('[RAG] Running Approach A: Smart Free-Routing Path.');
     const response = await openai.chat.completions.create({
-      model: 'openrouter/free',
+      model: 'google/gemini-2.5-flash:free',
       messages: [{ role: 'user', content: fullPrompt }],
     });
     answer = response.choices[0].message.content.trim();
