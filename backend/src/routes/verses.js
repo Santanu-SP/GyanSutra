@@ -1,7 +1,39 @@
 const express = require('express');
 const { collections } = require('../services/firestore');
+const gitaData = require('../data/gita.json');
 
 const router = express.Router();
+
+/**
+ * GET /api/verses/daily
+ * Intelligently returns a "Daily Darshan" verse that changes every day,
+ * using zero AI credits and zero database reads.
+ */
+router.get('/daily', (req, res) => {
+  // Deterministic daily index based on days since epoch
+  const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+  const verseIndex = daysSinceEpoch % gitaData.length;
+  
+  const v = gitaData[verseIndex];
+  
+  // Format to match the expected verse schema on the frontend
+  const formattedVerse = {
+    id: `bhagavad-gita_${v.chapter_number}_${v.verse_number}`,
+    chapterNumber: v.chapter_number,
+    verseNumber: v.verse_number,
+    sanskrit: v.sanskrit,
+    transliteration: v.transliteration,
+    translationEnglish: v.english,
+    translationHindi: v.hindi,
+    wordMeanings: v.word_meanings ? v.word_meanings.split('?').map(item => {
+      const parts = item.split(' ');
+      return { word: parts[0]?.trim() || '', meaning: parts.slice(1).join(' ')?.trim() || '' };
+    }).filter(item => item.word && !item.word.includes('Commentary')) : [],
+    detailedExplanations: v.detailed_explanations || [],
+  };
+
+  res.json({ verse: formattedVerse });
+});
 
 /**
  * GET /api/verses/:source_id

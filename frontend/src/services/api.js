@@ -32,6 +32,7 @@ export const getSourceVerses = (sourceId) => request(`/verses/${sourceId}`);
 
 // ── Verses ────────────────────────────────────────────────────────────────────
 export const getVerse = (id) => request(`/verses/${id}`);
+export const getDailyVerse = () => request('/verses/daily');
 
 // ── Search ────────────────────────────────────────────────────────────────────
 export const searchVerses = (q, limit = 10) =>

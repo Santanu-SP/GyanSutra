@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getDailyVerse } from '../services/api';
 
 const SOURCE_STYLES = {
   'bhagavad-gita': {
@@ -43,6 +45,13 @@ const SOURCES = [
 ];
 
 export default function Home({ onAskPrompt = () => {} }) {
+  const [dailyVerse, setDailyVerse] = useState(null);
+
+  useEffect(() => {
+    getDailyVerse()
+      .then(res => setDailyVerse(res.verse))
+      .catch(err => console.error("Failed to load daily darshan:", err));
+  }, []);
 
   return (
     <main className="relative overflow-hidden">
@@ -95,12 +104,17 @@ export default function Home({ onAskPrompt = () => {} }) {
               </div>
 
               <div className="space-y-4 rounded-[1.75rem] border border-amber-700/20 bg-[color:var(--bg)] p-6">
-                <p className="font-serif text-2xl leading-relaxed text-[color:var(--text-primary)]">
-                  “Within stillness, the eternal thread of knowledge reveals itself.”
+                <p className="font-serif text-xl leading-relaxed text-[color:var(--text-primary)] devanagari-hero" style={{ fontSize: '1.4rem' }}>
+                  {dailyVerse ? dailyVerse.sanskrit : "“Within stillness, the eternal thread of knowledge reveals itself.”"}
                 </p>
-                <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-                  Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom.
+                <p className="text-sm leading-7 text-[color:var(--text-muted)] italic">
+                  {dailyVerse ? `— ${dailyVerse.translationEnglish}` : "Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom."}
                 </p>
+                {dailyVerse && (
+                  <div className="mt-2 flex items-center justify-between text-xs text-amber-500/80">
+                    <span>Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
                   <span className="h-2 w-2 rounded-full bg-amber-400" />
                   Contemplation for Today
