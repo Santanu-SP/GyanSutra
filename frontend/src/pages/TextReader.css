@@ -275,3 +275,88 @@
     width: auto;
   }
 }
+
+/* ── Source Devanagari subtitle ─────────────────────────────────────── */
+.text-reader__devanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-sanskrit-body);
+  color: var(--marigold);
+  line-height: var(--leading-devanagari);
+  margin: 0 0 0.625rem;
+  display: block;
+}
+
+/* ── Coming Soon ────────────────────────────────────────────────────── */
+.text-reader__coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 1.5rem 6rem;
+  gap: 1.25rem;
+  animation: fadeSlideIn 500ms ease both;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.text-reader__coming-soon-icon {
+  font-family: var(--font-devanagari);
+  font-size: 4.5rem;
+  color: var(--marigold);
+  line-height: 1;
+  opacity: 0.55;
+  animation: divaOmPulse 3s ease-in-out infinite;
+}
+
+@keyframes divaOmPulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%       { opacity: 0.7;  transform: scale(1.05); }
+}
+
+.text-reader__coming-soon-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.text-reader__coming-soon-body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-loose);
+  color: var(--text-secondary);
+  max-width: 440px;
+  margin: 0;
+}
+
+.text-reader__coming-soon-body strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.text-reader__coming-soon-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1.25rem;
+  text-decoration: none;
+  margin-top: 0.5rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.text-reader__coming-soon-cta:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: var(--accent);
+}

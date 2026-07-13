@@ -1,20 +1,35 @@
 /**
- * TextReader — redesigned as a Chapter Navigator.
- *
- * Instead of dumping all verses in a flat list, this page shows:
- *   - Source title + description
- *   - Unified search + chapter/verse jump bar
- *   - All 18 chapters in a table-of-contents style (like a physical book)
- *
- * For sources other than bhagavad-gita, falls back gracefully.
- * All API calls preserved. Layout and presentation only changed.
+ * TextReader — Chapter Navigator for Bhagavad Gita.
+ * Shows a "Coming Soon" screen for sources not yet available.
  */
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getSources, getAllChapters } from '../services/api';
+import { getAllChapters } from '../services/api';
 import SearchBar from '../components/SearchBar';
 import './TextReader.css';
+
+// Static source metadata — avoids an extra backend round-trip
+const SOURCE_META = {
+  'bhagavad-gita': {
+    title: 'Bhagavad Gita',
+    description: 'A foundational dialogue on duty, devotion, and self-knowledge.',
+    devanagari: 'श्रीमद्भगवद्गीता',
+    available: true,
+  },
+  'upanishads': {
+    title: 'Upanishads',
+    description: 'A contemplative collection exploring the self, reality, and liberation.',
+    devanagari: 'उपनिषद्',
+    available: false,
+  },
+  'ramayana': {
+    title: 'Ramayana',
+    description: 'An epic text centered on dharma, exile, loyalty, and return.',
+    devanagari: 'रामायण',
+    available: false,
+  },
+};
 
 // Roman numerals for chapter numbers — more manuscript-like than Arabic
 const ROMAN = [
@@ -24,20 +39,26 @@ const ROMAN = [
 
 export default function TextReader() {
   const { source_id } = useParams();
-  const [source, setSource]   = useState(null);
+  const meta = SOURCE_META[source_id] || {
+    title: source_id,
+    description: '',
+    devanagari: 'ॐ',
+    available: false,
+  };
   const [chapters, setChapters] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(meta.available);
   const [error, setError]     = useState('');
   const [jumpInput, setJumpInput] = useState('');
 
   useEffect(() => {
+    // Only fetch chapters for sources that are actually available
+    if (!meta.available) return;
+
     setLoading(true);
     setError('');
 
-    Promise.all([getSources(), getAllChapters()])
-      .then(([sources, chaptersData]) => {
-        setSource(sources.find((s) => s.id === source_id) || null);
-        // API may return { chapters: [...] } or just an array
+    getAllChapters()
+      .then((chaptersData) => {
         const list = Array.isArray(chaptersData)
           ? chaptersData
           : (chaptersData.chapters || []);
@@ -45,6 +66,7 @@ export default function TextReader() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source_id]);
 
   // Chapter / verse reference jump (e.g. "3" → chapter 3, "3.16" → ch 3 start)
@@ -60,6 +82,40 @@ export default function TextReader() {
     }
   }
 
+  // ── Coming Soon view for sources not yet available ────────────────────
+  if (!meta.available) {
+    return (
+      <main className="text-reader">
+        <div className="text-reader__container">
+          <Link to="/" className="text-reader__back">← Library</Link>
+          <header className="text-reader__header">
+            <p className="text-reader__source-badge">Sacred Scripture</p>
+            <h1 className="text-reader__title">{meta.title}</h1>
+            <p className="text-reader__devanagari devanagari">{meta.devanagari}</p>
+            {meta.description && (
+              <p className="text-reader__description">{meta.description}</p>
+            )}
+          </header>
+          <hr className="gold-rule" />
+          <div className="text-reader__coming-soon">
+            <div className="text-reader__coming-soon-icon" aria-hidden="true">ॐ</div>
+            <h2 className="text-reader__coming-soon-title">Coming Soon</h2>
+            <p className="text-reader__coming-soon-body">
+              The <strong>{meta.title}</strong> is being carefully transcribed and curated for this library.
+              It will be available soon. Begin your journey with the Bhagavad Gita in the meantime.
+            </p>
+            <Link
+              to="/bhagavad-gita"
+              className="text-reader__coming-soon-cta"
+            >
+              Begin with Bhagavad Gita →
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="text-reader">
       <div className="text-reader__container">
@@ -70,15 +126,14 @@ export default function TextReader() {
         </Link>
 
         {/* Source header */}
-        {source && (
-          <header className="text-reader__header">
-            <p className="text-reader__source-badge">Sacred Scripture</p>
-            <h1 className="text-reader__title">{source.title}</h1>
-            {source.description && (
-              <p className="text-reader__description">{source.description}</p>
-            )}
-          </header>
-        )}
+        <header className="text-reader__header">
+          <p className="text-reader__source-badge">Sacred Scripture</p>
+          <h1 className="text-reader__title">{meta.title}</h1>
+          <p className="text-reader__devanagari devanagari">{meta.devanagari}</p>
+          {meta.description && (
+            <p className="text-reader__description">{meta.description}</p>
+          )}
+        </header>
 
         {/* Search + jump navigation bar */}
         <div className="text-reader__nav-bar">

@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getSources } from '../services/api';
 
 const SOURCE_STYLES = {
   'bhagavad-gita': {
@@ -20,17 +18,31 @@ const SOURCE_STYLES = {
   },
 };
 
-export default function Home({ onAskPrompt = () => {} }) {
-  const [sources, setSources] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+// Static source data — matches backend/src/data/sources.js exactly.
+// No API call needed: this data never changes and the cold-start delay
+// on Render would make cards appear blank for ~5s on first load.
+const SOURCES = [
+  {
+    id: 'bhagavad-gita',
+    title: 'Bhagavad Gita',
+    description: 'A foundational dialogue on duty, devotion, and self-knowledge.',
+    available: true,
+  },
+  {
+    id: 'upanishads',
+    title: 'Upanishads',
+    description: 'A contemplative collection exploring the self, reality, and liberation.',
+    available: false,
+  },
+  {
+    id: 'ramayana',
+    title: 'Ramayana',
+    description: 'An epic text centered on dharma, exile, loyalty, and return.',
+    available: false,
+  },
+];
 
-  useEffect(() => {
-    getSources()
-      .then((data) => setSources(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+export default function Home({ onAskPrompt = () => {} }) {
 
   return (
     <main className="relative overflow-hidden">
@@ -150,21 +162,9 @@ export default function Home({ onAskPrompt = () => {} }) {
             </p>
           </div>
 
-          {error ? (
-            <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-200">
-              {error}
-            </div>
-          ) : null}
-
+          {/* Source cards grid — rendered immediately from static data */}
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {loading
-              ? Array.from({ length: 3 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="min-h-[320px] animate-pulse rounded-[2rem] border border-amber-700/10 bg-white/[0.03]"
-                  />
-                ))
-              : sources.map((source) => {
+            {SOURCES.map((source) => {
                   const style = SOURCE_STYLES[source.id] || {
                     accent: 'from-amber-500/15 via-transparent to-transparent',
                     glyph: 'ॐ',
@@ -205,10 +205,14 @@ export default function Home({ onAskPrompt = () => {} }) {
                           <div className="h-px w-full bg-gradient-to-r from-amber-500/40 via-amber-500/10 to-transparent" />
                           <div className="flex items-center justify-between text-sm text-[color:var(--text-secondary)]">
                             <span className="uppercase tracking-[0.28em] text-[color:var(--text-muted)]">
-                              Open Manuscript
+                              {source.available ? 'Open Manuscript' : 'Coming Soon'}
                             </span>
-                            <span className="rounded-full border border-amber-500/25 px-3 py-1 text-amber-100 transition group-hover:border-amber-400/60">
-                              Enter
+                            <span className={`rounded-full border px-3 py-1 text-xs font-medium transition group-hover:border-amber-400/60 ${
+                              source.available
+                                ? 'border-amber-500/25 text-amber-100'
+                                : 'border-stone-500/25 text-stone-400 italic'
+                            }`}>
+                              {source.available ? 'Enter' : 'Soon'}
                             </span>
                           </div>
                         </div>
