@@ -68,7 +68,7 @@ async function askRag(question) {
   if (explicitMatch) {
     const ch = parseInt(explicitMatch[1], 10);
     const vNum = parseInt(explicitMatch[2], 10);
-    const exactDoc = await getDoc(collections.verses().doc(`bhagavad-gita_${ch}_${vNum}`));
+    const exactDoc = await getDoc('verses', `bhagavad-gita_${ch}_${vNum}`);
     
     if (exactDoc) {
       const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
