@@ -42,6 +42,7 @@ RULES — follow these without exception:
 6. Do not reference sources, traditions, scholars, or commentaries outside the retrieved verses.
 7. Respond in the same language the user asked the question in (English or Hindi). Keep the answer concise.
 8. EXCEPTION (Reflections): If the user specifically asks for "practical life lessons" or "reflection questions", you MUST generate profound, practical life lessons and reflective questions based purely on the spiritual principles found in the provided commentary. This overrides Rule 4.
+9. FORMATTING & TONE: Your output must be highly organized, visually elegant, and deeply educated. Use short, readable paragraphs. Use **bold text** for key spiritual concepts, and bullet points if listing multiple ideas. Maintain a warm, compassionate, and profoundly wise tone.
 
 Retrieved context follows:`;
 
@@ -171,7 +172,7 @@ async function askRag(question) {
     // ── APPROACH A: High-Reliability Single Free-Model Router ──
     console.log('[RAG] Running Approach A: Smart Free-Routing Path.');
     const response = await openai.chat.completions.create({
-      model: 'openrouter/free',
+      model: 'meta-llama/llama-3.1-8b-instruct:free',
       messages: [{ role: 'user', content: fullPrompt }],
     });
     answer = response.choices[0].message.content.trim();
