@@ -1,51 +1,69 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="flame" x1="256" y1="130" x2="256" y2="315" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#F6C878"/>
-      <stop offset="0.45" stop-color="#E8A33D"/>
-      <stop offset="1" stop-color="#BE6A2E"/>
+    <!-- Warm amber circle background for visibility at all sizes -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1A0A0A"/>
+      <stop offset="100%" stop-color="#0D0505"/>
+    </radialGradient>
+    <!-- Flame gradient — rich saffron to deep amber -->
+    <linearGradient id="flame" x1="256" y1="100" x2="256" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFE082"/>
+      <stop offset="45%" stop-color="#F59B2B"/>
+      <stop offset="100%" stop-color="#C2561C"/>
     </linearGradient>
-    <linearGradient id="thread" x1="150" y1="360" x2="362" y2="360" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#C99A4E"/>
-      <stop offset="0.5" stop-color="#E8C077"/>
-      <stop offset="1" stop-color="#C99A4E"/>
+    <!-- Sutra thread shimmer -->
+    <linearGradient id="thread" x1="140" y1="360" x2="372" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A87430"/>
+      <stop offset="50%" stop-color="#F0CF72"/>
+      <stop offset="100%" stop-color="#A87430"/>
     </linearGradient>
-    <linearGradient id="ring" x1="256" y1="24" x2="256" y2="488" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#C99A4E"/>
-      <stop offset="1" stop-color="#8C6B33"/>
+    <!-- Outer ring gradient -->
+    <linearGradient id="ring" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F0CF72"/>
+      <stop offset="100%" stop-color="#8C6020"/>
     </linearGradient>
   </defs>
 
-  <!-- seal ring -->
-  <circle cx="256" cy="256" r="232" fill="none" stroke="url(#ring)" stroke-width="5"/>
-  <circle cx="256" cy="256" r="216" fill="none" stroke="#C99A4E" stroke-width="1.25" opacity="0.5"/>
+  <!-- Deep background circle — ensures visibility on any tab/browser -->
+  <circle cx="256" cy="256" r="248" fill="url(#bg)"/>
 
-  <!-- open book, single ribbon of pages -->
-  <path d="M 138 344
-           C 138 316 182 300 256 300
-           C 330 300 374 316 374 344
-           L 374 358
-           C 374 332 330 318 256 318
-           C 182 318 138 332 138 358
+  <!-- Outer seal ring — bold enough to read at favicon size -->
+  <circle cx="256" cy="256" r="232" fill="none" stroke="url(#ring)" stroke-width="9"/>
+  <circle cx="256" cy="256" r="216" fill="none" stroke="#C99A4E" stroke-width="2" opacity="0.45"/>
+
+  <!-- Open book — ivory pages, clearly readable on dark background -->
+  <path d="M 128 350
+           C 128 315 186 295 256 295
+           C 326 295 384 315 384 350
+           L 384 368
+           C 384 335 326 318 256 318
+           C 186 318 128 335 128 368
            Z"
-        fill="#4B2142" stroke="#C99A4E" stroke-width="1.5" stroke-opacity="0.8"/>
-  <line x1="256" y1="303" x2="256" y2="315" stroke="#C99A4E" stroke-width="2" opacity="0.8"/>
+        fill="#F5ECD7" stroke="#C99A4E" stroke-width="2.5" stroke-opacity="0.9"/>
 
-  <!-- flame rising from the book, one continuous thread -->
-  <path d="M 238 312
-           C 197 270 206 202 243 163
-           C 249 155 254 145 256 136
-           C 258 145 263 155 269 163
-           C 306 202 315 270 274 312
-           C 268 300 262 292 256 292
-           C 250 292 244 300 238 312
+  <!-- Book center spine line -->
+  <line x1="256" y1="298" x2="256" y2="316" stroke="#C99A4E" stroke-width="3" opacity="0.9"/>
+
+  <!-- Flame — bold, clear teardrop shape rising from book -->
+  <path d="M 230 310
+           C 185 260 196 188 238 148
+           C 245 140 251 128 256 118
+           C 261 128 267 140 274 148
+           C 316 188 327 260 282 310
+           C 275 295 265 286 256 286
+           C 247 286 237 295 230 310
            Z"
         fill="url(#flame)"/>
 
-  <!-- the sutra thread, tying the mark together -->
-  <path d="M 150 366
-           C 184 400 222 336 256 366
-           C 290 396 328 400 362 366"
-        fill="none" stroke="url(#thread)" stroke-width="4.5" stroke-linecap="round"/>
-  <circle cx="256" cy="366" r="5.5" fill="#E8C077"/>
+  <!-- Inner flame glow — bright core -->
+  <ellipse cx="256" cy="210" rx="18" ry="38" fill="#FFF3B8" opacity="0.45"/>
+
+  <!-- Sutra thread — the tying wave -->
+  <path d="M 144 372
+           C 182 410 222 338 256 370
+           C 290 402 330 410 368 372"
+        fill="none" stroke="url(#thread)" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Thread midpoint jewel -->
+  <circle cx="256" cy="370" r="7" fill="#F0CF72"/>
 </svg>
