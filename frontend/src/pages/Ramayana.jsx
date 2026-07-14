@@ -31,23 +31,27 @@ export default function Ramayana() {
 
         <hr className="gold-rule" />
 
-        <ul className="text-reader__chapter-list">
+        <ol className="text-reader__chapter-list">
           {KANDAS.map((k, i) => (
-            <li key={k.id}>
-              <Link to={`/ramayana/${k.id}`} className="chapter-link group">
-                <span className="chapter-link__number">{ROMAN[i]}</span>
-                <div className="chapter-link__content">
-                  <span className="chapter-link__title">{k.name}</span>
-                  <span className="chapter-link__sanskrit">{k.sargas} Sargas</span>
-                  <span className="chapter-link__subtitle">{k.description}</span>
-                </div>
-                <span className="chapter-link__arrow" aria-hidden="true">
-                  →
+            <li key={k.id} className="text-reader__chapter-item">
+              <Link to={`/ramayana/${k.id}`} className="text-reader__chapter-row group">
+                <span className="text-reader__roman" aria-hidden="true">
+                  {ROMAN[i]}
                 </span>
+                <div className="text-reader__chapter-info">
+                  <span className="text-reader__chapter-english">{k.name}</span>
+                  <span className="text-reader__chapter-summary">{k.description}</span>
+                </div>
+                <div className="text-reader__chapter-meta">
+                  <span className="text-reader__verse-count">{k.sargas} sargas</span>
+                  <span className="text-reader__arrow" aria-hidden="true">
+                    →
+                  </span>
+                </div>
               </Link>
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
     </main>
   );
