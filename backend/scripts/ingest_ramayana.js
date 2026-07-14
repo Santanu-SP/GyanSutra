@@ -79,10 +79,9 @@ async function run() {
   const BATCH_SIZE = 50;
   let batchData = [];
 
-  // NOTE: For safety in this test run, we will just process the first 50 shlokas (Bala Kanda Sarga 1)
-  // To process all 24000+, remove the slice(0, 50).
-  const dataToProcess = rawData.slice(0, 50);
-  console.log(`Processing first ${dataToProcess.length} shlokas...`);
+  // Process ALL shlokas in the dataset
+  const dataToProcess = rawData;
+  console.log(`Processing all ${dataToProcess.length} shlokas across every sarga and kanda...`);
 
   for (let i = 0; i < dataToProcess.length; i++) {
     const item = dataToProcess[i];

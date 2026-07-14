@@ -81,6 +81,8 @@ export default function IlluminatedVerseCard({
     transliteration,
     translationEnglish,
     translationHindi,
+    explanationEnglish,
+    explanationHindi,
     sourceCommentary,
     detailedExplanations = [],
     wordMeanings = [],
@@ -178,7 +180,7 @@ export default function IlluminatedVerseCard({
         </section>
 
         {/* 2. AUTHENTIC COMMENTARY */}
-        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary) && (
+        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || explanationEnglish || explanationHindi) && (
           <section className="verse-section">
             <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9, marginBottom: '1rem' }}>
               {lang === 'hindi' ? 'प्रमाणिक व्याख्या' : 'Authentic Commentary'}
@@ -206,6 +208,25 @@ export default function IlluminatedVerseCard({
                     </p>
                   </div>
                 ))
+              ) : (explanationEnglish || explanationHindi) ? (
+                <div className="commentary-item" style={{ marginBottom: '2rem' }}>
+                  <h4 className="commentary-author" style={{ 
+                    color: 'var(--text-secondary)', 
+                    fontSize: '0.85rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
+                    Detailed Translation & Explanation
+                  </h4>
+                  <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
+                    {lang === 'hindi' ? (explanationHindi || explanationEnglish) : (explanationEnglish || explanationHindi)}
+                  </p>
+                </div>
               ) : (
                 <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
                   {sourceCommentary}
