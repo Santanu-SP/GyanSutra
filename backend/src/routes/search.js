@@ -1,6 +1,6 @@
 const express = require('express');
 const { embedText } = require('../services/embedding');
-const { findNearestVerses } = require('../services/firestore');
+const { findNearestVerses, getDoc } = require('../services/firestore');
 
 const router = express.Router();
 
@@ -30,7 +30,35 @@ router.get('/', async (req, res, next) => {
     const queryVector = await embedText(q, 'RETRIEVAL_QUERY');
 
     // Retrieve more than needed so we can filter by a soft threshold
-    const results = await findNearestVerses(queryVector, Math.min(limit * 2, 20));
+    let results = await findNearestVerses(queryVector, Math.min(limit * 2, 20));
+
+    // INTERCEPT: Explicitly catch "chapter X verse Y" to bypass vector inaccuracy on numbers
+    const explicitMatch = q.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
+    if (explicitMatch) {
+      const ch = parseInt(explicitMatch[1], 10);
+      const vNum = parseInt(explicitMatch[2], 10);
+      const exactDoc = await getDoc('verses', `bhagavad-gita_${ch}_${vNum}`);
+      
+      if (exactDoc) {
+        // Remove it from current results if the vector search found it lower down
+        results = results.filter(v => v.id !== exactDoc.id);
+        
+        // Force it to the very top with a perfect score
+        results.unshift({
+          id: exactDoc.id,
+          similarity: 1.0,
+          chapterNumber: exactDoc.chapterNumber,
+          verseNumber: exactDoc.verseNumber,
+          sanskrit: exactDoc.sanskrit,
+          transliteration: exactDoc.transliteration,
+          translationEnglish: exactDoc.translationEnglish,
+          translationHindi: exactDoc.translationHindi,
+          wordMeanings: exactDoc.wordMeanings,
+          detailedExplanations: exactDoc.detailedExplanations,
+          tags: exactDoc.tags || []
+        });
+      }
+    }
 
     // Apply a softer threshold for search (more permissive than /ask)
     const SEARCH_THRESHOLD = 0.55;
