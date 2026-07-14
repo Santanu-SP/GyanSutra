@@ -29,6 +29,7 @@ export const getChapterVerses = (id) => request(`/chapters/${id}/verses`);
 // ── Sources ───────────────────────────────────────────────────────────────────
 export const getSources = () => request('/sources');
 export const getSourceVerses = (sourceId) => request(`/verses/${sourceId}`);
+export const getRamayanaSarga = (kandaNum, sargaNum) => request(`/verses/ramayana/${kandaNum}/${sargaNum}`);
 
 // ── Verses ────────────────────────────────────────────────────────────────────
 export const getVerse = (id) => request(`/verses/${id}`);

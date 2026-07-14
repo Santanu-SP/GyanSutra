@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
+import { getRamayanaSarga } from '../services/api';
 import './ChapterReader.css';
 
 const KANDAS = [
@@ -31,8 +32,7 @@ export default function KandaReader() {
     setLoading(true);
     setCurrentIndex(0);
     
-    fetch(`/api/verses/ramayana/${kandaId}/${currentSarga}`)
-      .then(res => res.json())
+    getRamayanaSarga(kandaId, currentSarga)
       .then(data => {
         setVerses(data.verses || []);
         setLoading(false);
