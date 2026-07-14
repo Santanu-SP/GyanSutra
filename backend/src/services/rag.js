@@ -29,21 +29,15 @@ function getOpenRouterClient() {
   return openaiClient;
 }
 
-// ── System Prompt ─────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are Gyan Sutra's scripture guide for the Bhagavad Gita and the Valmiki Ramayana. Your role is strictly limited:
+const SYSTEM_PROMPT = `You are Gyan Sutra's Saarthi, the ultimate scripture guide for the Bhagavad Gita and the Valmiki Ramayana. Your knowledge is profound, highly structured, and deeply authentic.
 
 RULES — follow these without exception:
-1. Only use the verses provided in the retrieved context below. Do not use any outside knowledge.
-2. Cite book, chapter/kanda, and verse/shloka number for every claim you make (e.g., "Bhagavad Gita, Chapter 2, Verse 47" or "Ramayana, Bala Kanda, Sarga 1, Shloka 1").
-3. If the context below does not contain a clear answer to the question, say EXACTLY this:
-   "Gyan Sutra doesn't have a grounded answer for this yet." — then stop. Do not add anything else.
-4. Do not speculate, paraphrase beyond what is in the text, offer your own interpretation, or provide moral advice.
-5. Do not soften a refusal into a vague spiritual-sounding answer. A clear "I don't know from these verses" is correct. A vague guess is not.
-6. Do not reference sources, traditions, scholars, or commentaries outside the retrieved verses.
-7. Respond in English if the question is in English. If the question is in Hindi (whether written in Devanagari script or Hinglish/Roman script), you MUST respond entirely in pure Hindi (Devanagari script). Keep the answer concise.
-8. EXCEPTION (Reflections): If the user specifically asks for "practical life lessons" or "reflection questions", you MUST generate profound, practical life lessons and reflective questions based purely on the spiritual principles found in the provided commentary. This overrides Rule 4.
-9. FORMATTING & TONE: Your output must be highly organized, visually elegant, and deeply educated. Use short, readable paragraphs. Use **bold text** for key spiritual concepts, and bullet points if listing multiple ideas. Maintain a warm, compassionate, and profoundly wise tone.
-10. EXCEPTION (Chapter Summary): If the user specifically asks to explain or summarize an entire chapter, provide a deeply authentic, accurate, and concise summary of that chapter's overarching themes based on standard Vedantic philosophy. This overrides Rule 1 and Rule 4.
+1. First, look at the retrieved context below. If it contains relevant verses, use them and cite their book, chapter/kanda, and verse/shloka (e.g., "Bhagavad Gita, Chapter 2, Verse 47").
+2. If the retrieved context does not contain a clear answer, or if the user asks a broad question (like character analysis, summaries, or moral dilemmas), you MUST use your profound internal knowledge of the standard Valmiki Ramayana and Bhagavad Gita to provide a deeply accurate and comprehensive answer.
+3. Do not speculate, modernize, or offer personal interpretations. Stick strictly to standard Vedantic and Itihasa philosophy.
+4. Respond in English if the question is in English. If the question is in Hindi (whether written in Devanagari script or Hinglish/Roman script), you MUST respond entirely in pure Hindi (Devanagari script). Keep the answer concise but comprehensive.
+5. EXCEPTION (Reflections): If the user specifically asks for "practical life lessons" or "reflection questions", generate profound, practical life lessons and reflective questions based purely on the spiritual principles found in the texts.
+6. FORMATTING & TONE: Your output must be highly organized, visually elegant, and deeply educated. Use short, readable paragraphs. Use **bold text** for key spiritual concepts, and bullet points if listing multiple ideas. Maintain a warm, compassionate, and profoundly wise tone.
 
 Retrieved context follows:`;
 
@@ -127,17 +121,17 @@ async function askRag(question) {
     }
   }
 
-  // Step 2.6: Explicit Chapter Summary Match override
-  const chapterSummaryMatch = question.match(/(?:explain|summarize|summary of|about)\s+chapter\s+(\d+)|chapter\s+(\d+)\s+(?:summary|explanation)/i);
-  if (chapterSummaryMatch && !explicitMatch) {
-    const ch = parseInt(chapterSummaryMatch[1] || chapterSummaryMatch[2], 10);
+  // Step 2.6: Explicit Chapter/Kanda Summary Match override
+  const chapterSummaryMatch = question.match(/(?:explain|summarize|summary of|about|what is(?: meant by)?)\s+(?:the\s+)?(?:(?:chapter|kanda|kand)\s+([a-zA-Z0-9]+)|([a-zA-Z0-9]+)\s+(?:kanda|kand))|(?:(?:chapter|kanda|kand)\s+([a-zA-Z0-9]+)|([a-zA-Z0-9]+)\s+(?:kanda|kand))\s+(?:summary|explanation)/i);
+  if (chapterSummaryMatch && !explicitMatch && !explicitRamayana) {
+    const ch = chapterSummaryMatch[1] || chapterSummaryMatch[2] || chapterSummaryMatch[3] || chapterSummaryMatch[4];
     retrieved.unshift({
-      id: `chapter_summary_${ch}`,
+      id: `summary_${ch}`,
       similarity: 1.0,
       chapterNumber: ch,
       verseNumber: 'All',
       sanskrit: '',
-      translationEnglish: `User explicitly requested a summary for Chapter ${ch}.`,
+      translationEnglish: `User explicitly requested a summary or explanation for Chapter/Kanda ${ch}. Provide it based on standard knowledge.`,
       translationHindi: '',
       wordMeanings: [],
       detailedExplanations: [],
@@ -179,17 +173,13 @@ async function askRag(question) {
   const topSimilarity = retrieved.length > 0 ? retrieved[0].similarity : 0;
   const passedThreshold = retrieved.filter(v => v.similarity >= SIMILARITY_THRESHOLD);
 
+  // Instead of refusing, we will pass an empty context or the best available context 
+  // and let the LLM answer from its profound internal knowledge base.
+  let contextLines = "";
   if (passedThreshold.length === 0) {
-    return {
-      answered: false,
-      answer: REFUSAL_ANSWER,
-      citations: [],
-      topSimilarity,
-    };
-  }
-
-  // Step 4: Build grounded context string
-  const contextLines = passedThreshold.map((v, i) => {
+    contextLines = "No specific verses retrieved. Please answer directly using your comprehensive internal knowledge of the texts.";
+  } else {
+    contextLines = passedThreshold.map((v, i) => {
     const wordMeanings = Array.isArray(v.wordMeanings)
       ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
       : '';
@@ -198,8 +188,12 @@ async function askRag(question) {
       ? v.detailedExplanations.map(exp => `[Commentary by ${exp.author}]: ${exp.explanation}`).join('\n')
       : '';
 
+    const titleLine = v.book === 'Ramayana' || v.kanda 
+      ? `[${i + 1}] Ramayana, ${v.kanda || 'Kanda ' + v.kandaNumber}, Sarga ${v.sarga}, Shloka ${v.shlokaNumber} (similarity: ${v.similarity.toFixed(3)})`
+      : `[${i + 1}] Chapter ${v.chapterNumber}, Verse ${v.verseNumber} (similarity: ${v.similarity.toFixed(3)})`;
+
     return [
-      `[${i + 1}] Chapter ${v.chapterNumber}, Verse ${v.verseNumber} (similarity: ${v.similarity.toFixed(3)})`,
+      titleLine,
       `Sanskrit: ${v.sanskrit || ''}`,
       `Transliteration: ${v.transliteration || ''}`,
       `English: ${v.translationEnglish || ''}`,
@@ -210,6 +204,7 @@ async function askRag(question) {
       .filter(Boolean)
       .join('\n');
   }).join('\n\n---\n\n');
+  }
 
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nQuestion: ${question}`;
   const openai = getOpenRouterClient();

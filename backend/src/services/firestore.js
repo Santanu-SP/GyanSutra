@@ -130,11 +130,19 @@ async function findNearestVerses(queryVector, topK = 8) {
       similarity: similarityScore,
       chapterNumber: data.chapterNumber,
       verseNumber: data.verseNumber,
+      book: data.book,
+      kanda: data.kanda,
+      kandaNumber: data.kandaNumber,
+      sarga: data.sarga,
+      shlokaNumber: data.shlokaNumber,
       sanskrit: data.sanskrit || '',
       transliteration: data.transliteration || '',
       translationEnglish: data.translationEnglish || '',
       translationHindi: data.translationHindi || '',
+      explanationEnglish: data.explanationEnglish || '',
+      comments: data.comments || '',
       wordMeanings: data.wordMeanings || [],
+      detailedExplanations: data.detailedExplanations || [],
       tags: data.tags || []
     };
   });
