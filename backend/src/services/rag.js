@@ -172,10 +172,13 @@ async function askRag(question) {
     // ── APPROACH A: High-Reliability Single Free-Model Router ──
     console.log('[RAG] Running Approach A: Smart Free-Routing Path.');
     const response = await openai.chat.completions.create({
-      model: 'meta-llama/llama-3.1-8b-instruct:free',
+      model: 'openrouter/free',
       messages: [{ role: 'user', content: fullPrompt }],
     });
-    answer = response.choices[0].message.content.trim();
+    let rawAnswer = response.choices[0].message.content.trim();
+    // OpenRouter's free wildcard occasionally routes through Llama Guard, 
+    // which injects a safety tag. We strip it out cleanly here.
+    answer = rawAnswer.replace(/^User Safety:\s*safe\n*/i, '').replace(/^Your Reflection\n*/i, '').trim();
   }
 
   // Step 6: Map Citations back safely
