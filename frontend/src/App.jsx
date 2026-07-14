@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
@@ -63,6 +63,17 @@ function TriggerFlame() {
       <ellipse cx="10" cy="18" rx="5" ry="1.25" fill="currentColor" opacity="0.2" />
     </svg>
   );
+}
+
+// Automatically scrolls to top when navigating to a new route
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
 }
 
 export default function App() {
@@ -133,6 +144,7 @@ export default function App() {
 
   return (
     <div className="gs-app">
+      <ScrollToTop />
       {/* ── Header ──────────────────────────────────────────────────── */}
       <header className="gs-header">
         <nav className="gs-header__nav">
