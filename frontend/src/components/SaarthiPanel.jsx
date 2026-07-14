@@ -12,6 +12,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './SaarthiPanel.css';
 
 // Flame icon — Saarthi's identity mark
@@ -151,7 +152,9 @@ export default function SaarthiPanel({
               <p className="saarthi-msg__label">
                 {message.role === 'user' ? 'Your Reflection' : 'Saarthi'}
               </p>
-              <p className="saarthi-msg__content">{message.content}</p>
+              <div className="saarthi-msg__content">
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </div>
             </div>
           ))}
 
