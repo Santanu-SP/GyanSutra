@@ -15,39 +15,87 @@ const kandaToNumber = {
   'Uttara Kanda': 7
 };
 
+function normalizeSanskrit(text) {
+  if (!text) return '';
+  return text
+    .replace(/[\s\u200b\u200c\u200d।॥\d\.\,\?\!\-\_\;\(\)\{\}\[\]\n\r]/g, '')
+    .trim();
+}
+
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function run() {
-  console.log('Starting Ramayana ingestion...');
+  console.log('Starting Ramayana ingestion with Itihasa integration...');
 
   const valmikiPath = path.join(__dirname, '../data/raw/Valmiki_Ramayan_Dataset/data/Valmiki_Ramayan_Shlokas.json');
+  const itihasaPath = path.join(__dirname, '../data/raw/itihasa/res/ramayana.json');
+
   if (!fs.existsSync(valmikiPath)) {
     console.error('Valmiki_Ramayan_Shlokas.json not found!');
     process.exit(1);
+  }
+
+  // Load and Index Itihasa by Sanskrit text
+  let itihasaMap = new Map();
+  if (fs.existsSync(itihasaPath)) {
+    console.log('Loading Itihasa dataset for English translation backfilling...');
+    const itihasaData = JSON.parse(fs.readFileSync(itihasaPath, 'utf8'));
+    
+    let count = 0;
+    for (const vol in itihasaData) {
+      const chapters = itihasaData[vol];
+      for (const ch of chapters) {
+        if (ch.sn && ch.en) {
+          for (let i = 0; i < ch.sn.length; i++) {
+            const snText = ch.sn[i];
+            const enText = ch.en[i];
+            if (snText && enText) {
+              const norm = normalizeSanskrit(snText);
+              if (norm) {
+                // If collision, we keep the translation or append it
+                itihasaMap.set(norm, enText);
+                count++;
+              }
+            }
+          }
+        }
+      }
+    }
+    console.log(`Indexed ${count} shlokas from Itihasa dataset.`);
+  } else {
+    console.warn('Itihasa ramayana.json not found! Proceeding without it.');
   }
 
   const rawData = JSON.parse(fs.readFileSync(valmikiPath, 'utf8'));
   console.log(`Loaded ${rawData.length} shlokas from Valmiki_Ramayan_Dataset`);
 
   let successCount = 0;
+  let itihasaMatchCount = 0;
   let missingEnglishExpCount = 0;
-  
+
   // To avoid hitting API rate limits with embeddings, process in smaller batches
-  const BATCH_SIZE = 50; 
+  const BATCH_SIZE = 50;
   let batchData = [];
-  
+
   // NOTE: For safety in this test run, we will just process the first 50 shlokas (Bala Kanda Sarga 1)
   // To process all 24000+, remove the slice(0, 50).
-  const dataToProcess = rawData.slice(0, 50); 
+  const dataToProcess = rawData.slice(0, 50);
   console.log(`Processing first ${dataToProcess.length} shlokas...`);
 
   for (let i = 0; i < dataToProcess.length; i++) {
     const item = dataToProcess[i];
-    
+
     const kNum = kandaToNumber[item.kanda] || 0;
     const docId = `valmiki-ramayana_${kNum}_${item.sarga}_${item.shloka}`;
+
+    const normSanskrit = normalizeSanskrit(item.shloka_text);
+    const itihasaTranslation = itihasaMap.get(normSanskrit) || null;
+
+    if (itihasaTranslation) {
+      itihasaMatchCount++;
+    }
 
     const hasEnglishExp = !!item.explanation;
     if (!hasEnglishExp) missingEnglishExpCount++;
@@ -63,12 +111,12 @@ async function run() {
       sanskrit: item.shloka_text || '',
       transliteration: item.transliteration || '',
       translationHindi: null, // Genuninely missing from dataset
-      translationEnglish: item.translation || null, // Word by word meaning
+      translationEnglish: itihasaTranslation || item.translation || null, // Prioritize M.N. Dutt English translation from Itihasa, fallback to word-by-word
       explanationHindi: null, // Genuinely missing
       explanationEnglish: item.explanation || null, // Prose explanation
       comments: item.comments || null,
       key_terms: [], // Would require NLP extraction
-      source: 'AshuVj/Valmiki_Ramayan_Dataset',
+      source: itihasaTranslation ? 'AshuVj/Valmiki_Ramayan_Dataset + rahular/itihasa' : 'AshuVj/Valmiki_Ramayan_Dataset',
       verified: hasEnglishExp ? true : false,
     };
 
@@ -83,10 +131,10 @@ async function run() {
     try {
       const embedding = await embedText(embedStr);
       verseData.embedding = embedding;
-      
+
       batchData.push({ id: docId, data: verseData });
       successCount++;
-      
+
       console.log(`Processed: ${docId}`);
 
       if (batchData.length >= BATCH_SIZE) {
@@ -106,6 +154,7 @@ async function run() {
 
   console.log('--- INGESTION COMPLETE ---');
   console.log(`Successfully ingested: ${successCount} verses`);
+  console.log(`Matched with Itihasa: ${itihasaMatchCount}`);
   console.log(`Missing English Explanations (Flagged): ${missingEnglishExpCount}`);
   console.log(`Missing Hindi Translations: All (Left null for manual review)`);
 }
