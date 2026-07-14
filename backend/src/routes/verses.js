@@ -36,8 +36,37 @@ router.get('/daily', (req, res) => {
 });
 
 /**
+ * GET /api/verses/ramayana/:kandaNumber/:sarga
+ * Returns all verses for a given Kanda and Sarga in the Ramayana.
+ */
+router.get('/ramayana/:kandaNumber/:sarga', async (req, res, next) => {
+  try {
+    const kandaNum = parseInt(req.params.kandaNumber, 10);
+    const sarga = parseInt(req.params.sarga, 10);
+
+    const snap = await collections.verses()
+      .where('book', '==', 'ramayana')
+      .where('kandaNumber', '==', kandaNum)
+      .where('sarga', '==', sarga)
+      .get();
+
+    const verses = snap.docs
+      .map((doc) => {
+        const data = doc.data();
+        delete data.embedding;
+        return { id: doc.id, ...data };
+      })
+      .sort((a, b) => a.shlokaNumber - b.shlokaNumber);
+
+    res.json({ verses });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/verses/:source_id
- * Returns all verses for a given source_id.
+ * Returns all verses for a given source_id (e.g. bhagavad-gita).
  */
 router.get('/:source_id', async (req, res, next) => {
   try {

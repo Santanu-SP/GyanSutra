@@ -30,11 +30,11 @@ function getOpenRouterClient() {
 }
 
 // ── System Prompt ─────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are Gyan Sutra's scripture guide. Your role is strictly limited:
+const SYSTEM_PROMPT = `You are Gyan Sutra's scripture guide for the Bhagavad Gita and the Valmiki Ramayana. Your role is strictly limited:
 
 RULES — follow these without exception:
 1. Only use the verses provided in the retrieved context below. Do not use any outside knowledge.
-2. Cite chapter and verse number for every claim you make (e.g., "Chapter 2, Verse 47").
+2. Cite book, chapter/kanda, and verse/shloka number for every claim you make (e.g., "Bhagavad Gita, Chapter 2, Verse 47" or "Ramayana, Bala Kanda, Sarga 1, Shloka 1").
 3. If the context below does not contain a clear answer to the question, say EXACTLY this:
    "Gyan Sutra doesn't have a grounded answer for this yet." — then stop. Do not add anything else.
 4. Do not speculate, paraphrase beyond what is in the text, offer your own interpretation, or provide moral advice.
@@ -91,6 +91,38 @@ async function askRag(question) {
         wordMeanings: exactDoc.wordMeanings,
         detailedExplanations: exactDoc.detailedExplanations,
         tags: exactDoc.tags
+      });
+    }
+  }
+
+  // Step 2.5.1: Explicit Kanda/Sarga Match override (Ramayana)
+  const explicitRamayana = question.match(/kanda\s+(\d+)(?:\s*,?\s*|\s+and\s+)sarga\s+(\d+)(?:\s*,?\s*|\s+and\s+)(?:shloka|verse)\s+(\d+)/i);
+  if (explicitRamayana) {
+    const kNum = parseInt(explicitRamayana[1], 10);
+    const sarga = parseInt(explicitRamayana[2], 10);
+    const shloka = parseInt(explicitRamayana[3], 10);
+    const exactDoc = await getDoc('verses', `valmiki-ramayana_${kNum}_${sarga}_${shloka}`);
+    
+    if (exactDoc) {
+      const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
+      if (existingIdx > -1) {
+        retrieved.splice(existingIdx, 1);
+      }
+      retrieved.unshift({
+        id: exactDoc.id,
+        similarity: 1.0,
+        book: exactDoc.book,
+        kanda: exactDoc.kanda,
+        kandaNumber: exactDoc.kandaNumber,
+        sarga: exactDoc.sarga,
+        shlokaNumber: exactDoc.shlokaNumber,
+        sanskrit: exactDoc.sanskrit,
+        transliteration: exactDoc.transliteration,
+        translationEnglish: exactDoc.translationEnglish,
+        explanationEnglish: exactDoc.explanationEnglish,
+        comments: exactDoc.comments,
+        verified: exactDoc.verified,
+        tags: exactDoc.tags || []
       });
     }
   }

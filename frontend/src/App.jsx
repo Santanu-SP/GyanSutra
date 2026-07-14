@@ -24,6 +24,8 @@ import './app.css';
 const ChapterReader = lazy(() => import('./pages/ChapterReader'));
 const Search        = lazy(() => import('./pages/Search'));
 const VerseDetail   = lazy(() => import('./pages/VerseDetail'));
+const Ramayana      = lazy(() => import('./pages/Ramayana'));
+const KandaReader   = lazy(() => import('./pages/KandaReader'));
 
 // Suggested conversation starters — shown when panel is first opened
 const SAARTHI_PROMPTS = [
@@ -195,7 +197,10 @@ export default function App() {
             />
             {/* Bhagavad Gita chapter navigator */}
             <Route path="/chapters/:id" element={<ChapterReader />} />
-            {/* Source pages (Bhagavad Gita, Ramayana, etc.) */}
+            {/* Ramayana Kanda navigator */}
+            <Route path="/ramayana" element={<Ramayana />} />
+            <Route path="/ramayana/:kandaNum" element={<KandaReader />} />
+            {/* Source pages (Bhagavad Gita, etc.) */}
             <Route path="/:source_id" element={<TextReader />} />
             {/* Search */}
             <Route path="/search" element={<Search />} />

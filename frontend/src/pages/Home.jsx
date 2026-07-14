@@ -40,7 +40,7 @@ const SOURCES = [
     id: 'ramayana',
     title: 'Ramayana',
     description: 'An epic text centered on dharma, exile, loyalty, and return.',
-    available: false,
+    available: true,
   },
 ];
 

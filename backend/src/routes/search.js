@@ -32,18 +32,14 @@ router.get('/', async (req, res, next) => {
     // Retrieve more than needed so we can filter by a soft threshold
     let results = await findNearestVerses(queryVector, Math.min(limit * 2, 20));
 
-    // INTERCEPT: Explicitly catch "chapter X verse Y" to bypass vector inaccuracy on numbers
-    const explicitMatch = q.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
-    if (explicitMatch) {
-      const ch = parseInt(explicitMatch[1], 10);
-      const vNum = parseInt(explicitMatch[2], 10);
+    // INTERCEPT 1: Bhagavad Gita (e.g. "chapter 1 verse 1")
+    const explicitGita = q.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
+    if (explicitGita) {
+      const ch = parseInt(explicitGita[1], 10);
+      const vNum = parseInt(explicitGita[2], 10);
       const exactDoc = await getDoc('verses', `bhagavad-gita_${ch}_${vNum}`);
-      
       if (exactDoc) {
-        // Remove it from current results if the vector search found it lower down
         results = results.filter(v => v.id !== exactDoc.id);
-        
-        // Force it to the very top with a perfect score
         results.unshift({
           id: exactDoc.id,
           similarity: 1.0,
@@ -55,6 +51,34 @@ router.get('/', async (req, res, next) => {
           translationHindi: exactDoc.translationHindi,
           wordMeanings: exactDoc.wordMeanings,
           detailedExplanations: exactDoc.detailedExplanations,
+          tags: exactDoc.tags || []
+        });
+      }
+    }
+
+    // INTERCEPT 2: Ramayana (e.g. "kanda 1 sarga 1 shloka 1")
+    const explicitRamayana = q.match(/kanda\s+(\d+)(?:\s*,?\s*|\s+and\s+)sarga\s+(\d+)(?:\s*,?\s*|\s+and\s+)(?:shloka|verse)\s+(\d+)/i);
+    if (explicitRamayana) {
+      const kNum = parseInt(explicitRamayana[1], 10);
+      const sarga = parseInt(explicitRamayana[2], 10);
+      const shloka = parseInt(explicitRamayana[3], 10);
+      const exactDoc = await getDoc('verses', `valmiki-ramayana_${kNum}_${sarga}_${shloka}`);
+      if (exactDoc) {
+        results = results.filter(v => v.id !== exactDoc.id);
+        results.unshift({
+          id: exactDoc.id,
+          similarity: 1.0,
+          book: exactDoc.book,
+          kanda: exactDoc.kanda,
+          kandaNumber: exactDoc.kandaNumber,
+          sarga: exactDoc.sarga,
+          shlokaNumber: exactDoc.shlokaNumber,
+          sanskrit: exactDoc.sanskrit,
+          transliteration: exactDoc.transliteration,
+          translationEnglish: exactDoc.translationEnglish,
+          explanationEnglish: exactDoc.explanationEnglish,
+          comments: exactDoc.comments,
+          verified: exactDoc.verified,
           tags: exactDoc.tags || []
         });
       }
