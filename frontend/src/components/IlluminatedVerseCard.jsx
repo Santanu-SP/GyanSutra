@@ -87,6 +87,7 @@ export default function IlluminatedVerseCard({
     detailedExplanations = [],
     wordMeanings = [],
     tags = [],
+    comments,
   } = verse;
 
   const isClickable = !!onClick || variant === 'compact' || variant === 'citation';
@@ -157,7 +158,7 @@ export default function IlluminatedVerseCard({
             <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9 }}>
               {lang === 'hindi' ? 'सरल अर्थ' : 'Simple Meaning'}
             </h3>
-            {translationHindi && translationEnglish && (
+            {(translationHindi || (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)) && (
               <div className="verse-card__lang-toggle" role="group" aria-label="Translation language" style={{ margin: 0 }}>
                 <button
                   className={`verse-card__lang-btn ${lang === 'english' ? 'active' : ''}`}
@@ -175,12 +176,14 @@ export default function IlluminatedVerseCard({
             )}
           </div>
           <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1.7, fontWeight: 500 }}>
-            {lang === 'hindi' ? translationHindi : translationEnglish}
+            {lang === 'hindi' 
+              ? (translationHindi || "हिन्दी अनुवाद उपलब्ध नहीं है।") 
+              : (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)}
           </p>
         </section>
 
         {/* 2. AUTHENTIC COMMENTARY */}
-        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || explanationEnglish || explanationHindi) && (
+        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || comments || (verse.book !== 'ramayana' && (explanationEnglish || explanationHindi))) && (
           <section className="verse-section">
             <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9, marginBottom: '1rem' }}>
               {lang === 'hindi' ? 'प्रमाणिक व्याख्या' : 'Authentic Commentary'}
@@ -208,6 +211,25 @@ export default function IlluminatedVerseCard({
                     </p>
                   </div>
                 ))
+              ) : verse.book === 'ramayana' && comments ? (
+                <div className="commentary-item" style={{ marginBottom: '2rem' }}>
+                  <h4 className="commentary-author" style={{ 
+                    color: 'var(--text-secondary)', 
+                    fontSize: '0.85rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
+                    Valmiki Ramayana Commentary
+                  </h4>
+                  <p className="commentary-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                    {comments}
+                  </p>
+                </div>
               ) : (explanationEnglish || explanationHindi) ? (
                 <div className="commentary-item" style={{ marginBottom: '2rem' }}>
                   <h4 className="commentary-author" style={{ 
@@ -237,21 +259,27 @@ export default function IlluminatedVerseCard({
         )}
 
         {/* 3. KEY TEACHINGS (Word Meanings) */}
-        {variant === 'full' && wordMeanings.length > 0 && (
+        {variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) && (
           <details className="verse-card__word-meanings" style={{ borderTop: '1px solid var(--hairline)', paddingTop: '1.5rem', marginTop: '1rem' }}>
             <summary style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>
               {lang === 'hindi' ? 'मुख्य शब्दार्थ' : 'Key Vocabulary'}
             </summary>
-            <ul style={{ marginTop: '1rem', listStyleType: 'none', padding: 0, display: 'grid', gap: '0.75rem' }}>
-              {wordMeanings.map((wm, i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                  <span style={{ color: 'var(--amber-500)', fontSize: '0.8rem' }}>❖</span>
-                  <span className="devanagari" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{wm.word}</span>
-                  <span style={{ color: 'var(--text-muted)' }}>—</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{wm.meaning}</span>
-                </li>
-              ))}
-            </ul>
+            {verse.book === 'ramayana' ? (
+              <p style={{ marginTop: '1rem', lineHeight: 1.7, color: 'var(--text-secondary)', fontSize: '1rem' }}>
+                {translationEnglish}
+              </p>
+            ) : (
+              <ul style={{ marginTop: '1rem', listStyleType: 'none', padding: 0, display: 'grid', gap: '0.75rem' }}>
+                {wordMeanings.map((wm, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                    <span style={{ color: 'var(--amber-500)', fontSize: '0.8rem' }}>❖</span>
+                    <span className="devanagari" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{wm.word}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{wm.meaning}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </details>
         )}
 
