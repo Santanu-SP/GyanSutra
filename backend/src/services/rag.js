@@ -113,6 +113,36 @@ async function askRag(question) {
     });
   }
 
+  // Step 2.7: Explicit Daily Darshan Match override
+  const dailyDarshanMatch = question.match(/daily\s+(?:darshan|verse)/i);
+  if (dailyDarshanMatch && !explicitMatch && !chapterSummaryMatch) {
+    const gitaData = require('../../data/gita.json');
+    const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+    const verseIndex = daysSinceEpoch % gitaData.length;
+    const v = gitaData[verseIndex];
+    
+    const exactDoc = await getDoc('verses', `bhagavad-gita_${v.chapter_number}_${v.verse_number}`);
+    if (exactDoc) {
+      const existingIdx = retrieved.findIndex(doc => doc.id === exactDoc.id);
+      if (existingIdx > -1) {
+        retrieved.splice(existingIdx, 1);
+      }
+      retrieved.unshift({
+        id: exactDoc.id,
+        similarity: 1.0,
+        chapterNumber: exactDoc.chapterNumber,
+        verseNumber: exactDoc.verseNumber,
+        sanskrit: exactDoc.sanskrit,
+        transliteration: exactDoc.transliteration,
+        translationEnglish: exactDoc.translationEnglish,
+        translationHindi: exactDoc.translationHindi,
+        wordMeanings: exactDoc.wordMeanings,
+        detailedExplanations: exactDoc.detailedExplanations,
+        tags: exactDoc.tags
+      });
+    }
+  }
+
   // Step 3: Threshold gate
   const topSimilarity = retrieved.length > 0 ? retrieved[0].similarity : 0;
   const passedThreshold = retrieved.filter(v => v.similarity >= SIMILARITY_THRESHOLD);
