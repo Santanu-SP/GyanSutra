@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { getRamayanaSarga } from '../services/api';
 import './ChapterReader.css';
 
@@ -127,6 +128,10 @@ export default function KandaReader() {
         </div>
         <hr className="gold-rule" />
       </header>
+
+      {loading && !error && (
+        <LoadingSpinner size="medium" text="Loading Shlokas..." />
+      )}
 
       {error && <p className="text-center text-red-400 mt-8">Error: {error}</p>}
       

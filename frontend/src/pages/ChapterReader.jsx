@@ -14,6 +14,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getChapter, getChapterVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendationsRail from '../components/RecommendationsRail';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { filterVerses } from '../utils/verseUtils';
@@ -164,9 +165,7 @@ export default function ChapterReader() {
       {/* ── Current verse ─────────────────────────────────────────── */}
       <div className="chapter-reader__verse-area">
         {loading ? (
-          <div className="chapter-reader__skeleton" aria-hidden="true">
-            <div style={{ height: '320px', background: 'var(--bg-surface)', border: 'var(--hairline)' }} />
-          </div>
+          <LoadingSpinner size="medium" text="Loading Chapter..." />
         ) : currentVerse ? (
           <div className={animClass} key={currentVerse.id}>
             <IlluminatedVerseCard verse={currentVerse} variant="full" />

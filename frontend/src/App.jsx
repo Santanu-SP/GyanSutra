@@ -18,6 +18,7 @@ import TextReader from './pages/TextReader';
 import SearchBar from './components/SearchBar';
 import ThemeToggle from './components/ThemeToggle';
 import SaarthiPanel from './components/SaarthiPanel';
+import LoadingSpinner from './components/LoadingSpinner';
 import './app.css';
 
 // Lazy-load heavier pages to keep initial bundle small
@@ -34,12 +35,10 @@ const SAARTHI_PROMPTS = [
   'How does Sanatan wisdom guide daily life?',
 ];
 
-// Minimal loading state for lazy pages
+// Premium page loading state
 function PageLoader() {
   return (
-    <div className="gs-page-loader" aria-label="Loading" role="status">
-      <span className="gs-page-loader__dot" aria-hidden="true" />
-    </div>
+    <LoadingSpinner fullPage={true} text="Loading..." />
   );
 }
 

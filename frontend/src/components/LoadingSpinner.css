@@ -1,0 +1,135 @@
+/* ── LoadingSpinner.css — premium golden loader ── */
+
+.gs-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.gs-loader--full {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--night, #1c1420);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.gs-loader--inline {
+  width: 100%;
+  padding: var(--space-12) 0;
+}
+
+/* Container size constraints */
+.gs-loader--small .gs-loader__container {
+  width: 48px;
+  height: 48px;
+}
+.gs-loader--small .gs-loader__logo {
+  width: 24px;
+  height: 24px;
+}
+
+.gs-loader--medium .gs-loader__container {
+  width: 80px;
+  height: 80px;
+}
+.gs-loader--medium .gs-loader__logo {
+  width: 40px;
+  height: 40px;
+}
+
+.gs-loader--large .gs-loader__container {
+  width: 120px;
+  height: 120px;
+}
+.gs-loader--large .gs-loader__logo {
+  width: 64px;
+  height: 64px;
+}
+
+/* The structural container */
+.gs-loader__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer rotating ring */
+.gs-loader__ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(201, 154, 78, 0.12);
+  border-top: 1.5px solid var(--accent, #C99A4E);
+  border-radius: 50%;
+  animation: gsLoaderRotate 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+/* Inner pulsing logo */
+.gs-loader__logo {
+  position: relative;
+  z-index: 2;
+  animation: gsLoaderPulse 1.8s ease-in-out infinite;
+}
+
+/* Text */
+.gs-loader__text {
+  font-family: var(--font-body);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  animation: gsLoaderTextFade 1.8s ease-in-out infinite alternate;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────── */
+@keyframes gsLoaderRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gsLoaderPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(201, 154, 78, 0.2));
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(201, 154, 78, 0.6));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(201, 154, 78, 0.2));
+    opacity: 0.85;
+  }
+}
+
+@keyframes gsLoaderTextFade {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion considerations */
+@media (prefers-reduced-motion: reduce) {
+  .gs-loader__ring {
+    animation: gsLoaderRotate 3s linear infinite;
+  }
+  .gs-loader__logo,
+  .gs-loader__text {
+    animation: none;
+  }
+}

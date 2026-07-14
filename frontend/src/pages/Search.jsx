@@ -7,6 +7,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { searchVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import SearchBar from '../components/SearchBar';
+import LoadingSpinner from '../components/LoadingSpinner';
 import './Search.css';
 
 export default function Search() {
@@ -41,10 +42,7 @@ export default function Search() {
       {/* Results */}
       <div className="search-page__results">
         {loading && (
-          <div className="search-page__loading" role="status">
-            <div className="diya-flicker search-page__diya-dot" aria-hidden="true">✦</div>
-            <span>Searching…</span>
-          </div>
+          <LoadingSpinner size="medium" text="Searching scriptures..." />
         )}
 
         {!loading && searched && !error && results.length === 0 && (

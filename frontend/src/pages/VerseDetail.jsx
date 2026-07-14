@@ -7,6 +7,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getVerse } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import RecommendationsRail from '../components/RecommendationsRail';
+import LoadingSpinner from '../components/LoadingSpinner';
 import './VerseDetail.css';
 
 export default function VerseDetail() {
@@ -49,7 +50,7 @@ export default function VerseDetail() {
       </nav>
 
       {loading ? (
-        <div style={{ height: '400px', border: 'var(--hairline-faint)' }} aria-hidden="true" />
+        <LoadingSpinner size="medium" text="Loading Shloka..." />
       ) : verse ? (
         <>
           <IlluminatedVerseCard verse={verse} variant="full" />

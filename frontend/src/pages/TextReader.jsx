@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getAllChapters } from '../services/api';
 import SearchBar from '../components/SearchBar';
+import LoadingSpinner from '../components/LoadingSpinner';
 import './TextReader.css';
 
 // Static source metadata — avoids an extra backend round-trip
@@ -168,10 +169,7 @@ export default function TextReader() {
 
         {/* Loading state */}
         {loading && (
-          <div className="text-reader__loading" role="status">
-            <span className="diya-flicker text-reader__loading-dot" aria-hidden="true">✦</span>
-            <span>Loading chapters…</span>
-          </div>
+          <LoadingSpinner size="medium" text="Loading chapters..." />
         )}
 
         {/* Error state */}
