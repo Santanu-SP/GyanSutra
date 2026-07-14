@@ -1,26 +1,69 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="flameFav" x1="256" y1="100" x2="256" y2="340" gradientUnits="userSpaceOnUse">
+    <!-- Warm amber circle background for visibility at all sizes -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1A0A0A"/>
+      <stop offset="100%" stop-color="#0D0505"/>
+    </radialGradient>
+    <!-- Flame gradient — rich saffron to deep amber -->
+    <linearGradient id="flame" x1="256" y1="100" x2="256" y2="310" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#FFE082"/>
-      <stop offset="50%" stop-color="#F59B2B"/>
+      <stop offset="45%" stop-color="#F59B2B"/>
       <stop offset="100%" stop-color="#C2561C"/>
+    </linearGradient>
+    <!-- Sutra thread shimmer -->
+    <linearGradient id="thread" x1="140" y1="360" x2="372" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A87430"/>
+      <stop offset="50%" stop-color="#F0CF72"/>
+      <stop offset="100%" stop-color="#A87430"/>
+    </linearGradient>
+    <!-- Outer ring gradient -->
+    <linearGradient id="ring" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F0CF72"/>
+      <stop offset="100%" stop-color="#8C6020"/>
     </linearGradient>
   </defs>
 
-  <!-- Solid rich background — makes icon pop on any browser tab color -->
-  <circle cx="256" cy="256" r="256" fill="#1C0A00"/>
+  <!-- Deep background circle — ensures visibility on any tab/browser -->
+  <circle cx="256" cy="256" r="248" fill="url(#bg)"/>
 
-  <!-- Thin golden ring border -->
-  <circle cx="256" cy="256" r="234" fill="none" stroke="#C99A4E" stroke-width="10"/>
+  <!-- Outer seal ring — bold enough to read at favicon size -->
+  <circle cx="256" cy="256" r="232" fill="none" stroke="url(#ring)" stroke-width="9"/>
+  <circle cx="256" cy="256" r="216" fill="none" stroke="#C99A4E" stroke-width="2" opacity="0.45"/>
 
-  <!-- Bold, clear flame — simple teardrop, easy to read at 16px -->
-  <path d="M 256 90
-           C 256 90 150 210 150 310
-           C 150 375 196 420 256 420
-           C 316 420 362 375 362 310
-           C 362 210 256 90 256 90 Z"
-        fill="url(#flameFav)"/>
+  <!-- Open book — ivory pages, clearly readable on dark background -->
+  <path d="M 128 350
+           C 128 315 186 295 256 295
+           C 326 295 384 315 384 350
+           L 384 368
+           C 384 335 326 318 256 318
+           C 186 318 128 335 128 368
+           Z"
+        fill="#F5ECD7" stroke="#C99A4E" stroke-width="2.5" stroke-opacity="0.9"/>
 
-  <!-- Bright inner glow core of the flame -->
-  <ellipse cx="256" cy="270" rx="48" ry="90" fill="#FFF0B0" opacity="0.55"/>
+  <!-- Book center spine line -->
+  <line x1="256" y1="298" x2="256" y2="316" stroke="#C99A4E" stroke-width="3" opacity="0.9"/>
+
+  <!-- Flame — bold, clear teardrop shape rising from book -->
+  <path d="M 230 310
+           C 185 260 196 188 238 148
+           C 245 140 251 128 256 118
+           C 261 128 267 140 274 148
+           C 316 188 327 260 282 310
+           C 275 295 265 286 256 286
+           C 247 286 237 295 230 310
+           Z"
+        fill="url(#flame)"/>
+
+  <!-- Inner flame glow — bright core -->
+  <ellipse cx="256" cy="210" rx="18" ry="38" fill="#FFF3B8" opacity="0.45"/>
+
+  <!-- Sutra thread — the tying wave -->
+  <path d="M 144 372
+           C 182 410 222 338 256 370
+           C 290 402 330 410 368 372"
+        fill="none" stroke="url(#thread)" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Thread midpoint jewel -->
+  <circle cx="256" cy="370" r="7" fill="#F0CF72"/>
 </svg>
