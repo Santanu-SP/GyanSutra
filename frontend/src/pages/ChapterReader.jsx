@@ -65,6 +65,27 @@ export default function ChapterReader() {
     }
   };
 
+  // Keyboard Navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT' || activeEl.isContentEditable)) {
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        if (currentIndex > 0) goTo(currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        if (currentIndex < verses.length - 1) {
+          goTo(currentIndex + 1);
+        } else if (canInstall) {
+          triggerInstall();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, verses, canInstall, triggerInstall, goTo]);
+
   const isLastVerse   = currentIndex === verses.length - 1;
   const currentVerse  = verses[currentIndex];
 
@@ -240,6 +261,34 @@ export default function ChapterReader() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Floating Side Navigation */}
+      {!loading && verses.length > 0 && (
+        <>
+          <button
+            className="floating-nav-btn floating-nav-btn--prev"
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+            aria-label="Previous verse"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <button
+            className="floating-nav-btn floating-nav-btn--next"
+            onClick={handleNext}
+            disabled={isLastVerse}
+            aria-label="Next verse"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </>
       )}
     </main>
   );
