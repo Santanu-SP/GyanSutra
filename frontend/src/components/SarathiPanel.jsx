@@ -16,8 +16,8 @@ import ReactMarkdown from 'react-markdown';
 import './SarathiPanel.css';
 
 // Flame icon — Sarathi's identity mark
-const SarathiFlame = () => (
-  <svg viewBox="0 0 32 32" fill="none" className="sarathi-flame" aria-hidden="true">
+const SarathiFlame = ({ className = "sarathi-flame" }) => (
+  <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true">
     <path
       d="M16 4C16 4 8 11 8 18C8 22.418 11.582 26 16 26C20.418 26 24 22.418 24 18C24 11 16 4 16 4Z"
       fill="currentColor"
@@ -171,9 +171,20 @@ export default function SarathiPanel({
           {isLoading && (
             <div className="sarathi-msg sarathi-msg--sarathi">
               <p className="sarathi-msg__label">Sarathi</p>
-              <p className="sarathi-msg__content sarathi-msg__content--loading diya-flicker">
-                Reflecting on the scripture…
-              </p>
+              <div className="sarathi-loader">
+                <div className="sarathi-loader__flame-container">
+                  <div className="sarathi-loader__ring"></div>
+                  <div className="sarathi-loader__ring"></div>
+                  <div className="sarathi-loader__ring"></div>
+                  <SarathiFlame className="sarathi-loader__flame" />
+                </div>
+                <div className="sarathi-loader__dots">
+                  <span className="sarathi-loader__dot"></span>
+                  <span className="sarathi-loader__dot"></span>
+                  <span className="sarathi-loader__dot"></span>
+                </div>
+                <p className="sarathi-loader__text">Reflecting on the scripture…</p>
+              </div>
             </div>
           )}
 

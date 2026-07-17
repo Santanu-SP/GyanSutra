@@ -27,6 +27,19 @@ export default function Ramayana() {
           <p className="text-reader__description">
             An epic text centered on dharma, exile, loyalty, and return.
           </p>
+          <div style={{ marginTop: '1.5rem' }}>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: 'Ask a question about the Valmiki Ramayana' } }))}
+              className="inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/8 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 hover:text-[color:var(--accent)] transition"
+              style={{ cursor: 'pointer' }}
+            >
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
+                <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
+              </svg>
+              Consult Sarathi about Ramayana
+            </button>
+          </div>
         </header>
 
         <hr className="gold-rule" />

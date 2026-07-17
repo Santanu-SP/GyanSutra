@@ -11,8 +11,8 @@ import { askQuestion } from '../services/api';
 import IlluminatedVerseCard from './IlluminatedVerseCard';
 import './AskPanel.css';
 
-const DiyaIcon = () => (
-  <svg viewBox="0 0 32 32" fill="none" className="diya-icon" aria-hidden="true">
+const DiyaIcon = ({ className = "diya-icon" }) => (
+  <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true">
     {/* Flame */}
     <path d="M16 6C16 6 10 12 10 18C10 21.314 12.686 24 16 24C19.314 24 22 21.314 22 18C22 12 16 6 16 6Z"
       fill="currentColor" opacity="0.9" />
@@ -95,13 +95,23 @@ export default function AskPanel() {
         </div>
       </form>
 
-      {/* Loading state — diya flicker */}
+      {/* Loading state — premium loader */}
       {state === 'loading' && (
         <div className="ask-panel__loading" role="status" aria-live="polite">
-          <div className="ask-panel__diya diya-flicker">
-            <DiyaIcon />
+          <div className="sarathi-loader">
+            <div className="sarathi-loader__flame-container">
+              <div className="sarathi-loader__ring"></div>
+              <div className="sarathi-loader__ring"></div>
+              <div className="sarathi-loader__ring"></div>
+              <DiyaIcon className="sarathi-loader__flame" />
+            </div>
+            <div className="sarathi-loader__dots">
+              <span className="sarathi-loader__dot"></span>
+              <span className="sarathi-loader__dot"></span>
+              <span className="sarathi-loader__dot"></span>
+            </div>
+            <p className="sarathi-loader__text">Searching the verses…</p>
           </div>
-          <p className="ask-panel__loading-text">Searching the verses…</p>
         </div>
       )}
 
