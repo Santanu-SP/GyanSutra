@@ -112,8 +112,8 @@
   margin-left: auto;
 }
 
-/* ── Saarthi trigger button ─────────────────────────────────────────── */
-.saarthi-trigger {
+/* ── Sarathi trigger button ─────────────────────────────────────────── */
+.sarathi-trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -134,12 +134,12 @@
   white-space: nowrap;
 }
 
-.saarthi-trigger:hover {
+.sarathi-trigger:hover {
   background: color-mix(in srgb, var(--marigold) 8%, transparent);
   border-color: var(--marigold);
 }
 
-.saarthi-trigger__icon {
+.sarathi-trigger__icon {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
@@ -147,8 +147,8 @@
 
 /* Hide label on very small screens — icon only */
 @media (max-width: 440px) {
-  .saarthi-trigger__label { display: none; }
-  .saarthi-trigger { padding: 0.45rem 0.6rem; }
+  .sarathi-trigger__label { display: none; }
+  .sarathi-trigger { padding: 0.45rem 0.6rem; }
 }
 
 /* ── App body ───────────────────────────────────────────────────────── */
@@ -157,9 +157,9 @@
   transition: padding-right var(--transition-slow);
 }
 
-/* When Saarthi is open on desktop, nudge content left */
+/* When Sarathi is open on desktop, nudge content left */
 @media (min-width: 1024px) {
-  .gs-body--saarthi-open {
+  .gs-body--sarathi-open {
     padding-right: 380px;
   }
 }

@@ -90,7 +90,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
                 className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/8 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--accent)]"
               >
-                Consult Saarthi
+                Consult Sarathi
               </button>
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function Home({ onAskPrompt = () => {} }) {
               Your Companion
             </p>
             <h3 className="mt-3 font-serif text-2xl text-[color:var(--text-primary)]">
-              Saarthi — सारथी
+              Sarathi — सारथि
             </h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
               Ask about karma, detachment, devotion, or interpretation — and receive responses rooted in your sacred library.
@@ -156,7 +156,7 @@ export default function Home({ onAskPrompt = () => {} }) {
               onClick={() => onAskPrompt('How should I understand karma without attachment?')}
               className="mt-5 inline-flex items-center rounded border border-amber-500/30 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:bg-amber-500/10"
             >
-              Open Saarthi
+              Open Sarathi
             </button>
           </article>
         </section>

@@ -288,18 +288,18 @@ export default function IlluminatedVerseCard({
           <section className="verse-section" style={{ borderTop: '1px solid var(--hairline)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.25rem', maxWidth: '400px' }}>
               {lang === 'hindi' 
-                ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथी से गहन मनन और जीवन-सूत्र प्राप्त करें।'
-                : 'How does this verse apply to modern life? Ask Saarthi for practical life lessons and personal reflections.'}
+                ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथि से गहन मनन और जीवन-सूत्र प्राप्त करें।'
+                : 'How does this verse apply to modern life? Ask Sarathi for practical life lessons and personal reflections.'}
             </p>
               <button
               onClick={(e) => {
                 e.stopPropagation();
-                const saarthiPrompt = verse.book === 'ramayana'
+                const sarathiPrompt = verse.book === 'ramayana'
                   ? `What are the practical life lessons and reflection questions for ${verse.kanda || 'Kanda ' + verse.kandaNumber} Sarga ${verse.sarga} Shloka ${verse.shlokaNumber}?`
                   : `What are the practical life lessons and reflection questions for Chapter ${chapterNumber} Verse ${verseNumber}?`;
                   
-                window.dispatchEvent(new CustomEvent('open-saarthi', { 
-                  detail: { prompt: saarthiPrompt } 
+                window.dispatchEvent(new CustomEvent('open-sarathi', { 
+                  detail: { prompt: sarathiPrompt } 
                 }));
               }}
               className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/10 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--amber-500)]"
@@ -308,7 +308,7 @@ export default function IlluminatedVerseCard({
               <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
                 <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
               </svg>
-              {lang === 'hindi' ? 'सारथी के साथ मनन करें' : 'Reflect with Saarthi'}
+              {lang === 'hindi' ? 'सारथि के साथ मनन करें' : 'Reflect with Sarathi'}
             </button>
           </section>
         )}

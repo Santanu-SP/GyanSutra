@@ -2,12 +2,12 @@
  * App.jsx — Gyan Sutra application root.
  *
  * Layout:
- *   - Sticky header with brand, search, ThemeToggle, Saarthi trigger
- *   - App body shifts right on desktop when Saarthi is open
- *   - SaarthiPanel: desktop side panel / mobile bottom sheet (non-blocking)
+ *   - Sticky header with brand, search, ThemeToggle, Sarathi trigger
+ *   - App body shifts right on desktop when Sarathi is open
+ *   - SarathiPanel: desktop side panel / mobile bottom sheet (non-blocking)
  *   - Routes: all pages including previously unconnected ones
  *
- * Saarthi state lives here — SaarthiPanel is presentation only.
+ * Sarathi state lives here — SarathiPanel is presentation only.
  */
 
 import { useState, useEffect, lazy, Suspense } from 'react';
@@ -17,7 +17,7 @@ import Home from './pages/Home';
 import TextReader from './pages/TextReader';
 import SearchBar from './components/SearchBar';
 import ThemeToggle from './components/ThemeToggle';
-import SaarthiPanel from './components/SaarthiPanel';
+import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
 import './app.css';
 
@@ -29,7 +29,7 @@ const Ramayana      = lazy(() => import('./pages/Ramayana'));
 const KandaReader   = lazy(() => import('./pages/KandaReader'));
 
 // Suggested conversation starters — shown when panel is first opened
-const SAARTHI_PROMPTS = [
+const SARATHI_PROMPTS = [
   'What does the Gita teach about duty?',
   'Explain detachment in simple words.',
   'How does Sanatan wisdom guide daily life?',
@@ -42,13 +42,13 @@ function PageLoader() {
   );
 }
 
-// Flame icon used in the Saarthi trigger button
+// Flame icon used in the Sarathi trigger button
 function TriggerFlame() {
   return (
     <svg
       viewBox="0 0 20 20"
       fill="none"
-      className="saarthi-trigger__icon"
+      className="sarathi-trigger__icon"
       aria-hidden="true"
     >
       <path
@@ -78,27 +78,27 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  const [isSaarthiOpen, setIsSaarthiOpen] = useState(false);
+  const [isSarathiOpen, setIsSarathiOpen] = useState(false);
   const [question, setQuestion]           = useState('');
   const [isLoading, setIsLoading]         = useState(false);
   const [messages, setMessages]           = useState([
     {
       id: 'welcome',
-      role: 'saarthi',
+      role: 'sarathi',
       content:
         'I am here to illuminate what the scripture holds. Ask anything from the verses you are reading.',
     },
   ]);
 
   useEffect(() => {
-    const handleOpenSaarthi = (e) => {
+    const handleOpenSarathi = (e) => {
       if (e.detail?.prompt) {
         setQuestion(e.detail.prompt);
       }
-      setIsSaarthiOpen(true);
+      setIsSarathiOpen(true);
     };
-    window.addEventListener('open-saarthi', handleOpenSaarthi);
-    return () => window.removeEventListener('open-saarthi', handleOpenSaarthi);
+    window.addEventListener('open-sarathi', handleOpenSarathi);
+    return () => window.removeEventListener('open-sarathi', handleOpenSarathi);
   }, []);
 
   async function handleAsk(event) {
@@ -118,8 +118,8 @@ export default function App() {
       setMessages((cur) => [
         ...cur,
         {
-          id: `${Date.now()}-saarthi`,
-          role: 'saarthi',
+          id: `${Date.now()}-sarathi`,
+          role: 'sarathi',
           content: result.answer || 'No answer was returned.',
         },
       ]);
@@ -128,8 +128,8 @@ export default function App() {
         ...cur,
         {
           id: `${Date.now()}-error`,
-          role: 'saarthi',
-          content: error.message || 'Saarthi could not respond right now.',
+          role: 'sarathi',
+          content: error.message || 'Sarathi could not respond right now.',
         },
       ]);
     } finally {
@@ -140,7 +140,7 @@ export default function App() {
   // Called from Home page prompt buttons — pre-fills question and opens panel
   function handlePromptSelect(prompt) {
     setQuestion(prompt);
-    setIsSaarthiOpen(true);
+    setIsSarathiOpen(true);
   }
 
   return (
@@ -172,22 +172,22 @@ export default function App() {
             <ThemeToggle />
             <button
               type="button"
-              className="saarthi-trigger"
-              onClick={() => setIsSaarthiOpen(true)}
-              aria-label="Open Saarthi — your spiritual companion"
-              aria-expanded={isSaarthiOpen}
-              aria-controls="saarthi-panel"
-              id="open-saarthi-btn"
+              className="sarathi-trigger"
+              onClick={() => setIsSarathiOpen(true)}
+              aria-label="Open Sarathi — your spiritual companion"
+              aria-expanded={isSarathiOpen}
+              aria-controls="sarathi-panel"
+              id="open-sarathi-btn"
             >
               <TriggerFlame />
-              <span className="saarthi-trigger__label">Saarthi</span>
+              <span className="sarathi-trigger__label">Sarathi</span>
             </button>
           </div>
         </nav>
       </header>
 
-      {/* ── App body — shifts right on desktop when Saarthi is open ── */}
-      <div className={`gs-body${isSaarthiOpen ? ' gs-body--saarthi-open' : ''}`}>
+      {/* ── App body — shifts right on desktop when Sarathi is open ── */}
+      <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route
@@ -209,16 +209,16 @@ export default function App() {
         </Suspense>
       </div>
 
-      {/* ── Saarthi companion — side panel on desktop, sheet on mobile ── */}
-      <SaarthiPanel
-        isOpen={isSaarthiOpen}
-        onClose={() => setIsSaarthiOpen(false)}
+      {/* ── Sarathi companion — side panel on desktop, sheet on mobile ── */}
+      <SarathiPanel
+        isOpen={isSarathiOpen}
+        onClose={() => setIsSarathiOpen(false)}
         messages={messages}
         question={question}
         setQuestion={setQuestion}
         onAsk={handleAsk}
         isLoading={isLoading}
-        suggestedPrompts={SAARTHI_PROMPTS}
+        suggestedPrompts={SARATHI_PROMPTS}
       />
     </div>
   );

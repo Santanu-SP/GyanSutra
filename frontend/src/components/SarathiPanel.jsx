@@ -1,23 +1,23 @@
 /**
- * SaarthiPanel — Gyan Sutra's spiritual companion.
+ * SarathiPanel — Gyan Sutra's spiritual companion.
  *
- * Named Saarthi (सारथी) — as Krishna was Arjuna's charioteer and guide.
+ * Named Sarathi (सारथि) — as Krishna was Arjuna's charioteer and guide.
  * This is not a chatbot. It is a companion for scripture reflection.
  *
  * Layout behavior:
  *   Desktop (≥1024px) : Fixed right side panel, 380px. Content shifts left.
- *   Mobile  (<1024px) : Bottom sheet sliding up to 70dvh. Scripture visible above.
+ *   Mobile  (<1024px) : Bottom sheet sliding up to 55dvh. Scripture visible above.
  *
  * All functionality is passed in from App — this component is presentation only.
  */
 
 import { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import './SaarthiPanel.css';
+import './SarathiPanel.css';
 
-// Flame icon — Saarthi's identity mark
-const SaarthiFlame = () => (
-  <svg viewBox="0 0 32 32" fill="none" className="saarthi-flame" aria-hidden="true">
+// Flame icon — Sarathi's identity mark
+const SarathiFlame = () => (
+  <svg viewBox="0 0 32 32" fill="none" className="sarathi-flame" aria-hidden="true">
     <path
       d="M16 4C16 4 8 11 8 18C8 22.418 11.582 26 16 26C20.418 26 24 22.418 24 18C24 11 16 4 16 4Z"
       fill="currentColor"
@@ -32,7 +32,7 @@ const SaarthiFlame = () => (
   </svg>
 );
 
-export default function SaarthiPanel({
+export default function SarathiPanel({
   isOpen,
   onClose,
   messages,
@@ -49,9 +49,9 @@ export default function SaarthiPanel({
   useEffect(() => {
     if (isOpen) {
       // Find the last message in the list
-      const messagesContainer = document.querySelector('.saarthi-panel__messages');
+      const messagesContainer = document.querySelector('.sarathi-panel__messages');
       if (messagesContainer) {
-        const messageElements = messagesContainer.querySelectorAll('.saarthi-msg');
+        const messageElements = messagesContainer.querySelectorAll('.sarathi-msg');
         const lastMessage = messageElements[messageElements.length - 1];
         if (lastMessage) {
           lastMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -84,7 +84,7 @@ export default function SaarthiPanel({
       {/* Mobile + tablet backdrop — click to dismiss */}
       {isOpen && (
         <div
-          className="saarthi-backdrop"
+          className="sarathi-backdrop"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -92,30 +92,30 @@ export default function SaarthiPanel({
 
       {/* The panel itself */}
       <aside
-        className={`saarthi-panel${isOpen ? ' saarthi-panel--open' : ''}`}
+        className={`sarathi-panel${isOpen ? ' sarathi-panel--open' : ''}`}
         role="complementary"
-        aria-label="Saarthi — Your spiritual companion"
+        aria-label="Sarathi — Your spiritual companion"
         aria-hidden={!isOpen}
-        id="saarthi-panel"
+        id="sarathi-panel"
       >
         {/* Mobile drag handle */}
-        <div className="saarthi-panel__handle" aria-hidden="true" />
+        <div className="sarathi-panel__handle" aria-hidden="true" />
 
         {/* ── Header ─────────────────────────────────────────────── */}
-        <header className="saarthi-panel__header">
-          <div className="saarthi-panel__identity">
-            <SaarthiFlame />
-            <div className="saarthi-panel__identity-text">
-              <h2 className="saarthi-panel__title">Saarthi</h2>
-              <p className="saarthi-panel__title-devanagari">सारथी</p>
+        <header className="sarathi-panel__header">
+          <div className="sarathi-panel__identity">
+            <SarathiFlame />
+            <div className="sarathi-panel__identity-text">
+              <h2 className="sarathi-panel__title">Sarathi</h2>
+              <p className="sarathi-panel__title-devanagari">सारथि</p>
             </div>
           </div>
           <button
             type="button"
-            className="saarthi-panel__close"
+            className="sarathi-panel__close"
             onClick={onClose}
-            aria-label="Close Saarthi"
-            id="close-saarthi-btn"
+            aria-label="Close Sarathi"
+            id="close-sarathi-btn"
           >
             <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path
@@ -130,14 +130,14 @@ export default function SaarthiPanel({
 
         {/* ── Suggested paths ─────────────────────────────────────── */}
         {showSuggestions && (
-          <div className="saarthi-panel__paths">
-            <p className="saarthi-panel__paths-label">Paths to Explore</p>
-            <div className="saarthi-panel__paths-list">
+          <div className="sarathi-panel__paths">
+            <p className="sarathi-panel__paths-label">Paths to Explore</p>
+            <div className="sarathi-panel__paths-list">
               {suggestedPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
-                  className="saarthi-panel__path-btn"
+                  className="sarathi-panel__path-btn"
                   onClick={() => setQuestion(prompt)}
                 >
                   {prompt}
@@ -149,29 +149,29 @@ export default function SaarthiPanel({
 
         {/* ── Message thread ──────────────────────────────────────── */}
         <div
-          className="saarthi-panel__messages"
+          className="sarathi-panel__messages"
           role="log"
           aria-live="polite"
-          aria-label="Conversation with Saarthi"
+          aria-label="Conversation with Sarathi"
         >
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`saarthi-msg saarthi-msg--${message.role}`}
+              className={`sarathi-msg sarathi-msg--${message.role}`}
             >
-              <p className="saarthi-msg__label">
-                {message.role === 'user' ? 'Your Reflection' : 'Saarthi'}
+              <p className="sarathi-msg__label">
+                {message.role === 'user' ? 'Your Reflection' : 'Sarathi'}
               </p>
-              <div className="saarthi-msg__content">
+              <div className="sarathi-msg__content">
                 <ReactMarkdown>{message.content}</ReactMarkdown>
               </div>
             </div>
           ))}
 
           {isLoading && (
-            <div className="saarthi-msg saarthi-msg--saarthi">
-              <p className="saarthi-msg__label">Saarthi</p>
-              <p className="saarthi-msg__content saarthi-msg__content--loading diya-flicker">
+            <div className="sarathi-msg sarathi-msg--sarathi">
+              <p className="sarathi-msg__label">Sarathi</p>
+              <p className="sarathi-msg__content sarathi-msg__content--loading diya-flicker">
                 Reflecting on the scripture…
               </p>
             </div>
@@ -182,21 +182,21 @@ export default function SaarthiPanel({
 
         {/* ── Input form ──────────────────────────────────────────── */}
         <form
-          className="saarthi-panel__form"
+          className="sarathi-panel__form"
           onSubmit={onAsk}
-          aria-label="Ask Saarthi"
+          aria-label="Ask Sarathi"
         >
-          <div className="saarthi-panel__input-wrap">
+          <div className="sarathi-panel__input-wrap">
             <textarea
               ref={textareaRef}
-              id="saarthi-textarea"
-              className="saarthi-panel__textarea"
+              id="sarathi-textarea"
+              className="sarathi-panel__textarea"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={3}
               placeholder="Ask about dharma, a verse, devotion, or any teaching…"
               disabled={isLoading}
-              aria-label="Your question for Saarthi"
+              aria-label="Your question for Sarathi"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -204,15 +204,15 @@ export default function SaarthiPanel({
                 }
               }}
             />
-            <div className="saarthi-panel__form-footer">
-              <p className="saarthi-panel__grounded-note">
+            <div className="sarathi-panel__form-footer">
+              <p className="sarathi-panel__grounded-note">
                 Responses cite chapter &amp; verse
               </p>
               <button
                 type="submit"
-                className="saarthi-panel__submit"
+                className="sarathi-panel__submit"
                 disabled={isLoading || !question.trim()}
-                id="saarthi-submit-btn"
+                id="sarathi-submit-btn"
               >
                 {isLoading ? 'Seeking…' : 'Seek Guidance'}
               </button>

@@ -4,7 +4,7 @@
 
 Gyan Sutra is an open-source, highly extensible digital scripture engine. The platform is architected with a unified schema that treats Sanskrit shlokas, multi-lingual translations, and commentaries as first-class, structured nodes. This layout allows any new holy texts, epics, or commentary streams to be ingested directly into the database without requiring any changes to the frontend.
 
-Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommendation rails based on embedding cosine similarity, and an AI-driven spiritual guide called **Saarthi (सारथी)** that answers natural-language reflections using strict retrieval-grounded generation (RAG) with verifiable citations.
+Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommendation rails based on embedding cosine similarity, and an AI-driven spiritual guide called **Sarathi (सारथि)** that answers natural-language reflections using strict retrieval-grounded generation (RAG) with verifiable citations.
 
 ---
 
@@ -95,7 +95,7 @@ GyanSutra/
     │   ├── design-system/    # CSS custom properties (tokens.css) — the visual design system
     │   ├── components/
     │   │   ├── IlluminatedVerseCard.jsx # Signature gold-bordered shloka render engine
-    │   │   ├── SaarthiPanel.jsx         # Bottom-sheet/sidebar reflection interface
+    │   │   ├── SarathiPanel.jsx         # Bottom-sheet/sidebar reflection interface
     │   │   └── ...
     │   └── pages/            # Home, Search, Reader, and Auth views
 ```
@@ -129,10 +129,10 @@ When launching the RAG pipeline, we initially routed queries through a wildcard 
 * **The Fix**: We overrode the wildcard router and locked the pipeline to **Llama-3.3-70b-instruct:free**. This model has top-tier multilingual capabilities, ensuring answers are returned in pure, eloquent English (or Devanagari Hindi if requested).
 
 ### 5. Mobile UX Overhaul: Reclaiming the Scripture
-The **Saarthi** chat UI was designed as a sliding bottom sheet on mobile screens. 
-* **The Viewport Clutter**: It had a `70dvh` height and a dark, blurred background overlay (`.saarthi-backdrop`). When a user opened Saarthi to reflect on a verse, they couldn't even see the verse card behind the sheet to verify what they were discussing.
+The **Sarathi** chat UI was designed as a sliding bottom sheet on mobile screens. 
+* **The Viewport Clutter**: It had a `70dvh` height and a dark, blurred background overlay (`.sarathi-backdrop`). When a user opened Sarathi to reflect on a verse, they couldn't even see the verse card behind the sheet to verify what they were discussing.
 * **The Fix**: We removed the backdrop blur/darkening to make it transparent, and capped the sheet's mobile height at `55dvh`. Now, the scripture is perfectly visible at the top of the mobile screen.
-* **The Scroll Hijack**: The app automatically scrolled the viewport to the very bottom of the chat list on new messages. When Saarthi returned a long response, this pushed the start of the message off-screen. We wrote a custom DOM query inside the scroll `useEffect` that locates the *top* of the newly generated message and scrolls *that* to the top of the viewport, eliminating scroll fatigue.
+* **The Scroll Hijack**: The app automatically scrolled the viewport to the very bottom of the chat list on new messages. When Sarathi returned a long response, this pushed the start of the message off-screen. We wrote a custom DOM query inside the scroll `useEffect` that locates the *top* of the newly generated message and scrolls *that* to the top of the viewport, eliminating scroll fatigue.
 
 ---
 
