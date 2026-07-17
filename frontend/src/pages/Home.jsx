@@ -113,6 +113,19 @@ export default function Home({ onAskPrompt = () => {} }) {
                 {dailyVerse && (
                   <div className="mt-2 flex items-center justify-between text-xs text-amber-500/80">
                     <span>Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}</span>
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { 
+                        detail: { prompt: `What are the practical life lessons and reflection questions for Chapter ${dailyVerse.chapterNumber} Verse ${dailyVerse.verseNumber}?` } 
+                      }))}
+                      className="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" width="12" height="12" opacity="0.8">
+                        <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
+                      </svg>
+                      Ask Sarathi
+                    </button>
                   </div>
                 )}
                 <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
