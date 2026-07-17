@@ -45,10 +45,20 @@ export default function SaarthiPanel({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Scroll to latest message
+  // Scroll to latest message start
   useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isOpen) {
+      // Find the last message in the list
+      const messagesContainer = document.querySelector('.saarthi-panel__messages');
+      if (messagesContainer) {
+        const messageElements = messagesContainer.querySelectorAll('.saarthi-msg');
+        const lastMessage = messageElements[messageElements.length - 1];
+        if (lastMessage) {
+          lastMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   }, [messages, isOpen]);
 

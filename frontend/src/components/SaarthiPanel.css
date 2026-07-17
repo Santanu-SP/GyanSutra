@@ -15,9 +15,7 @@
     position: fixed;
     inset: 0;
     z-index: 48;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background: transparent; /* Changed from dark to transparent so user can read background */
   }
 }
 
@@ -35,7 +33,7 @@
     inset-x: 0;
     bottom: 0;
     z-index: 49;
-    max-height: 70dvh;
+    max-height: 55dvh;
     border-top: 1px solid var(--border);
     border-radius: 14px 14px 0 0;
     transform: translateY(105%);

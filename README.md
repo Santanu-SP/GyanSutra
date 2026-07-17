@@ -1,157 +1,140 @@
 # ज्ञान सूत्र — Gyan Sutra
 
-> *Thread of knowledge from Indian Scriptures*
+> **A bridge of code to the eternal wisdom of the Bhagavad Gita and Valmiki Ramayana.**
 
-Gyan Sutra is a digital knowledge platform designed to host the most authentic scriptural and mythological texts. The platform is launching with the **Bhagavad Gita** and the **Ramayana**, with a flexible data model and schema architecture designed to allow any subsequent holy texts, epics, and commentaries to be ingested without requiring frontend modifications. 
+Gyan Sutra is an open-source, highly extensible digital scripture engine. The platform is architected with a unified schema that treats Sanskrit shlokas, multi-lingual translations, and commentaries as first-class, structured nodes. This layout allows any new holy texts, epics, or commentary streams to be ingested directly into the database without requiring any changes to the frontend.
 
-Users can read texts chapter by chapter, perform semantic search queries, and ask natural-language questions which are answered using strict retrieval-grounded AI generation with direct citations.
+Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommendation rails based on embedding cosine similarity, and an AI-driven spiritual guide called **Saarthi (सारथी)** that answers natural-language reflections using strict retrieval-grounded generation (RAG) with verifiable citations.
 
 ---
 
-## Architecture
+## 🛠️ System Architecture
 
 ```
 Cloudflare Pages (React + Vite PWA)
-        │  HTTPS
-        ▼
-  Render.com (Express API — free tier)
-     │              │
-     ▼              ▼
-Firestore         Google AI Studio
-(Spark/free)      Gemini embeddings + Flash generation
-     │
-Firebase Auth (Spark/free)
+        │
+        ▼ (HTTPS REST)
+  Render.com (Node/Express API — Free Tier)
+    ├── Firestore DB (Spark/Free)
+    │     └── Collections: 'chapters', 'verses' (with Vector Index)
+    ├── Local Transformer (ONNX 'gte-small' 384-dim Embeddings)
+    └── OpenRouter API (Smart Model Routing)
 ```
-
-### The one rule that doesn't bend
-
-`POST /api/ask` embeds your question, retrieves the nearest verses, and checks: is the top cosine similarity ≥ 0.72? If **no** — the function returns a clean refusal and **the LLM is never called**. This is enforced in code (`backend/src/services/rag.js`), not in a prompt.
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
-### Prerequisites
+### 📋 Prerequisites
+- **Node.js** (v18 or higher recommended)
+- A **Firebase/Firestore** project in Native mode with Email Auth enabled.
+- An **OpenRouter API Key** (for querying Llama-3.3-70b-instruct).
 
-- Node.js ≥ 18
-- A Firebase project (Spark/free) with Firestore Native mode + Auth enabled
-- A [Google AI Studio](https://aistudio.google.com/app/apikey) API key (free, no card)
-
-### 1. Backend setup
-
+### 1. Backend Configuration
+Navigate to the backend directory, clone the template, and populate it with your credentials:
 ```bash
 cd backend
 cp .env.example .env
-# Fill in: FIREBASE_PROJECT_ID, FIREBASE_SERVICE_ACCOUNT_PATH, GEMINI_API_KEY
+# Open .env and set:
+# - FIREBASE_PROJECT_ID
+# - FIREBASE_SERVICE_ACCOUNT_PATH (pointing to your serviceAccountKey.json)
+# - GEMINI_API_KEY (Your OpenRouter API Key)
 npm install
 ```
 
-### 2. Firestore vector index
+### 2. Firestore Vector Index Configuration
+To enable semantic search and recommendation rails, configure a vector index in the Firebase Console:
+- **Collection**: `verses`
+- **Field Path**: `embedding`
+- **Dimension**: `384`
+- **Distance Measure**: `COSINE`
 
-In Firebase Console → Firestore → Indexes → Vector indexes:
-- Collection: `verses`
-- Field: `embedding`
-- Dimension: `768`
-- Distance measure: `COSINE`
-
-### 3. Data ingestion
-
-Run the local download script to compile the complete Gita database from verified source repositories:
+### 3. Data Ingestion
+To populate the database with the Bhagavad Gita and Valmiki Ramayana:
 
 ```bash
-node download.js
-```
-
-Then run the ingestion script to compute vector embeddings and populate Firestore:
-
-```bash
+# Ingest Chapter Blueprints & the Gita dataset:
 npm run ingest
+
+# Ingest the Ramayana dataset (normalizes and merges raw text with Itihasa translations):
+node scripts/ingest_ramayana.js
 ```
+*Flags:*
+- `--dry-run` : Runs the pipeline without writing to Firestore.
+- `--skip-embed` : Ingests text data but skips embedding calls (fills vectors with 0s).
 
-
-Flags:
-- `--dry-run` — validate without writing to Firestore
-- `--skip-embed` — write text data only, skip embedding API calls
-
-### 4. Run
-
+### 4. Running the Dev Environment
 ```bash
-# Backend
-cd backend && npm start          # :3001
+# Start backend API (runs on port 3001)
+cd backend && npm start
 
-# Frontend
-cd frontend && npm run dev       # :5173
+# Start frontend application (runs on port 5173)
+cd frontend && npm run dev
 ```
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 GyanSutra/
 ├── backend/
+│   ├── data/                 # Raw datasets (gita.json, Ramayana resources)
+│   ├── scripts/              # Dataset merging, cleaning, and ingestion pipelines
 │   ├── src/
-│   │   ├── app.js              # Express entry point
-│   │   ├── routes/             # 6 API routes
+│   │   ├── app.js            # Express API bootstrap
+│   │   ├── routes/           # REST endpoints (auth, chapter read, search, ask RAG)
 │   │   └── services/
-│   │       ├── firestore.js    # Admin SDK + findNearest KNN
-│   │       ├── embedding.js    # Gemini embedding calls
-│   │       └── rag.js          # Retrieve → threshold gate → generate
-│   ├── scripts/
-│   │   └── ingest.js           # One-time data ingestion
-│   └── render.yaml
+│   │       ├── firestore.js  # Admin SDK wrapper & vector search logic
+│   │       ├── embedding.js  # Local Xenova/transformers ONNX embedding loader
+│   │       └── rag.js        # RAG pipeline with cosine threshold gate
+│   └── models/               # Locally stored Xenova GTE embedding model binaries
 │
 └── frontend/
     ├── src/
-    │   ├── design-system/tokens.css  # All CSS vars — source of truth
+    │   ├── design-system/    # CSS custom properties (tokens.css) — the visual design system
     │   ├── components/
-    │   │   ├── IlluminatedVerseCard  # The visual signature
-    │   │   ├── ChapterNav            # Book-edge tab strip
-    │   │   ├── AskPanel              # RAG Q&A interface
-    │   │   └── RecommendationsRail   # Embedding-similarity suggestions
-    │   └── pages/
-    │       ├── Home.jsx              # Today's verse
-    │       ├── ChapterReader.jsx     # Verse-by-verse with page-turn
-    │       ├── VerseDetail.jsx
-    │       ├── Search.jsx            # Semantic search
-    │       └── Ask.jsx               # AI Q&A
-    └── vite.config.js                # PWA + Workbox config
+    │   │   ├── IlluminatedVerseCard.jsx # Signature gold-bordered shloka render engine
+    │   │   ├── SaarthiPanel.jsx         # Bottom-sheet/sidebar reflection interface
+    │   │   └── ...
+    │   └── pages/            # Home, Search, Reader, and Auth views
 ```
 
 ---
 
-## Deployment
+## 🪵 The Developer's Journal: Behind the Scenes & Hurdles
 
-### Backend → Render (free tier)
+Building a platform for ancient scriptures was not just a coding exercise—it was a battle of data wrangling, prompt tuning, and hardware/performance optimizations. Here is the honest record of the difficulties faced and how they were overcome.
 
-1. Push `backend/` to a GitHub repo
-2. New Web Service on Render → connect repo → root dir: `backend`
-3. Build command: `npm install` | Start: `node src/app.js`
-4. Set env vars in Render dashboard (copy from `.env.example`)
+### 1. The Bhagavad Gita Dataset Nightmare
+The Bhagavad Gita might be short (700 verses), but finding clean, structured, and complete data was incredibly painful.
+* **Fragmented Repositories**: The Sanskrit texts were in one database, the English translations in another, and the commentaries in a third.
+* **The API Enrichment Pipeline**: We had to write a custom script (`enrich_gita_data.js`) that fetched global metadata (`verse.json`) and raw commentary pools (`commentary.json`) from GitHub. We then had to manually map commentaries back to each verse via a calculated composite key (`chapter-verse`). We chose Swami Sivananda’s English commentary and Swami Chinmayananda’s Hindi commentary as our defaults.
+* **The Weird Delimiter Quirk**: The raw word-meanings in the repository were concatenated into long strings delimited by **question marks (`?`)** and arbitrary spaces instead of clean arrays. Our parser had to split the string by `?`, split again by space, strip out non-Devanagari characters, and throw away corrupted elements (like stray commentary notes that had sneaked into the vocabulary list) to create the clean word-meaning JSON schema.
 
-### Frontend → Cloudflare Pages (free tier)
+### 2. Ramayana Data Matching & Text Normalization
+The Ramayana is massive (~24,000 shlokas), and matching the verses across datasets was a major bottleneck.
+* **Varying Sanskrit Styles**: We combined the `Valmiki_Ramayan_Dataset` (which had excellent Sanskrit texts) with the `itihasa` dataset (which had M.N. Dutt's English translations). However, the Sanskrit shlokas didn't match directly because different editors had used different punctuation (e.g., `।` vs `॥` vs `|`), varying whitespaces, or soft vowels.
+* **Normalization Logic**: We had to write a strict regex-based normalization function (`normalizeSanskrit()`) that stripped all spaces, line-breaks, Devanagari numerals, and punctuation. The resulting raw character string served as our unique hash key to match and backfill English prose translations.
 
-1. Push `frontend/` to GitHub
-2. New Pages project → connect repo → root dir: `frontend`
-3. Build: `npm run build` | Output: `dist`
-4. Set `VITE_API_BASE_URL` to your Render URL
+### 3. Cloud Deployment vs. Local Transformers
+We wanted our vector embeddings to be **100% free and offline**, so we chose the `@xenova/transformers` library (running `gte-small` locally). This worked beautifully on a local machine, but crashed immediately on Render.com's free tier.
+* **403 Forbidden Errors**: Deploying to production resulted in Hugging Face blocking model download requests originating from cloud hosting IP ranges.
+* **The Fix**: We downloaded the `gte-small` model binaries locally and committed them to the repository inside `backend/models`. We then forced `env.allowRemoteModels = false` in code so the model would always be loaded strictly from local memory.
+* **Memory Limits**: Since Render's free tier is limited to 512MB RAM, loading even a small transformer model alongside Express and Firebase Admin required fine-grained garbage collection and lazy-loading of the ONNX pipeline instance.
 
-### Firebase Auth domain
+### 4. OpenRouter Free Tier Glitches & Multilingual Hallucinations
+When launching the RAG pipeline, we initially routed queries through a wildcard `openrouter/free` endpoint.
+* **The Tamasic Food Glitch**: A natural-language query asking *"Is tamasic food good in any way according to Gita"* returned a chaotic, corrupted response. The free-tier router had assigned a low-tier model that could not comprehend regional script requests, leading it to hallucinate a garbled mix of Hindi, Marathi, and random characters (like `dijo`, `へぇ`, and Arabic words).
+* **The Fix**: We overrode the wildcard router and locked the pipeline to **Llama-3.3-70b-instruct:free**. This model has top-tier multilingual capabilities, ensuring answers are returned in pure, eloquent English (or Devanagari Hindi if requested).
 
-Add your `*.pages.dev` URL to Firebase Console → Auth → Authorized domains.
+### 5. Mobile UX Overhaul: Reclaiming the Scripture
+The **Saarthi** chat UI was designed as a sliding bottom sheet on mobile screens. 
+* **The Viewport Clutter**: It had a `70dvh` height and a dark, blurred background overlay (`.saarthi-backdrop`). When a user opened Saarthi to reflect on a verse, they couldn't even see the verse card behind the sheet to verify what they were discussing.
+* **The Fix**: We removed the backdrop blur/darkening to make it transparent, and capped the sheet's mobile height at `55dvh`. Now, the scripture is perfectly visible at the top of the mobile screen.
+* **The Scroll Hijack**: The app automatically scrolled the viewport to the very bottom of the chat list on new messages. When Saarthi returned a long response, this pushed the start of the message off-screen. We wrote a custom DOM query inside the scroll `useEffect` that locates the *top* of the newly generated message and scrolls *that* to the top of the viewport, eliminating scroll fatigue.
 
 ---
 
-## Adding a Second Scripture (Ramayana)
-
-The schema is already ready:
-1. Prepare a JSON file in the same format as `data/gita.json`
-2. In `ingest.js`, change `sourceText: 'Bhagavad Gita'` → `'Ramayana'` for the new dataset
-3. Run ingestion — all verses share the same `/verses` collection; KNN search works across both
-4. No frontend changes needed
-
----
-
-## License
-
-Verse content: open-access Sanskrit corpus. App code: MIT.
+## 📄 License
+This project is licensed under the MIT License. Scriptural verse content is sourced from open-access Sanskrit databases.

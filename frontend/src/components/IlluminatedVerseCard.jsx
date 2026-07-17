@@ -291,11 +291,15 @@ export default function IlluminatedVerseCard({
                 ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथी से गहन मनन और जीवन-सूत्र प्राप्त करें।'
                 : 'How does this verse apply to modern life? Ask Saarthi for practical life lessons and personal reflections.'}
             </p>
-            <button
+              <button
               onClick={(e) => {
                 e.stopPropagation();
+                const saarthiPrompt = verse.book === 'ramayana'
+                  ? `What are the practical life lessons and reflection questions for ${verse.kanda || 'Kanda ' + verse.kandaNumber} Sarga ${verse.sarga} Shloka ${verse.shlokaNumber}?`
+                  : `What are the practical life lessons and reflection questions for Chapter ${chapterNumber} Verse ${verseNumber}?`;
+                  
                 window.dispatchEvent(new CustomEvent('open-saarthi', { 
-                  detail: { prompt: `What are the practical life lessons and reflection questions for Chapter ${chapterNumber} Verse ${verseNumber}?` } 
+                  detail: { prompt: saarthiPrompt } 
                 }));
               }}
               className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/10 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--amber-500)]"

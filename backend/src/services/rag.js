@@ -33,15 +33,11 @@ const SYSTEM_PROMPT = `You are Gyan Sutra's Saarthi, the ultimate scripture guid
 
 RULES — follow these without exception:
 1. First, look at the retrieved context below. If it contains relevant verses, use them and cite their book, chapter/kanda, and verse/shloka (e.g., "Bhagavad Gita, Chapter 2, Verse 47").
-2. Whenever you cite or refer to a shloka/verse, you MUST provide a detailed English translation of that shloka first, followed by the commentary.
-3. The English used in both the translations and the commentary must be extremely simple, clear, and easy to read. Avoid complex, archaic, or overly academic vocabulary so that anyone can easily understand, while keeping the spiritual commentary completely authentic and faithful to the original scriptures.
-4. If the retrieved context does not contain a clear answer, or if the user asks a broad question (like character analysis, summaries, or moral dilemmas), you MUST use your profound internal knowledge of the standard Valmiki Ramayana and Bhagavad Gita to provide a deeply accurate and comprehensive answer.
-5. NEVER hallucinate or mix concepts between texts. The Bhagavad Gita only has 18 Chapters (no Kandas). The Ramayana has Kandas (e.g., Bala Kanda, Ayodhya Kanda). Do not invent structural parts that do not exist.
-6. DISAMBIGUATION: If the user asks about a general topic or character that could exist in both texts, or if the query is highly ambiguous, politely ask the user to clarify whether they are referring to the Bhagavad Gita or the Ramayana.
-7. Do not speculate, modernize, or offer personal interpretations. Stick strictly to standard Vedantic and Itihasa philosophy.
-8. Respond in English if the question is in English. If the question is in Hindi (whether written in Devanagari script or Hinglish/Roman script), you MUST respond entirely in pure Hindi (Devanagari script). Keep the answer concise but comprehensive.
-9. EXCEPTION (Reflections): If the user specifically asks for "practical life lessons" or "reflection questions", generate profound, practical life lessons and reflective questions based purely on the spiritual principles found in the texts.
-10. FORMATTING & TONE: Your output must be highly organized, visually elegant, and deeply educated. Use short, readable paragraphs. Use **bold text** for key spiritual concepts, and bullet points if listing multiple ideas. Maintain a warm, compassionate, and profoundly wise tone.
+2. If the retrieved context does not contain a clear answer, or if the user asks a broad question (like character analysis, summaries, or moral dilemmas), you MUST use your profound internal knowledge of the standard Valmiki Ramayana and Bhagavad Gita to provide a deeply accurate and comprehensive answer.
+3. Do not speculate, modernize, or offer personal interpretations. Stick strictly to standard Vedantic and Itihasa philosophy.
+4. Respond in English if the question is in English. If the question is in Hindi (whether written in Devanagari script or Hinglish/Roman script), you MUST respond entirely in pure Hindi (Devanagari script). Keep the answer concise but comprehensive.
+5. EXCEPTION (Reflections): If the user specifically asks for "practical life lessons" or "reflection questions", generate profound, practical life lessons and reflective questions based purely on the spiritual principles found in the texts.
+6. FORMATTING & TONE: Your output must be highly organized, visually elegant, and deeply educated. Use short, readable paragraphs. Use **bold text** for key spiritual concepts, and bullet points if listing multiple ideas. Maintain a warm, compassionate, and profoundly wise tone.
 
 Retrieved context follows:`;
 
@@ -70,7 +66,7 @@ async function askRag(question) {
     const ch = parseInt(explicitMatch[1], 10);
     const vNum = parseInt(explicitMatch[2], 10);
     const exactDoc = await getDoc('verses', `bhagavad-gita_${ch}_${vNum}`);
-    
+
     if (exactDoc) {
       const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
       if (existingIdx > -1) {
@@ -100,7 +96,7 @@ async function askRag(question) {
     const sarga = parseInt(explicitRamayana[2], 10);
     const shloka = parseInt(explicitRamayana[3], 10);
     const exactDoc = await getDoc('verses', `valmiki-ramayana_${kNum}_${sarga}_${shloka}`);
-    
+
     if (exactDoc) {
       const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
       if (existingIdx > -1) {
@@ -150,7 +146,7 @@ async function askRag(question) {
     const daysSinceEpoch = Math.floor(Date.now() / 86400000);
     const verseIndex = daysSinceEpoch % gitaData.length;
     const v = gitaData[verseIndex];
-    
+
     const exactDoc = await getDoc('verses', `bhagavad-gita_${v.chapter_number}_${v.verse_number}`);
     if (exactDoc) {
       const existingIdx = retrieved.findIndex(doc => doc.id === exactDoc.id);
@@ -184,31 +180,30 @@ async function askRag(question) {
     contextLines = "No specific verses retrieved. Please answer directly using your comprehensive internal knowledge of the texts.";
   } else {
     contextLines = passedThreshold.map((v, i) => {
-    const wordMeanings = Array.isArray(v.wordMeanings)
-      ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
-      : '';
-      
-    const explanations = Array.isArray(v.detailedExplanations) && v.detailedExplanations.length > 0
-      ? v.detailedExplanations.map(exp => `[Commentary by ${exp.author}]: ${exp.explanation}`).join('\n')
-      : '';
+      const wordMeanings = Array.isArray(v.wordMeanings)
+        ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
+        : '';
 
-    const titleLine = v.book === 'Ramayana' || v.kanda 
-      ? `[${i + 1}] Ramayana, ${v.kanda || 'Kanda ' + v.kandaNumber}, Sarga ${v.sarga}, Shloka ${v.shlokaNumber} (similarity: ${v.similarity.toFixed(3)})`
-      : `[${i + 1}] Chapter ${v.chapterNumber}, Verse ${v.verseNumber} (similarity: ${v.similarity.toFixed(3)})`;
+      const explanations = Array.isArray(v.detailedExplanations) && v.detailedExplanations.length > 0
+        ? v.detailedExplanations.map(exp => `[Commentary by ${exp.author}]: ${exp.explanation}`).join('\n')
+        : '';
 
-    return [
-      titleLine,
-      `Sanskrit: ${v.sanskrit || ''}`,
-      `Transliteration: ${v.transliteration || ''}`,
-      `English Translation: ${v.translationEnglish || v.explanationEnglish || ''}`,
-      `Hindi: ${v.translationHindi || ''}`,
-      wordMeanings ? `Word meanings: ${wordMeanings}` : '',
-      explanations ? `Detailed Explanations:\n${explanations}` : '',
-      v.comments ? `Commentary:\n${v.comments}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-  }).join('\n\n---\n\n');
+      const titleLine = v.book === 'Ramayana' || v.kanda
+        ? `[${i + 1}] Ramayana, ${v.kanda || 'Kanda ' + v.kandaNumber}, Sarga ${v.sarga}, Shloka ${v.shlokaNumber} (similarity: ${v.similarity.toFixed(3)})`
+        : `[${i + 1}] Chapter ${v.chapterNumber}, Verse ${v.verseNumber} (similarity: ${v.similarity.toFixed(3)})`;
+
+      return [
+        titleLine,
+        `Sanskrit: ${v.sanskrit || ''}`,
+        `Transliteration: ${v.transliteration || ''}`,
+        `English: ${v.translationEnglish || ''}`,
+        `Hindi: ${v.translationHindi || ''}`,
+        wordMeanings ? `Word meanings: ${wordMeanings}` : '',
+        explanations ? `Detailed Explanations:\n${explanations}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    }).join('\n\n---\n\n');
   }
 
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nQuestion: ${question}`;
@@ -269,9 +264,9 @@ async function askRag(question) {
     verseNumber: v.verseNumber,
     sanskrit: v.sanskrit,
     transliteration: v.transliteration,
-    translationEnglish: v.translationEnglish || v.explanationEnglish || '',
+    translationEnglish: v.translationEnglish,
     translationHindi: v.translationHindi,
-    detailedExplanations: v.detailedExplanations || (v.comments ? [{ author: "Valmiki Ramayana Commentary", explanation: v.comments }] : []),
+    detailedExplanations: v.detailedExplanations || [],
     similarity: v.similarity,
     tags: v.tags || [],
   }));
