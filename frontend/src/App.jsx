@@ -172,7 +172,7 @@ export default function App() {
             <ThemeToggle />
             <button
               type="button"
-              className="sarathi-trigger"
+              className="sarathi-trigger sarathi-trigger--header"
               onClick={() => setIsSarathiOpen(true)}
               aria-label="Open Sarathi — your spiritual companion"
               aria-expanded={isSarathiOpen}
@@ -213,6 +213,7 @@ export default function App() {
       <SarathiPanel
         isOpen={isSarathiOpen}
         onClose={() => setIsSarathiOpen(false)}
+        onOpen={() => setIsSarathiOpen(true)}
         messages={messages}
         question={question}
         setQuestion={setQuestion}
