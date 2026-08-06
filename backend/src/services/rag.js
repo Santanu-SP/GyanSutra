@@ -13,10 +13,9 @@ const TOP_K = parseInt(process.env.RAG_TOP_K || '6', 10);
 
 // Fast, reliable models on OpenRouter (ordered by speed and reliability)
 const FAST_MODELS = [
-  'google/gemini-2.0-flash-001',
-  'google/gemini-2.0-flash-exp:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'mistralai/mistral-small-24b-instruct-2501:free',
+  'google/gemini-2.0-flash-lite-preview-02-05:free',
+  'meta-llama/llama-3.2-3b-instruct:free',
+  'meta-llama/llama-3.1-8b-instruct:free',
   'openrouter/free'
 ];
 
