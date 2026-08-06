@@ -37,7 +37,7 @@ export default function SplashScreen({ children }) {
         >
           <div className="gs-splash__center">
             <img
-              src="/icons/logo.svg"
+              src={`${import.meta.env.BASE_URL}icons/logo.svg`}
               alt=""
               className="gs-splash__logo"
               aria-hidden="true"

@@ -5,9 +5,11 @@ import './index.css';
 import App from './App.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 
+const basename = import.meta.env.BASE_URL;
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <SplashScreen>
         <App />
       </SplashScreen>

@@ -10,7 +10,7 @@ export default function LoadingSpinner({ fullPage = false, size = 'medium', text
       <div className="gs-loader__container">
         <div className="gs-loader__ring" />
         <img 
-          src="/icons/logo.svg" 
+          src={`${import.meta.env.BASE_URL}icons/logo.svg`} 
           className="gs-loader__logo" 
           alt="" 
           aria-hidden="true" 

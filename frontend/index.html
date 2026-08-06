@@ -9,7 +9,7 @@
     <meta name="description" content="Explore the Bhagavad Gita and Valmiki Ramayana through authentic texts, semantic search, related verses, commentaries, and Sarathi." />
     <meta name="keywords" content="Bhagavad Gita, Valmiki Ramayana, Sanskrit, scripture, Gita, Hindu, verses, chapter, karma, dharma, atman, Sarathi" />
     <meta name="author" content="Gyan Sutra" />
-    <link rel="canonical" href="https://gyansutraapp.pages.dev/" />
+    <link rel="canonical" href="%VITE_SITE_URL%" />
 
     <!-- PWA — %BASE_URL% is substituted by Vite at build time for each deployment -->
     <link rel="manifest" href="%BASE_URL%manifest.json" />
@@ -24,9 +24,9 @@
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%icons/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%icons/favicon-32.png" />
 
-    <!-- Open Graph — og:image points to Cloudflare (single stable HTTPS source for crawlers) -->
+    <!-- Open Graph — og:image uses absolute HTTPS URL on Cloudflare -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://gyansutraapp.pages.dev/" />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
     <meta property="og:site_name" content="Gyan Sutra" />
     <meta property="og:title" content="Gyan Sutra — Thread of Knowledge" />
     <meta property="og:description" content="Explore the Bhagavad Gita and Valmiki Ramayana through authentic texts, semantic search, related verses, commentaries, and Sarathi." />
@@ -52,10 +52,7 @@
 
     <!--
       GitHub Pages SPA restore — pairs with public/404.html.
-      When GitHub Pages serves 404.html for a deep link, that page encodes the
-      real path into sessionStorage and redirects to the app root. This script
-      reads it back and replaces the browser history entry before React boots,
-      so React Router sees the original path instead of '/GyanSutra/'.
+      Restores the target pathname before React Router boots.
     -->
     <script>
       (function() {
@@ -64,7 +61,9 @@
           sessionStorage.removeItem('spa-redirect');
           try {
             var parsed = JSON.parse(redirect);
-            window.history.replaceState(null, null, parsed.path + (parsed.query || '') + (parsed.hash || ''));
+            if (parsed.pathname && parsed.pathname !== window.location.pathname) {
+              window.history.replaceState(null, null, parsed.pathname + (parsed.search || '') + (parsed.hash || ''));
+            }
           } catch (e) { /* ignore */ }
         }
       })();
