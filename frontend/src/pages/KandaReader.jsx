@@ -137,8 +137,8 @@ export default function KandaReader() {
       
       {!loading && !error && verses.length === 0 && (
         <div className="text-center mt-16 text-[color:var(--text-secondary)]">
-          <p>No verses found for this Sarga yet.</p>
-          <p className="text-sm mt-2">Only Bala Kanda Sarga 1 has been ingested in this trial.</p>
+          <p>No verses found for this Sarga.</p>
+          <p className="text-sm mt-2">Try selecting a different Sarga from the dropdown above.</p>
         </div>
       )}
 

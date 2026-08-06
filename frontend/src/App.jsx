@@ -194,17 +194,17 @@ export default function App() {
               path="/"
               element={<Home onAskPrompt={handlePromptSelect} />}
             />
+            {/* Search — must come before wildcard /:source_id */}
+            <Route path="/search" element={<Search />} />
+            {/* Individual verse — must come before wildcard /:source_id */}
+            <Route path="/verses/:id" element={<VerseDetail />} />
             {/* Bhagavad Gita chapter navigator */}
             <Route path="/chapters/:id" element={<ChapterReader />} />
             {/* Ramayana Kanda navigator */}
             <Route path="/ramayana" element={<Ramayana />} />
             <Route path="/ramayana/:kandaNum" element={<KandaReader />} />
-            {/* Source pages (Bhagavad Gita, etc.) */}
+            {/* Source pages (Bhagavad Gita, etc.) — wildcard, must be last */}
             <Route path="/:source_id" element={<TextReader />} />
-            {/* Search */}
-            <Route path="/search" element={<Search />} />
-            {/* Individual verse */}
-            <Route path="/verses/:id" element={<VerseDetail />} />
           </Routes>
         </Suspense>
       </div>
