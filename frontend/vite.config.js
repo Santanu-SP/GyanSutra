@@ -3,7 +3,13 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// VITE_BASE_PATH is injected by each CI/CD environment at build time:
+//   Cloudflare Pages  → unset, defaults to '/'
+//   GitHub Actions    → '/GyanSutra/'
+const base = process.env.VITE_BASE_PATH || '/';
+
 export default defineConfig({
+  base,
   plugins: [
     tailwindcss(),
     react(),

@@ -11,14 +11,19 @@ Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommen
 ## 🛠️ System Architecture
 
 ```
-Cloudflare Pages (React + Vite PWA)
-        │
-        ▼ (HTTPS REST)
-  Render.com (Node/Express API — Free Tier)
-    ├── Firestore DB (Spark/Free)
-    │     └── Collections: 'chapters', 'verses' (with Vector Index)
-    ├── Local Transformer (ONNX 'gte-small' 384-dim Embeddings)
-    └── OpenRouter API (Smart Model Routing)
+┌─ Cloudflare Pages ──────────────┐   ┌─ GitHub Pages ──────────────────┐
+│  https://gyansutraapp.pages.dev │   │  https://santanu-sp.github.io/  │
+│  (React + Vite PWA, base='/')   │   │  GyanSutra/                     │
+│  Primary / LinkedIn Featured    │   │  (same build, base='/GyanSutra/')│
+└────────────────┬────────────────┘   └──────────────┬──────────────────┘
+                 │                                    │
+                 └──────────────┬─────────────────────┘
+                                ▼ (HTTPS REST)
+                  Render.com (Node/Express API — Free Tier)
+                    ├── Firestore DB (Spark/Free)
+                    │     └── Collections: 'chapters', 'verses' (Vector Index)
+                    ├── Local Transformer (ONNX 'gte-small' 384-dim Embeddings)
+                    └── OpenRouter API (Smart Model Routing)
 ```
 
 ---
@@ -133,6 +138,89 @@ The **Sarathi** chat UI was designed as a sliding bottom sheet on mobile screens
 * **The Viewport Clutter**: It had a `70dvh` height and a dark, blurred background overlay (`.sarathi-backdrop`). When a user opened Sarathi to reflect on a verse, they couldn't even see the verse card behind the sheet to verify what they were discussing.
 * **The Fix**: We removed the backdrop blur/darkening to make it transparent, and capped the sheet's mobile height at `55dvh`. Now, the scripture is perfectly visible at the top of the mobile screen.
 * **The Scroll Hijack**: The app automatically scrolled the viewport to the very bottom of the chat list on new messages. When Sarathi returned a long response, this pushed the start of the message off-screen. We wrote a custom DOM query inside the scroll `useEffect` that locates the *top* of the newly generated message and scrolls *that* to the top of the viewport, eliminating scroll fatigue.
+
+---
+
+## 🚀 Deployment Guide
+
+Gyan Sutra is deployed to **two free hosts simultaneously** from the same Git repository:
+
+| Host | URL | Base path | Use |
+|------|-----|-----------|-----|
+| Cloudflare Pages | `https://gyansutraapp.pages.dev/` | `/` | Primary / LinkedIn |
+| GitHub Pages | `https://santanu-sp.github.io/GyanSutra/` | `/GyanSutra/` | Secondary / free CDN |
+
+Both deployments connect to the **same Render backend** — no backend changes are needed.
+
+---
+
+### Cloudflare Pages (existing — no changes needed)
+
+Cloudflare is already configured and will continue to build automatically on every push to `main`. It builds with the default `base='/'` because `VITE_BASE_PATH` is not set in its environment.
+
+> **Build command:** `npm run build` (in `frontend/`)
+> **Output directory:** `frontend/dist`
+
+---
+
+### GitHub Pages Setup (one-time steps)
+
+#### Step 1 — Add the backend URL secret
+
+1. Go to your repository on GitHub.
+2. Navigate to **Settings → Secrets and variables → Actions → New repository secret**.
+3. Create a secret:
+   - **Name:** `VITE_API_BASE_URL`
+   - **Value:** `https://<your-service>.onrender.com` (your Render backend URL, no trailing slash)
+4. Click **Add secret**.
+
+> ⚠️ Never put the actual URL directly in the workflow file. Always use the secret reference `${{ secrets.VITE_API_BASE_URL }}`.
+
+#### Step 2 — Enable GitHub Pages
+
+1. Go to **Settings → Pages**.
+2. Under **Source**, select **GitHub Actions**.
+3. Click **Save**.
+
+The workflow file is at `.github/workflows/deploy-github-pages.yml` and runs automatically on every push to `main`.
+
+#### Step 3 — Push and verify
+
+After enabling Pages and adding the secret, push any commit to `main`. The **Actions** tab will show the `Deploy to GitHub Pages` workflow running. Once complete, the site is live at:
+
+```
+https://santanu-sp.github.io/GyanSutra/
+```
+
+---
+
+### How both deployments work from the same source
+
+Vite's `base` config controls how asset URLs are emitted. The GitHub Actions workflow sets `VITE_BASE_PATH=/GyanSutra/` at build time so all asset paths are prefixed correctly for the GitHub Pages sub-path. Cloudflare builds without this variable (defaults to `/`).
+
+**React Router deep links on GitHub Pages** are handled by a two-step SPA shim:
+1. `public/404.html` — GitHub Pages serves this for any unmatched route. It saves the real path to `sessionStorage` and redirects to the app root.
+2. The restore script in `index.html` — runs before React boots, reads `sessionStorage`, and calls `history.replaceState()` with the original path. React Router then sees the correct URL.
+
+---
+
+### Testing both deployments
+
+```bash
+# Test Cloudflare (primary)
+open https://gyansutraapp.pages.dev/
+open https://gyansutraapp.pages.dev/chapters/1          # Deep link
+open https://gyansutraapp.pages.dev/ramayana            # Deep link
+
+# Test GitHub Pages (secondary)
+open https://santanu-sp.github.io/GyanSutra/
+open https://santanu-sp.github.io/GyanSutra/chapters/1  # Deep link — must not 404
+open https://santanu-sp.github.io/GyanSutra/ramayana    # Deep link — must not 404
+
+# Validate LinkedIn / OG metadata
+# Visit: https://www.linkedin.com/post-inspector/
+# Enter the GitHub Pages URL and check og:title, og:image, og:description
+```
 
 ---
 

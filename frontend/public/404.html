@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gyan Sutra — Redirecting…</title>
+    <!--
+      GitHub Pages SPA Fallback — Gyan Sutra
+      ========================================
+      GitHub Pages returns this file for any path that does not match a
+      physical file in the repo (i.e. all React Router deep links).
+
+      Strategy (credit: rafaelp/gh-pages-spa):
+        1. Save the real URL into sessionStorage as JSON.
+        2. Redirect to the app root (preserves the correct base path).
+        3. index.html restores the URL via history.replaceState before React
+           boots, so React Router sees the original path.
+
+      This file must live in frontend/public/ so it is copied to dist/ as-is
+      by Vite. The GitHub Actions workflow also explicitly copies
+      dist/index.html → dist/404.html as a belt-and-suspenders measure,
+      but this purpose-built file is preferred because it handles the redirect
+      without loading the entire React bundle on the wrong path.
+    -->
+    <script>
+      (function () {
+        var l = window.location;
+
+        // Build the base path: everything up to and including the repo name.
+        // On GitHub Pages the pathname starts with /GyanSutra/...
+        // We detect the repo segment by splitting on '/' and taking the first
+        // two segments ('/GyanSutra').
+        var pathParts = l.pathname.split('/');
+        // pathParts[0] = '' (before leading '/'), pathParts[1] = 'GyanSutra' (repo)
+        var repoBase = pathParts.length > 1 && pathParts[1] ? '/' + pathParts[1] + '/' : '/';
+
+        // Encode the real path (relative to the repo base), query, and hash.
+        var realPath = l.pathname.replace(repoBase.replace(/\/$/, ''), '') || '/';
+        sessionStorage.setItem('spa-redirect', JSON.stringify({
+          path: realPath,
+          query: l.search,
+          hash: l.hash
+        }));
+
+        // Redirect to the app root (base path).
+        l.replace(repoBase);
+      }());
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <p>JavaScript is required to run Gyan Sutra. Please enable it and refresh.</p>
+    </noscript>
+    <p style="font-family:sans-serif;text-align:center;margin-top:3rem;color:#666;">
+      Redirecting to Gyan Sutra…
+    </p>
+  </body>
+</html>

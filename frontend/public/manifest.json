@@ -1,8 +1,8 @@
 {
   "name": "Gyan Sutra — Thread of Knowledge",
   "short_name": "Gyan Sutra",
-  "description": "Bhagavad Gita — read, search, and ask questions grounded in scripture",
-  "start_url": "/",
+  "description": "Explore the Bhagavad Gita and Valmiki Ramayana through authentic texts, semantic search, related verses, commentaries, and Sarathi.",
+  "start_url": "./",
   "display": "standalone",
   "theme_color": "#3B2245",
   "background_color": "#F6EFDD",
@@ -11,19 +11,19 @@
   "categories": ["education", "books", "religion"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512-maskable.png",
+      "src": "icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -35,8 +35,8 @@
       "name": "Ask the Gita",
       "short_name": "Ask",
       "description": "Ask a question grounded in scripture",
-      "url": "/ask",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "./ask",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

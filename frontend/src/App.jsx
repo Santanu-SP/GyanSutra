@@ -152,7 +152,7 @@ export default function App() {
           {/* Brand */}
           <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra — Home">
             <img
-              src="/icons/logo.svg"
+              src={`${import.meta.env.BASE_URL}icons/logo.svg`}
               alt="Gyan Sutra"
               className="gs-header__logo"
             />
