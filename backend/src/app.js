@@ -21,14 +21,30 @@ app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigin = process.env.CORS_ORIGIN;
+const defaultOrigins = [
+  'https://gyansutraapp.pages.dev',
+  'https://santanu-sp.github.io',
+  'http://localhost:5173',
+  'http://localhost:3001',
+];
+
+const envOriginsStr = process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGIN;
+const configuredOrigins = envOriginsStr
+  ? envOriginsStr.split(',').map((o) => o.trim().replace(/\/$/, ''))
+  : [];
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!allowedOrigin) {
-      return callback(new Error('CORS_ORIGIN is not configured.'));
+    // Allow non-browser requests (Postman, curl, server-to-server)
+    if (!origin) return callback(null, true);
+
+    const cleanOrigin = origin.replace(/\/$/, '');
+
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(cleanOrigin)) {
+      return callback(null, true);
     }
-    if (origin === allowedOrigin) return callback(null, true);
     return callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST'],
