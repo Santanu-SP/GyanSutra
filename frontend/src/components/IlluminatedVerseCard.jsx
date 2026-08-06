@@ -182,70 +182,100 @@ export default function IlluminatedVerseCard({
           </p>
         </section>
 
-        {/* 2. AUTHENTIC COMMENTARY */}
+        {/* 2. AUTHENTIC COMMENTARY & GURU EXPLANATIONS */}
         {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || comments || (verse.book !== 'ramayana' && (explanationEnglish || explanationHindi))) && (
-          <section className="verse-section">
-            <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9, marginBottom: '1rem' }}>
-              {lang === 'hindi' ? 'प्रमाणिक व्याख्या' : 'Authentic Commentary'}
-            </h3>
+          <section className="verse-section" style={{ borderTop: '1px solid var(--hairline)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--amber-500)', opacity: 0.9, margin: 0 }}>
+                {lang === 'hindi' ? 'प्रमाणिक गुरु व्याख्याएँ (Commentaries)' : 'Authentic Guru Commentaries'}
+              </h3>
+              {detailedExplanations.length > 1 && (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                  {detailedExplanations.length} Acharyas & Gurus
+                </span>
+              )}
+            </div>
             
             <div className="commentary-list">
               {detailedExplanations.length > 0 ? (
                 detailedExplanations.map((exp, idx) => (
-                  <div key={idx} className="commentary-item" style={{ marginBottom: '2rem' }}>
-                    <h4 className="commentary-author" style={{ 
-                      color: 'var(--text-secondary)', 
-                      fontSize: '0.85rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginBottom: '0.75rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
-                      {exp.author}
-                    </h4>
-                    <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                  <div 
+                    key={idx} 
+                    className="commentary-item" 
+                    style={{ 
+                      marginBottom: '1.75rem',
+                      padding: '1.25rem',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(217, 119, 6, 0.03)',
+                      border: '1px solid rgba(217, 119, 6, 0.12)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <h4 className="commentary-author" style={{ 
+                        color: 'var(--amber-500)', 
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        letterSpacing: '0.03em',
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)' }}></span>
+                        {exp.author}
+                      </h4>
+                      {exp.language && (
+                        <span style={{ 
+                          fontSize: '0.7rem', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.1em',
+                          color: 'var(--text-muted)',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid var(--hairline)'
+                        }}>
+                          {exp.language}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '0.975rem', color: 'var(--text-primary)', margin: 0 }}>
                       {exp.explanation}
                     </p>
                   </div>
                 ))
               ) : verse.book === 'ramayana' && comments ? (
-                <div className="commentary-item" style={{ marginBottom: '2rem' }}>
+                <div className="commentary-item" style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '8px', backgroundColor: 'rgba(217, 119, 6, 0.03)', border: '1px solid rgba(217, 119, 6, 0.12)' }}>
                   <h4 className="commentary-author" style={{ 
-                    color: 'var(--text-secondary)', 
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    color: 'var(--amber-500)', 
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
                     marginBottom: '0.75rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem'
                   }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)' }}></span>
                     Valmiki Ramayana Commentary
                   </h4>
-                  <p className="commentary-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                  <p className="commentary-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '0.975rem', color: 'var(--text-primary)', margin: 0 }}>
                     {comments}
                   </p>
                 </div>
               ) : (explanationEnglish || explanationHindi) ? (
-                <div className="commentary-item" style={{ marginBottom: '2rem' }}>
+                <div className="commentary-item" style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '8px', backgroundColor: 'rgba(217, 119, 6, 0.03)', border: '1px solid rgba(217, 119, 6, 0.12)' }}>
                   <h4 className="commentary-author" style={{ 
-                    color: 'var(--text-secondary)', 
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    color: 'var(--amber-500)', 
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
                     marginBottom: '0.75rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem'
                   }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)', opacity: 0.5 }}></span>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)' }}></span>
                     Detailed Translation & Explanation
                   </h4>
-                  <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
+                  <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, margin: 0 }}>
                     {lang === 'hindi' ? (explanationHindi || explanationEnglish) : (explanationEnglish || explanationHindi)}
                   </p>
                 </div>

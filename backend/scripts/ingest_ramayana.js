@@ -4,6 +4,16 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { db, setDoc, batchWrite } = require('../src/services/firestore');
 const { embedText } = require('../src/services/embedding');
 
+// CLI flags
+const SKIP_EMBED = process.argv.includes('--skip-embed');
+const KANDA_FILTER = (() => {
+  const idx = process.argv.indexOf('--kanda');
+  return idx !== -1 ? parseInt(process.argv[idx + 1], 10) : null;
+})();
+
+if (SKIP_EMBED) console.log('[INFO] --skip-embed: storing zero-vectors, skipping AI embedding calls.');
+if (KANDA_FILTER) console.log(`[INFO] --kanda ${KANDA_FILTER}: only ingesting Kanda #${KANDA_FILTER}.`);
+
 // Map Kanda names to numbers
 const kandaToNumber = {
   'Bala Kanda': 1,
@@ -79,9 +89,11 @@ async function run() {
   const BATCH_SIZE = 50;
   let batchData = [];
 
-  // Process ALL shlokas in the dataset
-  const dataToProcess = rawData;
-  console.log(`Processing all ${dataToProcess.length} shlokas across every sarga and kanda...`);
+  // Process ALL shlokas (or filtered by kanda)
+  const dataToProcess = KANDA_FILTER
+    ? rawData.filter(item => kandaToNumber[item.kanda] === KANDA_FILTER)
+    : rawData;
+  console.log(`Processing ${dataToProcess.length} shlokas${KANDA_FILTER ? ` from Kanda #${KANDA_FILTER}` : ' across every sarga and kanda'}...`);
 
   for (let i = 0; i < dataToProcess.length; i++) {
     const item = dataToProcess[i];
@@ -128,18 +140,23 @@ async function run() {
     ].filter(Boolean).join(' | ');
 
     try {
-      const embedding = await embedText(embedStr);
-      verseData.embedding = embedding;
+      if (SKIP_EMBED) {
+        verseData.embedding = new Array(384).fill(0);
+      } else {
+        verseData.embedding = await embedText(embedStr);
+      }
 
       batchData.push({ id: docId, data: verseData });
       successCount++;
 
-      console.log(`Processed: ${docId}`);
+      if (successCount % 100 === 0) {
+        console.log(`Processed: ${successCount}/${dataToProcess.length} (${docId})`);
+      }
 
       if (batchData.length >= BATCH_SIZE) {
         await batchWrite('verses', batchData);
         batchData = [];
-        await sleep(1000); // Gentle backoff for rate limits
+        if (!SKIP_EMBED) await sleep(1000); // Gentle backoff only when generating embeddings
       }
     } catch (err) {
       console.error(`Failed to process ${docId}:`, err.message);
