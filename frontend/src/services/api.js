@@ -4,7 +4,8 @@
  * Falls back to localhost:3001 for local development.
  */
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+const defaultBaseUrl = import.meta.env.DEV ? 'http://localhost:3001' : 'https://gyansutra-api.onrender.com';
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || defaultBaseUrl).replace(/\/$/, '');
 
 async function request(path, options = {}) {
   const url = `${BASE_URL}/api${path}`;
