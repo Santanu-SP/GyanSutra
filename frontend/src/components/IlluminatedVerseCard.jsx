@@ -33,6 +33,100 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './IlluminatedVerseCard.css';
 
+// Helper component to format long commentary texts into readable paragraphs
+// and separate word meanings from the actual commentary in English texts.
+const FormattedCommentary = ({ text, language, className = '', style = {} }) => {
+  if (!text) return null;
+  
+  let formattedText = text.trim();
+  const isEnglish = language === 'english' || (!language && /[a-z]/i.test(formattedText));
+  
+  const splitIntoParagraphs = (str, isHindi) => {
+    const sentenceRegex = isHindi ? /([^।!?]+[।!?]+)/g : /([^.!?]+[.!?]+)/g;
+    let sentences = str.match(sentenceRegex);
+    
+    if (!sentences || sentences.length === 0) {
+      sentences = [str];
+    } else {
+      const matchedLength = sentences.join('').length;
+      if (matchedLength < str.length) {
+        sentences.push(str.substring(matchedLength));
+      }
+    }
+
+    const paragraphs = [];
+    for (let i = 0; i < sentences.length; i += 3) {
+      let pText = sentences.slice(i, i + 3).join(' ').trim();
+      if (isHindi) {
+        pText = pText.replace(/(\S)\?\s+(?=[^\s])/g, '$1, ');
+      }
+      if (pText) paragraphs.push(pText);
+    }
+    return paragraphs;
+  };
+
+  const baseStyle = { lineHeight: 1.8, fontSize: '0.975rem', color: 'var(--text-primary)', ...style };
+
+  if (isEnglish) {
+    const match = formattedText.match(/^(.*?)(?:\.\s*|\s+)Commentary[:\s]+(.*)$/is);
+    
+    if (match && match[1].length > 10 && match[2].length > 10) {
+      let wordMeaning = match[1].trim();
+      let commentary = match[2].trim();
+      
+      wordMeaning = wordMeaning.replace(/\?/g, ',');
+      const paragraphs = splitIntoParagraphs(commentary, false);
+      
+      return (
+        <div className={`formatted-commentary ${className}`} style={baseStyle}>
+          <div className="word-meaning-block" style={{
+            fontSize: '0.85rem',
+            color: 'var(--text-muted)',
+            marginBottom: '1.25rem',
+            padding: '0.85rem 1rem',
+            backgroundColor: 'rgba(201, 154, 78, 0.05)',
+            border: '1px solid rgba(201, 154, 78, 0.15)',
+            borderRadius: '8px',
+            borderLeft: '3px solid var(--amber-500)',
+            lineHeight: 1.6,
+            whiteSpace: 'normal'
+          }}>
+            <span style={{fontWeight: 600, display: 'block', marginBottom: '0.4rem', color: 'var(--amber-500)', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.7rem'}}>
+              Word Meaning
+            </span>
+            <span style={{ fontStyle: 'italic' }}>{wordMeaning}</span>
+          </div>
+          <div className="commentary-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal' }}>
+            {paragraphs.map((p, idx) => (
+              <p key={idx} style={{ margin: 0 }}>{p}</p>
+            ))}
+          </div>
+        </div>
+      );
+    } else {
+      const paragraphs = splitIntoParagraphs(formattedText, false);
+      return (
+        <div className={`formatted-commentary ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
+          {paragraphs.map((p, idx) => (
+            <p key={idx} style={{ margin: 0 }}>{p}</p>
+          ))}
+        </div>
+      );
+    }
+  } else {
+    formattedText = formattedText.replace(/।([^\s\n])/g, '। $1');
+    const paragraphs = splitIntoParagraphs(formattedText, true);
+    
+    return (
+      <div className={`formatted-commentary devanagari ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
+        {paragraphs.map((p, idx) => (
+          <p key={idx} style={{ margin: 0 }}>{p}</p>
+        ))}
+      </div>
+    );
+  }
+};
+
 // SVG corner flourish — flame and thread motif at low opacity
 const CornerFlourish = ({ position = 'top-right', size = 48 }) => (
   <svg
@@ -238,9 +332,12 @@ export default function IlluminatedVerseCard({
                         </span>
                       )}
                     </div>
-                    <p className={`commentary-text ${exp.language === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '0.975rem', color: 'var(--text-primary)', margin: 0 }}>
-                      {exp.explanation}
-                    </p>
+                    <FormattedCommentary 
+                      text={exp.explanation} 
+                      language={exp.language} 
+                      className="commentary-text"
+                      style={{ margin: 0 }}
+                    />
                   </div>
                 ))
               ) : verse.book === 'ramayana' && comments ? (
@@ -257,9 +354,12 @@ export default function IlluminatedVerseCard({
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)' }}></span>
                     Valmiki Ramayana Commentary
                   </h4>
-                  <p className="commentary-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '0.975rem', color: 'var(--text-primary)', margin: 0 }}>
-                    {comments}
-                  </p>
+                  <FormattedCommentary 
+                    text={comments} 
+                    language="english" 
+                    className="commentary-text"
+                    style={{ margin: 0 }}
+                  />
                 </div>
               ) : (explanationEnglish || explanationHindi) ? (
                 <div className="commentary-item" style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '8px', backgroundColor: 'rgba(217, 119, 6, 0.03)', border: '1px solid rgba(217, 119, 6, 0.12)' }}>
@@ -275,14 +375,20 @@ export default function IlluminatedVerseCard({
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--amber-500)' }}></span>
                     Detailed Translation & Explanation
                   </h4>
-                  <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, margin: 0 }}>
-                    {lang === 'hindi' ? (explanationHindi || explanationEnglish) : (explanationEnglish || explanationHindi)}
-                  </p>
+                  <FormattedCommentary 
+                    text={lang === 'hindi' ? (explanationHindi || explanationEnglish) : (explanationEnglish || explanationHindi)} 
+                    language={lang} 
+                    className="commentary-text"
+                    style={{ margin: 0 }}
+                  />
                 </div>
               ) : (
-                <p className={`commentary-text ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
-                  {sourceCommentary}
-                </p>
+                <FormattedCommentary 
+                  text={sourceCommentary} 
+                  language={lang} 
+                  className="commentary-text"
+                  style={{ margin: 0 }}
+                />
               )}
             </div>
           </section>
