@@ -19,14 +19,28 @@ import SearchBar from './components/SearchBar';
 import ThemeToggle from './components/ThemeToggle';
 import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
 import './app.css';
 
+// Helper to safely lazy load routes and auto-reload on chunk load failure (stale JS build)
+function lazyWithRetry(componentImport) {
+  return lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.warn('Dynamic import chunk load failed. Reloading page to fetch latest version...', error);
+      window.location.reload();
+      return new Promise(() => {});
+    }
+  });
+}
+
 // Lazy-load heavier pages to keep initial bundle small
-const ChapterReader = lazy(() => import('./pages/ChapterReader'));
-const Search        = lazy(() => import('./pages/Search'));
-const VerseDetail   = lazy(() => import('./pages/VerseDetail'));
-const Ramayana      = lazy(() => import('./pages/Ramayana'));
-const KandaReader   = lazy(() => import('./pages/KandaReader'));
+const ChapterReader = lazyWithRetry(() => import('./pages/ChapterReader'));
+const Search        = lazyWithRetry(() => import('./pages/Search'));
+const VerseDetail   = lazyWithRetry(() => import('./pages/VerseDetail'));
+const Ramayana      = lazyWithRetry(() => import('./pages/Ramayana'));
+const KandaReader   = lazyWithRetry(() => import('./pages/KandaReader'));
 
 // Suggested conversation starters — shown when panel is first opened
 const SARATHI_PROMPTS = [
@@ -188,25 +202,27 @@ export default function App() {
 
       {/* ── App body — shifts right on desktop when Sarathi is open ── */}
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route
-              path="/"
-              element={<Home onAskPrompt={handlePromptSelect} />}
-            />
-            {/* Search — must come before wildcard /:source_id */}
-            <Route path="/search" element={<Search />} />
-            {/* Individual verse — must come before wildcard /:source_id */}
-            <Route path="/verses/:id" element={<VerseDetail />} />
-            {/* Bhagavad Gita chapter navigator */}
-            <Route path="/chapters/:id" element={<ChapterReader />} />
-            {/* Ramayana Kanda navigator */}
-            <Route path="/ramayana" element={<Ramayana />} />
-            <Route path="/ramayana/:kandaNum" element={<KandaReader />} />
-            {/* Source pages (Bhagavad Gita, etc.) — wildcard, must be last */}
-            <Route path="/:source_id" element={<TextReader />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route
+                path="/"
+                element={<Home onAskPrompt={handlePromptSelect} />}
+              />
+              {/* Search — must come before wildcard /:source_id */}
+              <Route path="/search" element={<Search />} />
+              {/* Individual verse — must come before wildcard /:source_id */}
+              <Route path="/verses/:id" element={<VerseDetail />} />
+              {/* Bhagavad Gita chapter navigator */}
+              <Route path="/chapters/:id" element={<ChapterReader />} />
+              {/* Ramayana Kanda navigator */}
+              <Route path="/ramayana" element={<Ramayana />} />
+              <Route path="/ramayana/:kandaNum" element={<KandaReader />} />
+              {/* Source pages (Bhagavad Gita, etc.) — wildcard, must be last */}
+              <Route path="/:source_id" element={<TextReader />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* ── Sarathi companion — side panel on desktop, sheet on mobile ── */}

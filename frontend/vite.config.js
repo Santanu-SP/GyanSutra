@@ -30,12 +30,12 @@ export default defineConfig({
           },
           // API — network-first, fall back to cache
           {
-            urlPattern: /^https?:\/\/.*\/api\/(chapters|verses)\/.*/i,
+            urlPattern: /^https?:\/\/.*\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-scripture',
               expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              networkTimeoutSeconds: 5,
+              networkTimeoutSeconds: 30,
               cacheableResponse: { statuses: [0, 200] },
             },
           },

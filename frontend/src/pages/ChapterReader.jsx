@@ -36,14 +36,17 @@ export default function ChapterReader() {
   useEffect(() => {
     setLoading(true);
     setCurrentIndex(0);
+    setError(null);
     Promise.all([getChapter(id), getChapterVerses(id)])
-      .then(([ch, { verses: vs }]) => {
-        setChapter(ch);
+      .then(([ch, versesRes]) => {
+        setChapter(ch || null);
+        const vs = Array.isArray(versesRes?.verses) ? versesRes.verses : [];
         setVerses(vs);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        console.error("Failed to load chapter:", err);
+        setError(err?.message || 'Could not load chapter.');
         setLoading(false);
       });
   }, [id]);
