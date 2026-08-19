@@ -8,8 +8,13 @@ const { embedText } = require('./embedding');
 const { findNearestVerses, collections, getDoc } = require('./firestore');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.65');
-const TOP_K = parseInt(process.env.RAG_TOP_K || '6', 10);
+// Threshold below which retrieved verses are treated as "background context"
+// (still passed to LLM, but model uses broader knowledge to answer).
+// Set lower than 0.72 so more queries get verse-grounded answers.
+const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.55');
+const TOP_K                = parseInt(process.env.RAG_TOP_K || '6', 10);
+const TOP_CONTEXT          = 3;    // max verses sent to LLM — keeps prompt compact
+const MAX_COMMENTARY_CHARS = 600;  // truncate per-guru commentary (avg 3000 chars → 600 keeps key insight)
 
 // Primary + fallback model chain (ordered by quality → reliability)
 // NOTE: Avoid thinking/reasoning models (e.g. gemini-flash-lite-preview, deepseek-r1)
@@ -37,35 +42,32 @@ function getOpenRouterClient() {
   return openaiClient;
 }
 
-const SYSTEM_PROMPT = `You are Gyan Sutra's Sarathi (सारथि), the authentic and revered spiritual guide rooted in the Bhagavad Gita and Valmiki Ramayana.
+const SYSTEM_PROMPT = `You are Gyan Sutra's Sarathi (सारथि) — an authentic, revered spiritual guide with deep mastery of the Bhagavad Gita and Valmiki Ramayana.
 
-CRITICAL RULES — ALWAYS FOLLOW WITHOUT EXCEPTION:
+CRITICAL RULES — FOLLOW WITHOUT EXCEPTION:
 
-1. **SCRIPTURE GROUNDING & CONTEXT CLARITY**:
-   - If the retrieved context contains relevant verses, explicitly cite the Book, Chapter/Kanda, and Verse/Shloka number (e.g., *Bhagavad Gita, Chapter 2, Verse 47* or *Valmiki Ramayana, Bala Kanda, Sarga 1, Shloka 1*).
-   - If the user asks a question that is **NOT found or covered in the Bhagavad Gita or Valmiki Ramayana datasets**, you MUST start your response by explicitly informing the user:
-     "⚠️ **Context Notice:** *This question is not directly found in the verses of the Bhagavad Gita or Valmiki Ramayana datasets.*"
-   - If the topic is entirely secular or outside Sanatan scripture (e.g. modern technology, sports, coding), state clearly that the scripture does not address this topic.
+1. **ANSWERING FROM SCRIPTURE — ALWAYS ANSWER, NEVER REFUSE SPIRITUAL QUESTIONS**:
+   - If the retrieved context contains relevant verses, cite them explicitly (Book, Chapter/Kanda, Verse/Shloka number) and build your answer on them.
+   - If retrieved verses are lower-confidence matches or absent, **draw from your deep knowledge of the Bhagavad Gita and Valmiki Ramayana** to give a complete, authentic answer. You are a scholar of these scriptures — your knowledge goes beyond what is in the context window. Attribute statements to their scripture (e.g., *"The Bhagavad Gita teaches in Chapter 3..."* or *"In the Valmiki Ramayana, Yuddha Kanda..."*).
+   - **NEVER** say "I cannot answer" or "this is not in my database" for genuine spiritual, dharmic, philosophical, or devotional questions. The Gita and Ramayana are vast — always engage thoughtfully.
+   - **ONLY decline** if the question is completely outside Sanatan scripture (e.g., modern technology, coding, sports, politics, entertainment). For those say: *"This topic falls outside the teachings of the Bhagavad Gita and Valmiki Ramayana."*
+   - **Accuracy is paramount.** Never fabricate verse numbers. If you cite a specific verse (e.g., BG 2.47), you must be certain. If sharing general scriptural wisdom without a pinpointed verse, say so honestly: *"The Bhagavad Gita broadly teaches..."*
 
-2. **GURU & ACHARYA ATTRIBUTION**:
-   - When explaining Bhagavad Gita verses, you MUST explicitly provide detailed explanations attributed to the revered Gurus and Acharyas present in the commentaries or tradition:
+2. **GURU & ACHARYA ATTRIBUTION** (mandatory for Bhagavad Gita verse explanations):
+   - Provide perspectives attributed clearly to each Guru:
      - **According to Sri Adi Shankaracharya (Advaita)**: ...
      - **According to Sri Ramanujacharya (Vishishtadvaita)**: ...
      - **According to Sri Madhvacharya (Dvaita)**: ...
      - **According to Swami Sivananda**: ...
      - **According to Swami Chinmayananda**: ...
      - **According to Swami Ramsukhdas**: ...
-   - Always state clearly which Guru provides which perspective: "**According to [Guru Name]...**".
 
-3. **LANGUAGE & AUTHENTICITY**:
-   - If the user asks in English, respond in articulate, respectful English.
-   - If the user asks in Hindi (Devanagari or Hinglish/Roman Hindi), respond in pure Hindi (Devanagari script) with traditional respect.
-   - Maintain the highest philosophical precision and respect for Vedantic and Itihasa traditions.
+3. **LANGUAGE**: English if asked in English. Pure Hindi (Devanagari script) if asked in Hindi or Hinglish.
 
-4. **FORMATTING & SPEED**:
-   - Keep answers well-structured using clear markdown headers, bold spiritual terms, bullet points, and concise paragraphs for immediate readability.
+4. **FORMAT**: Well-structured markdown — clear headers, bold spiritual terms, bullet points, concise paragraphs. Every answer must be complete — do not cut off mid-thought.
 
 Retrieved Context Follows:`;
+
 
 /**
  * Strip chain-of-thought reasoning artifacts from free model responses.
@@ -186,18 +188,52 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
 }
 
 /**
- * Main RAG function
+ * Main RAG function — Retrieve, Augment, Generate.
+ *
+ * Speed optimisation: explicit-match doc lookups run in parallel with embedText(),
+ * saving ~300-400ms on every request that contains a verse reference.
  */
 async function askRag(question) {
-  // Step 1: Embed the question
-  let queryVector = [];
-  try {
-    queryVector = await embedText(question, 'RETRIEVAL_QUERY');
-  } catch (embedErr) {
-    console.error('[RAG] Embedding failed:', embedErr.message);
+
+  // ── Step 1: Parse explicit references synchronously (~0ms, no I/O) ────────
+  const gitaMatch = question.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
+  const gitaCh   = gitaMatch ? parseInt(gitaMatch[1], 10) : null;
+  const gitaV    = gitaMatch ? parseInt(gitaMatch[2], 10) : null;
+
+  const KANDA_NAME_MAP = {
+    bala: 1, ayodhya: 2, aranya: 3, kishkindha: 4, sundara: 5, yuddha: 6, uttara: 7,
+    'bala kanda': 1, 'ayodhya kanda': 2, 'aranya kanda': 3,
+    'kishkindha kanda': 4, 'sundara kanda': 5, 'yuddha kanda': 6, 'uttara kanda': 7,
+  };
+  const ramNumeric = question.match(/kanda\s+(\d+)(?:\s*,?\s*|\s+and\s+)sarga\s+(\d+)(?:\s*,?\s*|\s+and\s+)(?:shloka|verse)\s+(\d+)/i);
+  const ramNamed   = question.match(/([a-z]+(?:\s+kanda)?)\s*,?\s*sarga\s+(\d+)\s*,?\s*(?:shloka|verse)\s+(\d+)/i);
+
+  let ramK = null, ramS = null, ramShl = null;
+  if (ramNumeric) {
+    ramK = parseInt(ramNumeric[1], 10); ramS = parseInt(ramNumeric[2], 10); ramShl = parseInt(ramNumeric[3], 10);
+  } else if (ramNamed) {
+    const rawName = ramNamed[1].toLowerCase().trim();
+    const mapped  = KANDA_NAME_MAP[rawName] || KANDA_NAME_MAP[rawName.replace(/\s+kanda$/, '')] || null;
+    if (mapped) { ramK = mapped; ramS = parseInt(ramNamed[2], 10); ramShl = parseInt(ramNamed[3], 10); }
   }
 
-  // Step 2: Retrieve top-K nearest verses from Firestore
+  // ── Step 2: Parallel — embed question + fetch exact-match docs ────────────
+  // embedText and the two getDoc calls have no dependencies on each other;
+  // running them together saves one or two sequential Firestore round-trips.
+  const [queryVector, exactGitaDoc, exactRamDoc] = await Promise.all([
+    embedText(question, 'RETRIEVAL_QUERY').catch(e => {
+      console.error('[RAG] Embedding failed:', e.message);
+      return [];
+    }),
+    (gitaCh && gitaV)
+      ? getDoc('verses', `bhagavad-gita_${gitaCh}_${gitaV}`).catch(() => null)
+      : Promise.resolve(null),
+    (ramK && ramS && ramShl)
+      ? getDoc('verses', `valmiki-ramayana_${ramK}_${ramS}_${ramShl}`).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+
+  // ── Step 3: KNN similarity search (sequential — needs the vector) ─────────
   let retrieved = [];
   if (queryVector && queryVector.length > 0) {
     try {
@@ -207,106 +243,85 @@ async function askRag(question) {
     }
   }
 
-  // Step 2.5: Explicit Chapter/Verse Match override
-  const explicitMatch = question.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
-  if (explicitMatch) {
-    const ch = parseInt(explicitMatch[1], 10);
-    const vNum = parseInt(explicitMatch[2], 10);
-    const exactDoc = await getDoc('verses', `bhagavad-gita_${ch}_${vNum}`);
-
-    if (exactDoc) {
-      const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
-      if (existingIdx > -1) retrieved.splice(existingIdx, 1);
-      retrieved.unshift({
-        id: exactDoc.id,
-        similarity: 1.0,
-        chapterNumber: exactDoc.chapterNumber,
-        verseNumber: exactDoc.verseNumber,
-        sanskrit: exactDoc.sanskrit,
-        transliteration: exactDoc.transliteration,
-        translationEnglish: exactDoc.translationEnglish,
-        translationHindi: exactDoc.translationHindi,
-        wordMeanings: exactDoc.wordMeanings,
-        detailedExplanations: exactDoc.detailedExplanations,
-        tags: exactDoc.tags
-      });
-    }
+  // ── Step 4: Inject exact-match docs at position 0 (similarity = 1.0) ─────
+  function injectDoc(doc, extra) {
+    if (!doc) return;
+    const idx = retrieved.findIndex(v => v.id === doc.id);
+    if (idx > -1) retrieved.splice(idx, 1);
+    retrieved.unshift({ id: doc.id, similarity: 1.0, ...extra(doc) });
   }
 
-  // Step 2.6: Explicit Kanda/Sarga Match override (Ramayana)
-  // Map of named Kandas → their numeric index in the Firestore IDs
-  const KANDA_NAME_MAP = {
-    bala: 1, ayodhya: 2, aranya: 3, kishkindha: 4, sundara: 5, yuddha: 6, uttara: 7,
-    'bala kanda': 1, 'ayodhya kanda': 2, 'aranya kanda': 3,
-    'kishkindha kanda': 4, 'sundara kanda': 5, 'yuddha kanda': 6, 'uttara kanda': 7,
-  };
+  injectDoc(exactGitaDoc, d => ({
+    chapterNumber: d.chapterNumber,
+    verseNumber: d.verseNumber,
+    sanskrit: d.sanskrit,
+    transliteration: d.transliteration,
+    translationEnglish: d.translationEnglish,
+    translationHindi: d.translationHindi,
+    wordMeanings: d.wordMeanings,
+    detailedExplanations: d.detailedExplanations,
+    tags: d.tags,
+  }));
 
-  // Try numeric form: "Kanda 5 Sarga 1 Shloka 1"
-  const explicitRamayana = question.match(/kanda\s+(\d+)(?:\s*,?\s*|\s+and\s+)sarga\s+(\d+)(?:\s*,?\s*|\s+and\s+)(?:shloka|verse)\s+(\d+)/i);
-  // Try named form: "Sundara Kanda Sarga 1 Shloka 1" or "Sundara Kanda, Sarga 1, Shloka 1"
-  const explicitRamayanaByName = question.match(
-    /([a-z]+(?:\s+kanda)?)\s*,?\s*sarga\s+(\d+)\s*,?\s*(?:shloka|verse)\s+(\d+)/i
-  );
+  injectDoc(exactRamDoc, d => ({
+    book: d.book,
+    kanda: d.kanda,
+    kandaNumber: d.kandaNumber,
+    sarga: d.sarga,
+    shlokaNumber: d.shlokaNumber,
+    sanskrit: d.sanskrit,
+    transliteration: d.transliteration,
+    translationEnglish: d.translationEnglish,
+    explanationEnglish: d.explanationEnglish,
+    comments: d.comments,
+    verified: d.verified,
+    tags: d.tags || [],
+  }));
 
-  let ramayanaKNum = null, ramayanaSarga = null, ramayanaShloka = null;
+  // ── Step 5: Context construction — always provide best available verses ───
+  //
+  // Design principle: Sarathi ALWAYS answers. We never send a hard refusal
+  // instruction to the LLM. Instead:
+  //   • Verses above SIMILARITY_THRESHOLD → "direct match" context
+  //   • Verses below threshold            → "background context" (softer note)
+  //   • Zero retrieved                    → LLM uses its own scriptural knowledge
+  //
+  // Only TOP_CONTEXT (3) verses are sent to keep the prompt compact and fast.
+  // Guru commentaries are truncated at MAX_COMMENTARY_CHARS (600) — the LLM
+  // naturally expands from its training on these Gurus; the truncated snippet
+  // is enough to ground and verify the response.
 
-  if (explicitRamayana) {
-    ramayanaKNum  = parseInt(explicitRamayana[1], 10);
-    ramayanaSarga = parseInt(explicitRamayana[2], 10);
-    ramayanaShloka = parseInt(explicitRamayana[3], 10);
-  } else if (explicitRamayanaByName) {
-    const rawName = explicitRamayanaByName[1].toLowerCase().trim();
-    // Try both "sundara" and "sundara kanda" keys
-    const mappedNum = KANDA_NAME_MAP[rawName] || KANDA_NAME_MAP[rawName.replace(/\s+kanda$/, '')] || null;
-    if (mappedNum) {
-      ramayanaKNum  = mappedNum;
-      ramayanaSarga = parseInt(explicitRamayanaByName[2], 10);
-      ramayanaShloka = parseInt(explicitRamayanaByName[3], 10);
-    }
-  }
+  const topSimilarity      = retrieved.length > 0 ? (retrieved[0].similarity || 0) : 0;
+  const aboveThreshold     = retrieved.filter(v => (v.similarity || 0) >= SIMILARITY_THRESHOLD);
+  const isDirectlyInContext = aboveThreshold.length > 0;
 
-  if (ramayanaKNum && ramayanaSarga && ramayanaShloka) {
-    const exactDoc = await getDoc('verses', `valmiki-ramayana_${ramayanaKNum}_${ramayanaSarga}_${ramayanaShloka}`);
+  // Use high-confidence matches first; fall back to best-available for grounding
+  const contextVerses = (aboveThreshold.length > 0 ? aboveThreshold : retrieved)
+    .slice(0, TOP_CONTEXT);
 
-    if (exactDoc) {
-      const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);
-      if (existingIdx > -1) retrieved.splice(existingIdx, 1);
-      retrieved.unshift({
-        id: exactDoc.id,
-        similarity: 1.0,
-        book: exactDoc.book,
-        kanda: exactDoc.kanda,
-        kandaNumber: exactDoc.kandaNumber,
-        sarga: exactDoc.sarga,
-        shlokaNumber: exactDoc.shlokaNumber,
-        sanskrit: exactDoc.sanskrit,
-        transliteration: exactDoc.transliteration,
-        translationEnglish: exactDoc.translationEnglish,
-        explanationEnglish: exactDoc.explanationEnglish,
-        comments: exactDoc.comments,
-        verified: exactDoc.verified,
-        tags: exactDoc.tags || []
-      });
-    }
-  }
-
-  // Step 3: Threshold and context construction
-  const topSimilarity = retrieved.length > 0 ? (retrieved[0].similarity || 0) : 0;
-  const passedThreshold = retrieved.filter(v => (v.similarity || 0) >= SIMILARITY_THRESHOLD);
-
-  let contextLines = "";
-  const isDirectlyInContext = passedThreshold.length > 0;
-
-  if (!isDirectlyInContext) {
-    contextLines = "[NOTICE]: No specific verses from the database match this query above the similarity threshold. The topic is NOT explicitly present in the retrieved dataset. You MUST alert the user that this is outside the specific verses of the dataset.";
+  let contextLines;
+  if (contextVerses.length === 0) {
+    // No embedding results at all — ask LLM to draw on its own training
+    contextLines = '[No verse retrieved. Answer from your deep knowledge of the Bhagavad Gita and Valmiki Ramayana. Be transparent: note when sharing general scriptural wisdom rather than a pinpointed verse.]';
   } else {
-    contextLines = passedThreshold.map((v, i) => {
+    const prefix = isDirectlyInContext
+      ? '' // High-confidence — no extra instruction needed
+      : '[Note: The verses below are the closest available matches but may not directly address the question. Use them as reference and draw on your broader Gita/Ramayana knowledge to give a complete, accurate answer.]\n\n';
+
+    contextLines = prefix + contextVerses.map((v, i) => {
       const wordMeanings = Array.isArray(v.wordMeanings)
         ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
         : '';
 
+      // Truncate long commentaries — avg 3000 chars; 600 keeps the key insight
+      // and keeps the prompt well within the LLM's context window.
       const explanations = Array.isArray(v.detailedExplanations) && v.detailedExplanations.length > 0
-        ? v.detailedExplanations.map(exp => `[Commentary by ${exp.author} (${exp.language || 'English'})]: ${exp.explanation}`).join('\n\n')
+        ? v.detailedExplanations.map(exp => {
+            const text = exp.explanation.length > MAX_COMMENTARY_CHARS
+              ? exp.explanation.slice(0, MAX_COMMENTARY_CHARS) + '…'
+              : exp.explanation;
+            return `[Commentary by ${exp.author} (${exp.language || 'English'})]: ${text}`;
+          }).join('\n\n')
         : '';
 
       const titleLine = v.book === 'ramayana' || v.kanda
@@ -319,28 +334,27 @@ async function askRag(question) {
         `Transliteration: ${v.transliteration || ''}`,
         `English Translation: ${v.translationEnglish || ''}`,
         `Hindi Translation: ${v.translationHindi || ''}`,
-        wordMeanings ? `Word Meanings: ${wordMeanings}` : '',
-        explanations ? `Guru Commentaries:\n${explanations}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+        wordMeanings   ? `Word Meanings: ${wordMeanings}` : '',
+        explanations   ? `Guru Commentaries:\n${explanations}` : '',
+      ].filter(Boolean).join('\n');
     }).join('\n\n====================\n\n');
   }
 
-  const isCompareMode = question.toLowerCase().trim().startsWith('[compare]');
-  const cleanQuestion = isCompareMode ? question.replace(/^\[compare\]/i, '').trim() : question;
-  const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nUser Question: ${cleanQuestion}`;
+  // ── Step 6: Build prompt and call LLM ────────────────────────────────────
+  const isCompareMode  = question.toLowerCase().trim().startsWith('[compare]');
+  const cleanQuestion  = isCompareMode ? question.replace(/^\[compare\]/i, '').trim() : question;
+  const fullPrompt     = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nUser Question: ${cleanQuestion}`;
 
-  let answer = "";
+  let answer = '';
   try {
     answer = await callLlmWithFallback(fullPrompt, isCompareMode);
   } catch (llmError) {
     console.error('[RAG] LLM Execution Error:', llmError.message);
-    answer = `⚠️ **Sarathi Notification:**\n\nThe AI language service could not process your question at this moment (${llmError.message}).\n\nPlease check your internet connection or try asking again in a few moments.`;
+    answer = `⚠️ **Sarathi Notification:**\n\nThe AI service could not respond right now (${llmError.message}).\n\nPlease try again in a moment.`;
   }
 
-  // Step 6: Map Citations back safely
-  const citations = passedThreshold.map(v => ({
+  // ── Step 7: Build citations from above-threshold verses ──────────────────
+  const citations = aboveThreshold.slice(0, TOP_CONTEXT).map(v => ({
     id: v.id,
     chapterNumber: v.chapterNumber,
     verseNumber: v.verseNumber,
@@ -358,13 +372,7 @@ async function askRag(question) {
     tags: v.tags || [],
   }));
 
-  return {
-    answered: true,
-    inContext: isDirectlyInContext,
-    answer,
-    citations,
-    topSimilarity
-  };
+  return { answered: true, inContext: isDirectlyInContext, answer, citations, topSimilarity };
 }
 
 /**
