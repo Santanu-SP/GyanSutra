@@ -93,6 +93,7 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const location = useLocation();
   const [isSarathiOpen, setIsSarathiOpen] = useState(false);
   const [question, setQuestion]           = useState('');
   const [isLoading, setIsLoading]         = useState(false);
@@ -178,6 +179,14 @@ export default function App() {
             </span>
           </Link>
 
+          {/* Desktop nav links */}
+          <nav className="gs-header__nav-links" aria-label="Primary navigation">
+            <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
+            <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
+            <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
+            <Link to="/search" className={`gs-header__nav-link${location.pathname === '/search' ? ' gs-header__nav-link--active' : ''}`}>Search</Link>
+          </nav>
+
           {/* Global search — hidden on small mobile */}
           <div className="gs-header__search-wrap">
             <SearchBar placeholder="Search scripture… (⌘K)" />
@@ -239,6 +248,45 @@ export default function App() {
         isLoading={isLoading}
         suggestedPrompts={SARATHI_PROMPTS}
       />
+
+      {/* ── Mobile bottom navigation bar ───────────────────────────── */}
+      <nav className="gs-bottom-nav" aria-label="Mobile navigation">
+        <Link
+          to="/"
+          className={`gs-bottom-nav__item${location.pathname === '/' ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Home"
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25a.75.75 0 00-.75-.75h-6a.75.75 0 00-.75.75V21.75H3.75A.75.75 0 013 21V9.75z" />
+          </svg>
+          Home
+        </Link>
+
+        <Link
+          to="/search"
+          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Search"
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+          </svg>
+          Search
+        </Link>
+
+        <button
+          type="button"
+          className={`gs-bottom-nav__item${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
+          onClick={() => setIsSarathiOpen(true)}
+          aria-label="Open Sarathi"
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
+            <path d="M10 7C10 7 8 9.5 8 12C8 13.105 8.895 14 10 14C11.105 14 12 13.105 12 12C12 9.5 10 7 10 7Z" fill="white" opacity="0.5"/>
+          </svg>
+          Sarathi
+        </button>
+      </nav>
     </div>
   );
 }

@@ -57,7 +57,7 @@ export default function Home({ onAskPrompt = () => {} }) {
     <main className="relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
-      <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-24 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-14 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
         <header className="grid gap-8 grid-cols-1 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
           <div className="lg:col-span-7 space-y-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
@@ -66,7 +66,7 @@ export default function Home({ onAskPrompt = () => {} }) {
             </p>
 
             <div className="space-y-4">
-              <h1 className="max-w-4xl font-serif text-4xl leading-tight text-[color:var(--text-primary)] sm:text-5xl lg:text-7xl">
+              <h1 className="max-w-3xl font-serif text-3xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
                 Eternal Wisdom of Sanatan Dharma
               </h1>
               <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
@@ -144,7 +144,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
                   Curated Journey
                 </p>
-                <h2 className="mt-3 font-serif text-3xl text-[color:var(--text-primary)]">
+                <h2 className="mt-2 font-serif text-2xl font-normal text-[color:var(--text-primary)]">
                   A Living Sanctuary of Texts
                 </h2>
               </div>
@@ -158,7 +158,7 @@ export default function Home({ onAskPrompt = () => {} }) {
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
               Your Companion
             </p>
-            <h2 className="mt-3 font-serif text-2xl text-[color:var(--text-primary)]">
+            <h2 className="mt-2 font-serif text-xl font-normal text-[color:var(--text-primary)]">
               Sarathi — सारथि
             </h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
@@ -180,7 +180,7 @@ export default function Home({ onAskPrompt = () => {} }) {
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
                 Text Library
               </p>
-              <h2 className="mt-3 font-serif text-3xl text-[color:var(--text-primary)] sm:text-4xl">
+              <h2 className="mt-2 font-serif text-2xl font-normal text-[color:var(--text-primary)] sm:text-3xl">
                 Sacred Manuscripts
               </h2>
             </div>
@@ -207,19 +207,19 @@ export default function Home({ onAskPrompt = () => {} }) {
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
 
-                      <div className="relative flex h-full min-h-[420px] flex-col justify-between">
+                      <div className="relative flex h-full flex-col justify-between gap-6 py-1">
                         <div className="space-y-5">
                           <div className="flex items-start justify-between gap-4">
                             <span className="text-xs uppercase tracking-[0.35em] text-amber-400/85">
                               {style.label}
                             </span>
-                            <span className="font-serif text-3xl text-amber-200/90">
+                            <span className="font-serif text-2xl text-amber-200/90">
                               {style.glyph}
                             </span>
                           </div>
 
                           <div className="space-y-3">
-                            <h3 className="font-serif text-3xl text-[color:var(--text-primary)]">
+                            <h3 className="font-serif text-xl font-normal text-[color:var(--text-primary)]">
                               {source.title}
                             </h3>
                             <p className="text-sm leading-7 text-[color:var(--text-secondary)]">

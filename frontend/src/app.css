@@ -39,6 +39,43 @@
   }
 }
 
+/* ── Desktop nav links ────────────────────────────────────────────── */
+.gs-header__nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.gs-header__nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.gs-header__nav-link:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.gs-header__nav-link--active {
+  color: var(--accent);
+}
+
+/* Hide nav links on mobile — bottom nav handles mobile navigation */
+@media (max-width: 767px) {
+  .gs-header__nav-links { display: none; }
+}
+
 /* ── Brand / logo ───────────────────────────────────────────────────── */
 .gs-header__brand {
   display: inline-flex;
@@ -162,6 +199,15 @@
 .gs-body {
   flex: 1;
   transition: padding-right var(--transition-slow);
+  /* Reserve space at bottom for mobile nav */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile: add bottom padding so content isn't hidden behind bottom nav */
+@media (max-width: 767px) {
+  .gs-body {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
 }
 
 /* When Sarathi is open on desktop, nudge content left */
@@ -196,4 +242,61 @@
 @media (prefers-reduced-motion: reduce) {
   .gs-body { transition: none; }
   .gs-page-loader__dot { animation: none; opacity: 1; }
+}
+
+/* ── Mobile bottom navigation bar ────────────────────────────────────── */
+.gs-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .gs-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(60px + env(safe-area-inset-bottom));
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  .gs-bottom-nav__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .gs-bottom-nav__item:hover,
+  .gs-bottom-nav__item--active {
+    color: var(--accent);
+  }
+
+  .gs-bottom-nav__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
 }
