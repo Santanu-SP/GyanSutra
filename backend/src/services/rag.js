@@ -11,12 +11,14 @@ const { findNearestVerses, collections, getDoc } = require('./firestore');
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.65');
 const TOP_K = parseInt(process.env.RAG_TOP_K || '6', 10);
 
-// Fast, reliable models on OpenRouter (ordered by speed and reliability)
+// Primary + fallback model chain (ordered by quality → reliability)
+// NOTE: Avoid thinking/reasoning models (e.g. gemini-flash-lite-preview, deepseek-r1)
+// — they leak their chain-of-thought into the response text and consume max_tokens.
 const FAST_MODELS = [
-  'google/gemini-2.0-flash-lite-preview-02-05:free',
-  'meta-llama/llama-3.2-3b-instruct:free',
-  'meta-llama/llama-3.1-8b-instruct:free',
-  'openrouter/free'
+  'meta-llama/llama-3.3-70b-instruct:free',   // Best free model — no thinking leakage, multilingual
+  'meta-llama/llama-3.1-8b-instruct:free',    // Lightweight fallback
+  'meta-llama/llama-3.2-3b-instruct:free',    // Smallest fallback
+  'openrouter/free'                            // Last-resort wildcard
 ];
 
 // ── OpenRouter Client Initialization ──────────────────────────────────────────
@@ -66,6 +68,70 @@ CRITICAL RULES — ALWAYS FOLLOW WITHOUT EXCEPTION:
 Retrieved Context Follows:`;
 
 /**
+ * Strip chain-of-thought reasoning artifacts from free model responses.
+ *
+ * Some free/preview models (e.g. Gemini flash-lite, DeepSeek-R1) output their
+ * internal reasoning before the answer. This function removes all known patterns:
+ *   - XML-style <thinking>…</thinking> blocks
+ *   - "Here's a thinking process:" / "Here is my thinking:" preambles
+ *   - "Analyze User Input:" / "Check Rules Applicability:" meta-sections
+ *   - OpenRouter safety / guard prefix tags
+ *
+ * @param {string} raw - The raw LLM response string
+ * @returns {string} - The cleaned answer ready to display to the user
+ */
+function cleanResponse(raw) {
+  let text = raw.trim();
+
+  // 1. Strip XML-style thinking blocks entirely (DeepSeek-R1, Gemini thinking models)
+  text = text.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  text = text.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+
+  // 2. Strip "Here's a thinking process:" / "Here is my thinking:" preamble sections.
+  //    These models dump their reasoning as a prose block before the real answer.
+  //    Strategy: find the preamble marker, then skip everything until the first
+  //    real markdown heading or "📖" / "##" / "**" content starts.
+  const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–—]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
+  if (thinkingPreamblePattern.test(text)) {
+    // Find the first line that looks like real structured output (heading, bold, emoji section)
+    const realContentMatch = text.match(/(\n#{1,3} |\n\*{2}📖|\n📖|^\s*#{1,3} |\n---\n|\*{2}Scripture Reference|\*{2}Practical Life)/im);
+    if (realContentMatch && realContentMatch.index > 0) {
+      text = text.slice(realContentMatch.index).trim();
+    }
+  }
+
+  // 3. Strip "Analyze User Input:" / "Check Rules Applicability:" reasoning sections.
+  //    Pattern: line that starts with a step-label, followed by numbered reasoning.
+  //    These appear when the system prompt rules are interpreted as a reasoning template.
+  const metaSectionPattern = /^(analyze user input|check rules applicability|identify key constraints|step \d+:|user question:|user role:|rule \d+:|critical rules|output generation)/im;
+  if (metaSectionPattern.test(text)) {
+    // Find where actual answer content begins — after the meta-reasoning dump
+    const answerStart = text.match(/(\n#{1,3} |\n📖|\n\*{2}📖|^📖|^\s*#{1,3} )/im);
+    if (answerStart && answerStart.index > 0) {
+      text = text.slice(answerStart.index).trim();
+    } else {
+      // Fallback: split on double newline, drop lines that are pure meta-reasoning
+      const lines = text.split('\n');
+      const firstRealLine = lines.findIndex(l =>
+        /^#{1,3} |^📖|^\*{2}|^---$/.test(l.trim()) && l.trim().length > 3
+      );
+      if (firstRealLine > 0) {
+        text = lines.slice(firstRealLine).join('\n').trim();
+      }
+    }
+  }
+
+  // 4. Strip known OpenRouter / safety guard prefixes
+  text = text
+    .replace(/^User Safety:\s*safe\n*/i, '')
+    .replace(/^Your Reflection\n*/i, '')
+    .replace(/^Assistant:\s*/i, '');
+
+  return text.trim();
+}
+
+/**
  * Execute LLM call with rapid timeout and model fallback
  */
 async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
@@ -108,11 +174,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
       if (rawAnswer) {
-        // Clean OpenRouter / guard tags
-        return rawAnswer
-          .replace(/^User Safety:\s*safe\n*/i, '')
-          .replace(/^Your Reflection\n*/i, '')
-          .trim();
+        return cleanResponse(rawAnswer);
       }
     } catch (err) {
       lastError = err;
