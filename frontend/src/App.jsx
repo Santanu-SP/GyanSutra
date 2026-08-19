@@ -20,6 +20,7 @@ import ThemeToggle from './components/ThemeToggle';
 import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
+import SEO from './components/SEO';
 import './app.css';
 
 // Helper to safely lazy load routes and auto-reload on chunk load failure (stale JS build)
@@ -159,6 +160,7 @@ export default function App() {
 
   return (
     <div className="gs-app">
+      <SEO />
       <ScrollToTop />
       {/* ── Header ──────────────────────────────────────────────────── */}
       <header className="gs-header">
