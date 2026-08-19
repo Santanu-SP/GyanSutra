@@ -1,1 +1,10 @@
+# ── macOS ──────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Build output ───────────────────────────────────────────────
+frontend/dist/
+frontend/dist-ssr/
+
+# ── Raw ingestion datasets (too large for git) ─────────────────
 backend/data/raw/

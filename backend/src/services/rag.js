@@ -29,7 +29,7 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: process.env.GEMINI_API_KEY,
-      timeout: 12000, // 12-second hard timeout for fast response
+      timeout: 25000, // 25-second timeout — free models need time for long answers
     });
   }
   return openaiClient;
@@ -82,7 +82,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
         model: modelId,
         messages: [{ role: 'user', content: fullPrompt }],
         temperature: 0.2,
-        max_tokens: 1200,
+        max_tokens: 2500, // Increased: compare mode needs full answers from each model
       }).then(res => ({
         name: modelId.split('/')[1]?.split(':')[0]?.toUpperCase() || modelId,
         text: res.choices[0]?.message?.content?.trim() || 'No content'
@@ -103,7 +103,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
         model,
         messages: [{ role: 'user', content: fullPrompt }],
         temperature: 0.2,
-        max_tokens: 1200,
+        max_tokens: 2500, // Increased from 1200 — allows complete Guru commentaries + reflections
       });
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
@@ -172,12 +172,39 @@ async function askRag(question) {
   }
 
   // Step 2.6: Explicit Kanda/Sarga Match override (Ramayana)
+  // Map of named Kandas → their numeric index in the Firestore IDs
+  const KANDA_NAME_MAP = {
+    bala: 1, ayodhya: 2, aranya: 3, kishkindha: 4, sundara: 5, yuddha: 6, uttara: 7,
+    'bala kanda': 1, 'ayodhya kanda': 2, 'aranya kanda': 3,
+    'kishkindha kanda': 4, 'sundara kanda': 5, 'yuddha kanda': 6, 'uttara kanda': 7,
+  };
+
+  // Try numeric form: "Kanda 5 Sarga 1 Shloka 1"
   const explicitRamayana = question.match(/kanda\s+(\d+)(?:\s*,?\s*|\s+and\s+)sarga\s+(\d+)(?:\s*,?\s*|\s+and\s+)(?:shloka|verse)\s+(\d+)/i);
+  // Try named form: "Sundara Kanda Sarga 1 Shloka 1" or "Sundara Kanda, Sarga 1, Shloka 1"
+  const explicitRamayanaByName = question.match(
+    /([a-z]+(?:\s+kanda)?)\s*,?\s*sarga\s+(\d+)\s*,?\s*(?:shloka|verse)\s+(\d+)/i
+  );
+
+  let ramayanaKNum = null, ramayanaSarga = null, ramayanaShloka = null;
+
   if (explicitRamayana) {
-    const kNum = parseInt(explicitRamayana[1], 10);
-    const sarga = parseInt(explicitRamayana[2], 10);
-    const shloka = parseInt(explicitRamayana[3], 10);
-    const exactDoc = await getDoc('verses', `valmiki-ramayana_${kNum}_${sarga}_${shloka}`);
+    ramayanaKNum  = parseInt(explicitRamayana[1], 10);
+    ramayanaSarga = parseInt(explicitRamayana[2], 10);
+    ramayanaShloka = parseInt(explicitRamayana[3], 10);
+  } else if (explicitRamayanaByName) {
+    const rawName = explicitRamayanaByName[1].toLowerCase().trim();
+    // Try both "sundara" and "sundara kanda" keys
+    const mappedNum = KANDA_NAME_MAP[rawName] || KANDA_NAME_MAP[rawName.replace(/\s+kanda$/, '')] || null;
+    if (mappedNum) {
+      ramayanaKNum  = mappedNum;
+      ramayanaSarga = parseInt(explicitRamayanaByName[2], 10);
+      ramayanaShloka = parseInt(explicitRamayanaByName[3], 10);
+    }
+  }
+
+  if (ramayanaKNum && ramayanaSarga && ramayanaShloka) {
+    const exactDoc = await getDoc('verses', `valmiki-ramayana_${ramayanaKNum}_${ramayanaSarga}_${ramayanaShloka}`);
 
     if (exactDoc) {
       const existingIdx = retrieved.findIndex(v => v.id === exactDoc.id);

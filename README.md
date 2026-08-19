@@ -83,29 +83,102 @@ cd frontend && npm run dev
 
 ```
 GyanSutra/
+├── .github/
+│   └── workflows/
+│       └── deploy-github-pages.yml  # Auto-deploy to GitHub Pages on push to main
+│
 ├── backend/
-│   ├── data/                 # Raw datasets (gita.json, Ramayana resources)
-│   ├── scripts/              # Dataset merging, cleaning, and ingestion pipelines
+│   ├── data/
+│   │   ├── gita.json                # Enriched Gita dataset (700 verses, commentaries, translations)
+│   │   └── raw/                     # Raw ingestion source files (git-ignored, local dev only)
+│   │       ├── Valmiki_Ramayan_Dataset/  # Sanskrit shlokas source
+│   │       └── itihasa/                 # M.N. Dutt English translations source
+│   ├── models/
+│   │   └── Xenova/gte-small/        # Local ONNX embedding model (384-dim) — required at runtime
+│   ├── scripts/
+│   │   ├── ingest.js                # Ingests Bhagavad Gita into Firestore with embeddings
+│   │   ├── ingest_ramayana.js       # Ingests Valmiki Ramayana into Firestore with embeddings
+│   │   └── enrich_gita_data.js      # Downloads and merges Guru commentaries into gita.json
 │   ├── src/
-│   │   ├── app.js            # Express API bootstrap
-│   │   ├── routes/           # REST endpoints (auth, chapter read, search, ask RAG)
+│   │   ├── app.js                   # Express API bootstrap — CORS, rate limiting, route registration
+│   │   ├── data/
+│   │   │   └── sources.js           # Static source registry (Gita, Ramayana, Upanishads)
+│   │   ├── routes/
+│   │   │   ├── ask.js               # POST /api/ask — Sarathi RAG endpoint
+│   │   │   ├── chapters.js          # GET /api/chapters — chapter metadata
+│   │   │   ├── recommendations.js   # GET /api/recommendations — cosine-similar verse rail
+│   │   │   ├── search.js            # GET /api/search — semantic + keyword search
+│   │   │   ├── sources.js           # GET /api/sources — scripture source list
+│   │   │   └── verses.js            # GET /api/verses — verse fetch by ID/chapter/kanda
 │   │   └── services/
-│   │       ├── firestore.js  # Admin SDK wrapper & vector search logic
-│   │       ├── embedding.js  # Local Xenova/transformers ONNX embedding loader
-│   │       └── rag.js        # RAG pipeline with cosine threshold gate
-│   └── models/               # Locally stored Xenova GTE embedding model binaries
+│   │       ├── embedding.js         # Local Xenova/transformers ONNX embedding pipeline
+│   │       ├── firestore.js         # Firebase Admin SDK wrapper + KNN vector search
+│   │       └── rag.js               # RAG pipeline: embed → retrieve → threshold → generate
+│   ├── .env.example                 # Environment variable template (copy to .env)
+│   ├── .gitignore
+│   ├── package.json
+│   └── render.yaml                  # Render.com deployment config
 │
 └── frontend/
+    ├── public/
+    │   ├── icons/                   # PWA icons (192px, 512px, apple-touch, favicon)
+    │   ├── linkedin/                # OG/social preview image
+    │   ├── 404.html                 # GitHub Pages SPA shim (redirects unknown routes)
+    │   ├── icons.svg                # Sprite sheet for inline SVG icons
+    │   └── manifest.json            # PWA web app manifest
     ├── src/
-    │   ├── design-system/    # CSS custom properties (tokens.css) — the visual design system
+    │   ├── design-system/
+    │   │   └── tokens.css           # CSS custom properties — the entire visual design system
     │   ├── components/
-    │   │   ├── IlluminatedVerseCard.jsx # Signature gold-bordered shloka render engine
-    │   │   ├── SarathiPanel.jsx         # Bottom-sheet/sidebar reflection interface
-    │   │   └── ...
-    │   └── pages/            # Home, Search, Reader, and Auth views
+    │   │   ├── AskPanel.(jsx|css)           # Standalone Ask panel (see Developer Notes)
+    │   │   ├── ChapterNav.(jsx|css)         # Chapter navigation sidebar
+    │   │   ├── ErrorBoundary.jsx            # React error boundary
+    │   │   ├── IlluminatedVerseCard.(jsx|css) # Signature gold-bordered shloka renderer
+    │   │   ├── LoadingSpinner.(jsx|css)     # Reusable loading state
+    │   │   ├── RecommendationsRail.(jsx|css)# Related verse horizontal rail
+    │   │   ├── SarathiPanel.(jsx|css)       # Sarathi bottom-sheet/sidebar AI companion
+    │   │   ├── SearchBar.(jsx|css)          # Global keyboard-shortcut search
+    │   │   ├── SplashScreen.(jsx|css)       # First-load animated splash
+    │   │   └── ThemeToggle.(jsx|css)        # Light/dark theme toggle
+    │   ├── hooks/
+    │   │   ├── usePWAInstall.js     # PWA install prompt hook
+    │   │   └── useTheme.js          # Theme persistence (localStorage + CSS attribute)
+    │   ├── pages/
+    │   │   ├── Ask.(jsx|css)        # Ask page (see Developer Notes — currently no route)
+    │   │   ├── ChapterReader.(jsx|css) # Chapter-by-chapter Gita reader
+    │   │   ├── Home.jsx             # Landing page with daily verse + entry points
+    │   │   ├── KandaReader.jsx      # Ramayana kanda reader
+    │   │   ├── Ramayana.jsx         # Ramayana kanda index
+    │   │   ├── Search.(jsx|css)     # Full-page semantic search
+    │   │   ├── TextReader.(jsx|css) # Source overview page (chapters list)
+    │   │   └── VerseDetail.(jsx|css)# Individual verse detail page
+    │   ├── services/
+    │   │   └── api.js               # All fetch calls to the Express backend
+    │   ├── utils/
+    │   │   └── verseUtils.js        # Verse ID parsing helpers
+    │   ├── App.jsx                  # App root — routing, Sarathi state, header
+    │   ├── app.css                  # Global layout styles
+    │   ├── index.css                # Base reset + typography
+    │   └── main.jsx                 # React entry point — PWA registration
+    ├── dist/                        # ⚡ Generated by `npm run build` — do not commit (git-ignored)
+    ├── index.html                   # App shell — meta tags, OG, PWA, SPA theme init
+    ├── vite.config.js               # Vite config — PWA plugin, Tailwind, base path
+    ├── .env.example                 # Frontend env variable template
+    └── package.json
 ```
 
 ---
+
+## 🗒️ Developer Notes
+
+### Ask.jsx / AskPanel.jsx — Standalone Page (No Active Route)
+`src/pages/Ask.jsx` and `src/components/AskPanel.jsx` are a self-contained full-page version of the Sarathi Q&A interface. They are **not wired to any route in `App.jsx`** and are therefore unreachable in the running app. They exist as a development foundation for a future dedicated `/ask` page. Do not delete them — they are not dead code but rather a planned future feature.
+
+### gita.json — The Active Dataset
+`backend/data/gita.json` (≈30 MB) is the enriched, production-ready Gita dataset used by `scripts/ingest.js`. It was generated by running `scripts/enrich_gita_data.js` which pulls Guru commentaries from the open-source `gita/gita` GitHub repository and merges them with the base verse records.
+
+### Local Embedding Model
+`backend/models/Xenova/gte-small/` contains the ONNX model binaries for the `gte-small` transformer (384-dimensional embeddings). These are committed to the repository intentionally to avoid Hugging Face download failures on Render's cloud hosting (which blocks HuggingFace requests from certain IP ranges). The model is loaded lazily on first `/ask` request.
 
 ## 🪵 The Developer's Journal: Behind the Scenes & Hurdles
 

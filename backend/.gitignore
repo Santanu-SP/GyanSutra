@@ -1,4 +1,11 @@
+# ── Environment & Secrets ──────────────────────────────────────
 .env
 serviceAccount.json
-node_modules/
 serviceAccountKey.json
+
+# ── Dependencies ───────────────────────────────────────────────
+node_modules/
+
+# ── macOS ──────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
