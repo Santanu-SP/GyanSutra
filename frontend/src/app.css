@@ -96,8 +96,8 @@
 
 /* ── Search area in header ─────────────────────────────────────────── */
 .gs-header__search-wrap {
-  flex: 1;
-  max-width: 380px;
+  margin-left: auto;
+  max-width: 320px;
 }
 
 @media (max-width: 680px) {
@@ -109,7 +109,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: auto;
+  margin-left: 1rem;
+  flex-shrink: 0;
 }
 
 /* ── Sarathi trigger button ─────────────────────────────────────────── */

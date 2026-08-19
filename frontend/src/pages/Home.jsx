@@ -58,8 +58,8 @@ export default function Home({ onAskPrompt = () => {} }) {
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
       <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-24 lg:pt-12">
-        <header className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
-          <div className="space-y-6">
+        <header className="grid gap-8 grid-cols-1 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
+          <div className="lg:col-span-7 space-y-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
               <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.55)]" />
               Sacred Archive
@@ -81,21 +81,21 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
               >
                 Enter the Library
               </button>
               <button
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="inline-flex items-center justify-center rounded border border-amber-500/20 bg-amber-500/8 px-6 py-3 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:text-[color:var(--accent)]"
+                className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4"
               >
-                Consult Sarathi
+                Consult Sarathi →
               </button>
             </div>
           </div>
 
-          <aside className="relative overflow-hidden rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
+          <aside className="lg:col-span-5 relative overflow-hidden rounded-[2rem] bg-[color:var(--bg-surface)] p-6 lg:rotate-1">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
@@ -137,7 +137,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </aside>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+        <section aria-label="Feature highlights" className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
           <article className="rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -158,9 +158,9 @@ export default function Home({ onAskPrompt = () => {} }) {
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
               Your Companion
             </p>
-            <h3 className="mt-3 font-serif text-2xl text-[color:var(--text-primary)]">
+            <h2 className="mt-3 font-serif text-2xl text-[color:var(--text-primary)]">
               Sarathi — सारथि
-            </h3>
+            </h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
               Ask about karma, detachment, devotion, or interpretation — and receive responses rooted in your sacred library.
             </p>
@@ -174,7 +174,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </article>
         </section>
 
-        <section id="text-library" className="space-y-6">
+        <section id="text-library" aria-label="Text library" className="space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
@@ -190,7 +190,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </div>
 
           {/* Source cards grid — rendered immediately from static data */}
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
             {SOURCES.map((source) => {
                   const style = SOURCE_STYLES[source.id] || {
                     accent: 'from-amber-500/15 via-transparent to-transparent',
@@ -207,7 +207,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
 
-                      <div className="relative flex h-full min-h-[320px] flex-col justify-between">
+                      <div className="relative flex h-full min-h-[420px] flex-col justify-between">
                         <div className="space-y-5">
                           <div className="flex items-start justify-between gap-4">
                             <span className="text-xs uppercase tracking-[0.35em] text-amber-400/85">
@@ -231,8 +231,8 @@ export default function Home({ onAskPrompt = () => {} }) {
                         <div className="space-y-4">
                           <div className="h-px w-full bg-gradient-to-r from-amber-500/40 via-amber-500/10 to-transparent" />
                           <div className="flex items-center justify-between text-sm text-[color:var(--text-secondary)]">
-                            <span className="uppercase tracking-[0.28em] text-[color:var(--text-muted)]">
-                              {source.available ? 'Open Manuscript' : 'Coming Soon'}
+                            <span className="text-sm text-[color:var(--text-muted)] hover:text-[color:var(--accent)] transition-colors">
+                              {source.available ? 'Continue reading →' : 'Coming Soon'}
                             </span>
                             <span className={`rounded-full border px-3 py-1 text-xs font-medium transition group-hover:border-amber-400/60 ${
                               source.available
