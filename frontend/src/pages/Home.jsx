@@ -57,45 +57,45 @@ export default function Home({ onAskPrompt = () => {} }) {
     <main className="relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-14 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
-        <header className="grid gap-8 grid-cols-1 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
-          <div className="lg:col-span-7 space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
+      <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
+        <header className="grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
+          <div className="lg:col-span-7 space-y-3 sm:space-y-6">
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-3 py-1 sm:px-4 sm:py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
               <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.55)]" />
               Sacred Archive
             </p>
 
-            <div className="space-y-4">
-              <h1 className="max-w-3xl font-serif text-3xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
+            <div className="space-y-2 sm:space-y-4">
+              <h1 className="max-w-3xl font-serif text-2xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
                 Eternal Wisdom of Sanatan Dharma
               </h1>
-              <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
+              <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-row flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-6 py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
               >
                 Enter the Library
               </button>
               <button
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4"
+                className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4 whitespace-nowrap"
               >
                 Consult Sarathi →
               </button>
             </div>
           </div>
 
-          <aside className="lg:col-span-5 relative overflow-hidden rounded-[2rem] bg-[color:var(--bg-surface)] p-6 lg:rotate-1">
+          <aside className="lg:col-span-5 relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-[color:var(--bg-surface)] p-3 sm:p-6 lg:rotate-1">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
@@ -103,7 +103,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 <span className="text-amber-400">Featured Sutra</span>
               </div>
 
-              <div className="space-y-4 rounded-[1.75rem] border border-amber-700/20 bg-[color:var(--bg)] p-6">
+              <div className="space-y-3 rounded-xl sm:rounded-[1.75rem] border border-amber-700/20 bg-[color:var(--bg)] p-4 sm:p-6">
                 <p className="font-serif text-xl leading-relaxed text-[color:var(--text-primary)] devanagari-hero" style={{ fontSize: '1.4rem' }}>
                   {dailyVerse ? dailyVerse.sanskrit : "“Within stillness, the eternal thread of knowledge reveals itself.”"}
                 </p>
@@ -137,8 +137,8 @@ export default function Home({ onAskPrompt = () => {} }) {
           </aside>
         </header>
 
-        <section aria-label="Feature highlights" className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-          <article className="rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
+        <section aria-label="Feature highlights" className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+          <article className="rounded-2xl sm:rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
@@ -154,7 +154,7 @@ export default function Home({ onAskPrompt = () => {} }) {
             </div>
           </article>
 
-          <article className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
+          <article className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
               Your Companion
             </p>
@@ -174,7 +174,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </article>
         </section>
 
-        <section id="text-library" aria-label="Text library" className="space-y-6">
+        <section id="text-library" aria-label="Text library" className="space-y-4 sm:space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
@@ -202,7 +202,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                     <Link
                       key={source.id}
                       to={`/${source.id}`}
-                      className="group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
+                      className="group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
                     >
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
