@@ -195,18 +195,6 @@ export default function App() {
           {/* Right actions */}
           <div className="gs-header__actions">
             <ThemeToggle />
-            <button
-              type="button"
-              className="sarathi-trigger sarathi-trigger--header"
-              onClick={() => setIsSarathiOpen(true)}
-              aria-label="Open Sarathi — your spiritual companion"
-              aria-expanded={isSarathiOpen}
-              aria-controls="sarathi-panel"
-              id="open-sarathi-btn"
-            >
-              <TriggerFlame />
-              <span className="sarathi-trigger__label">Sarathi</span>
-            </button>
           </div>
         </nav>
       </header>

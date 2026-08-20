@@ -196,18 +196,7 @@ export default function SarathiPanel({
 
   return (
     <>
-      {/* ── Floating Sarathi pill — mobile only, shown when panel is closed ── */}
-      <button
-        type="button"
-        className={`sarathi-pill${!isOpen ? ' sarathi-pill--visible' : ''}`}
-        onClick={onOpen}
-        aria-label="Open Sarathi — your spiritual companion"
-        id="sarathi-pill-btn"
-      >
-        <span className="sarathi-pill__glow" aria-hidden="true" />
-        <SarathiFlame className="sarathi-pill__flame" />
-        <span className="sarathi-pill__label">Sarathi</span>
-      </button>
+
 
       {/* ── Mobile backdrop — only for normal/full sizes (peek lets user see screen) ── */}
       {isOpen && panelSize !== 'peek' && (
