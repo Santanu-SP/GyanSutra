@@ -273,19 +273,6 @@ export default function App() {
           </svg>
           Search
         </Link>
-
-        <button
-          type="button"
-          className={`gs-bottom-nav__item${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
-          onClick={() => setIsSarathiOpen(true)}
-          aria-label="Open Sarathi"
-        >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
-            <path d="M10 7C10 7 8 9.5 8 12C8 13.105 8.895 14 10 14C11.105 14 12 13.105 12 12C12 9.5 10 7 10 7Z" fill="white" opacity="0.5"/>
-          </svg>
-          Sarathi
-        </button>
       </nav>
     </div>
   );

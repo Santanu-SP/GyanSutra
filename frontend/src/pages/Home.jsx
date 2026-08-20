@@ -60,16 +60,11 @@ export default function Home({ onAskPrompt = () => {} }) {
       <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
         <header className="grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
           <div className="lg:col-span-7 space-y-3 sm:space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full border border-amber-700/20 bg-white/[0.03] px-3 py-1 sm:px-4 sm:py-2 text-xs uppercase tracking-[0.35em] text-amber-400">
-              <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.55)]" />
-              Sacred Archive
-            </p>
-
             <div className="space-y-2 sm:space-y-4">
-              <h1 className="max-w-3xl font-serif text-2xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
+              <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
                 Eternal Wisdom of Sanatan Dharma
               </h1>
-              <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
+              <p className="max-w-2xl text-xs leading-5 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
               </p>
             </div>
@@ -81,9 +76,10 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2.5 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
+                className="flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
               >
-                Enter the Library
+                <span>Enter the Library</span>
+                <span className="text-[10px] font-normal opacity-60 tracking-wide normal-case">Sacred Manuscripts</span>
               </button>
               <button
                 type="button"
