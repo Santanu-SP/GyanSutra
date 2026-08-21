@@ -8,15 +8,25 @@ const SOURCE_STYLES = {
     glyph: 'गीता',
     label: 'Song of the Divine',
   },
+  ramayana: {
+    accent: 'from-orange-500/20 via-transparent to-transparent',
+    glyph: 'राम',
+    label: 'Epic of Dharma',
+  },
   upanishads: {
     accent: 'from-indigo-500/20 via-transparent to-transparent',
     glyph: 'श्रुति',
     label: 'Whispers of the Self',
   },
-  ramayana: {
-    accent: 'from-orange-500/20 via-transparent to-transparent',
-    glyph: 'राम',
-    label: 'Epic of Dharma',
+  mahabharata: {
+    accent: 'from-red-500/20 via-transparent to-transparent',
+    glyph: 'कुरु',
+    label: 'Epic of Karma',
+  },
+  puranas: {
+    accent: 'from-emerald-500/20 via-transparent to-transparent',
+    glyph: 'पुराण',
+    label: 'Ancient Chronicles',
   },
 };
 
@@ -31,16 +41,28 @@ const SOURCES = [
     available: true,
   },
   {
+    id: 'ramayana',
+    title: 'Ramayana',
+    description: 'An epic text centered on dharma, exile, loyalty, and return.',
+    available: true,
+  },
+  {
     id: 'upanishads',
     title: 'Upanishads',
     description: 'A contemplative collection exploring the self, reality, and liberation.',
     available: false,
   },
   {
-    id: 'ramayana',
-    title: 'Ramayana',
-    description: 'An epic text centered on dharma, exile, loyalty, and return.',
-    available: true,
+    id: 'mahabharata',
+    title: 'Mahabharata',
+    description: 'The great epic of the Kurukshetra War and the destinies of princes.',
+    available: false,
+  },
+  {
+    id: 'puranas',
+    title: 'Puranas',
+    description: 'Ancient lore and mythological narratives of the divine.',
+    available: false,
   },
 ];
 
