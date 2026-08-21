@@ -184,7 +184,6 @@ export default function App() {
             <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
             <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
             <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
-            <Link to="/search" className={`gs-header__nav-link${location.pathname === '/search' ? ' gs-header__nav-link--active' : ''}`}>Search</Link>
           </nav>
 
           {/* Global search — hidden on small mobile */}
