@@ -90,6 +90,8 @@ export default function SarathiPanel({
   const [isMinimizing, setIsMinimizing]  = useState(false);
   const [isDragging, setIsDragging]      = useState(false);
   const [dynamicHeight, setDynamicHeight] = useState(null);    // dvh number during drag; null = use snap
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);    // live timer during loading
+  const [stageIndex, setStageIndex]      = useState(0);       // rotating stage message index
 
   // Keep ref in sync
   const setPanelSize = (s) => { panelSizeRef.current = s; _setPanelSize(s); };
@@ -175,6 +177,32 @@ export default function SarathiPanel({
     const t = setTimeout(() => textareaRef.current?.focus(), 150);
     return () => clearTimeout(t);
   }, [isOpen]);
+
+  // ── Live elapsed timer + rotating stage messages while loading ───────────
+  const LOADING_STAGES = [
+    'Searching the scriptures…',
+    'Retrieving relevant verses…',
+    'Consulting the Bhagavad Gita…',
+    'Reflecting on the teaching…',
+    'Composing the answer…',
+  ];
+
+  useEffect(() => {
+    if (!isLoading) {
+      setElapsedSeconds(0);
+      setStageIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+      setStageIndex(prev => (prev + 1) % LOADING_STAGES.length);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
+  const ESTIMATED_TOTAL = 18; // seconds — typical Sarathi response time
+  const remaining = Math.max(0, ESTIMATED_TOTAL - elapsedSeconds);
+  const progress  = Math.min(100, (elapsedSeconds / ESTIMATED_TOTAL) * 100);
 
   // ── Escape closes ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -347,7 +375,36 @@ export default function SarathiPanel({
                   <span className="sarathi-loader__dot"></span>
                   <span className="sarathi-loader__dot"></span>
                 </div>
-                <p className="sarathi-loader__text">Reflecting on the scripture…</p>
+                <p className="sarathi-loader__text">{LOADING_STAGES[stageIndex]}</p>
+
+                {/* Progress bar + time estimate */}
+                <div style={{ width: '100%', marginTop: '0.75rem' }}>
+                  <div style={{
+                    height: '3px',
+                    borderRadius: '99px',
+                    background: 'rgba(245,158,11,0.15)',
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${progress}%`,
+                      background: 'linear-gradient(90deg, rgba(245,158,11,0.6), rgba(245,158,11,1))',
+                      borderRadius: '99px',
+                      transition: 'width 1s linear',
+                    }} />
+                  </div>
+                  <p style={{
+                    marginTop: '0.4rem',
+                    fontSize: '0.7rem',
+                    color: 'var(--text-muted)',
+                    textAlign: 'center',
+                    letterSpacing: '0.04em',
+                  }}>
+                    {remaining > 0
+                      ? `~ ${remaining}s remaining`
+                      : 'Almost there…'}
+                  </p>
+                </div>
               </div>
             </div>
           )}
