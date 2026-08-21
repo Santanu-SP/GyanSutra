@@ -58,7 +58,7 @@ export default function Home({ onAskPrompt = () => {} }) {
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
       <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
-        <header className="grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12 lg:items-start" aria-label="Hero introduction">
+        <header className="grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12 lg:items-center" aria-label="Hero introduction">
           <div className="lg:col-span-7 space-y-3 sm:space-y-6">
             <div className="space-y-2 sm:space-y-4">
               <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
@@ -88,6 +88,27 @@ export default function Home({ onAskPrompt = () => {} }) {
               >
                 Consult Sarathi →
               </button>
+            </div>
+
+            <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                Ad-Free & Private
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Complete Scriptures
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                AI Spiritual Guide
+              </span>
             </div>
           </div>
 
