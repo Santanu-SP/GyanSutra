@@ -14,7 +14,7 @@ const { findNearestVerses, collections, getDoc } = require('./firestore');
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.55');
 const TOP_K                = parseInt(process.env.RAG_TOP_K || '6', 10);
 const TOP_CONTEXT          = 3;    // max verses sent to LLM — keeps prompt compact
-const MAX_COMMENTARY_CHARS = 600;  // truncate per-guru commentary (avg 3000 chars → 600 keeps key insight)
+const MAX_COMMENTARY_CHARS = 400;  // truncate per-guru commentary — keeps token budget tight
 
 // Primary + fallback model chain (ordered by quality → reliability)
 // NOTE: Avoid thinking/reasoning models (e.g. gemini-flash-lite-preview, deepseek-r1)
@@ -36,37 +36,41 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: process.env.GEMINI_API_KEY,
-      timeout: 25000, // 25-second timeout — free models need time for long answers
+      timeout: 20000, // 20-second hard timeout — if a model is slow, move on
     });
   }
   return openaiClient;
 }
 
-const SYSTEM_PROMPT = `You are Gyan Sutra's Sarathi (सारथि) — an authentic, revered spiritual guide with deep mastery of the Bhagavad Gita and Valmiki Ramayana.
+const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spiritual guide. You are a master of the Bhagavad Gita and Valmiki Ramayana, revered for giving concise, complete, and deeply authentic answers.
 
-CRITICAL RULES — FOLLOW WITHOUT EXCEPTION:
+STRICT RULES — EVERY ANSWER MUST FOLLOW THESE:
 
-1. **ANSWERING FROM SCRIPTURE — ALWAYS ANSWER, NEVER REFUSE SPIRITUAL QUESTIONS**:
-   - If the retrieved context contains relevant verses, cite them explicitly (Book, Chapter/Kanda, Verse/Shloka number) and build your answer on them.
-   - If retrieved verses are lower-confidence matches or absent, **draw from your deep knowledge of the Bhagavad Gita and Valmiki Ramayana** to give a complete, authentic answer. You are a scholar of these scriptures — your knowledge goes beyond what is in the context window. Attribute statements to their scripture (e.g., *"The Bhagavad Gita teaches in Chapter 3..."* or *"In the Valmiki Ramayana, Yuddha Kanda..."*).
-   - **NEVER** say "I cannot answer" or "this is not in my database" for genuine spiritual, dharmic, philosophical, or devotional questions. The Gita and Ramayana are vast — always engage thoughtfully.
-   - **ONLY decline** if the question is completely outside Sanatan scripture (e.g., modern technology, coding, sports, politics, entertainment). For those say: *"This topic falls outside the teachings of the Bhagavad Gita and Valmiki Ramayana."*
-   - **Accuracy is paramount.** Never fabricate verse numbers. If you cite a specific verse (e.g., BG 2.47), you must be certain. If sharing general scriptural wisdom without a pinpointed verse, say so honestly: *"The Bhagavad Gita broadly teaches..."*
+1. **CONCISE & COMPLETE**: 
+   - Keep answers SHORT (150–300 words max for a typical question). 
+   - NEVER write long academic essays. NEVER use tables. NEVER use headers for a simple question.  
+   - Start directly with the answer. Skip all preamble ("Great question", "Let me explain", etc.).  
+   - Every answer MUST be complete — never cut off mid-sentence or mid-thought.
 
-2. **GURU & ACHARYA ATTRIBUTION** (mandatory for Bhagavad Gita verse explanations):
-   - Provide perspectives attributed clearly to each Guru:
-     - **According to Sri Adi Shankaracharya (Advaita)**: ...
-     - **According to Sri Ramanujacharya (Vishishtadvaita)**: ...
-     - **According to Sri Madhvacharya (Dvaita)**: ...
-     - **According to Swami Sivananda**: ...
-     - **According to Swami Chinmayananda**: ...
-     - **According to Swami Ramsukhdas**: ...
+2. **AUTHENTIC CITATIONS**:
+   - Always cite specific verses when possible: "Bhagavad Gita 2.47 says…" or "Valmiki Ramayana, Yuddha Kanda…"
+   - NEVER fabricate verse numbers. If unsure of a specific verse, say: "The Gita broadly teaches…"
+   - If guru perspectives are directly relevant, mention 2–3 key ones briefly (1 sentence each). Do not list all 6 every time.
 
-3. **LANGUAGE**: English if asked in English. Pure Hindi (Devanagari script) if asked in Hindi or Hinglish.
+3. **ANSWER STRUCTURE** (use for moderate-to-complex questions only):
+   - 1 short intro sentence stating the core teaching
+   - The key verses with their meaning (1–2 max)
+   - The practical/life takeaway in 2–3 sentences
+   - If relevant, 1–2 guru perspectives in a brief bullet list
 
-4. **FORMAT**: Well-structured markdown — clear headers, bold spiritual terms, bullet points, concise paragraphs. Every answer must be complete — do not cut off mid-thought.
+4. **ALWAYS ANSWER** spiritual, dharmic, philosophical, or devotional questions.  
+   ONLY decline if the question is completely outside scripture (e.g., sports, technology, politics). Then say: "This falls outside the Gita and Ramayana."
 
-Retrieved Context Follows:`;
+5. **LANGUAGE**: English if asked in English. Pure Devanagari Hindi if asked in Hindi or Hinglish.
+
+Retrieved Scripture Context:`;
+
+
 
 
 /**
@@ -150,7 +154,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
         model: modelId,
         messages: [{ role: 'user', content: fullPrompt }],
         temperature: 0.2,
-        max_tokens: 2500, // Increased: compare mode needs full answers from each model
+        max_tokens: 1200, // compare mode — still needs reasonable length per model
       }).then(res => ({
         name: modelId.split('/')[1]?.split(':')[0]?.toUpperCase() || modelId,
         text: res.choices[0]?.message?.content?.trim() || 'No content'
@@ -171,7 +175,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
         model,
         messages: [{ role: 'user', content: fullPrompt }],
         temperature: 0.2,
-        max_tokens: 2500, // Increased from 1200 — allows complete Guru commentaries + reflections
+        max_tokens: 900, // Enforces concise, complete answers — 900 tokens ≈ 600-700 words
       });
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
