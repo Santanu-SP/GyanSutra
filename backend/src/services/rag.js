@@ -182,7 +182,9 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
       if (rawAnswer) {
-        return cleanResponse(rawAnswer);
+        const cleaned = cleanResponse(rawAnswer);
+        // Safety: if cleanResponse strips everything, return the raw answer
+        return cleaned.length > 10 ? cleaned : rawAnswer;
       }
     } catch (err) {
       lastError = err;
@@ -375,6 +377,12 @@ async function askRag(question, history = []) {
   } catch (llmError) {
     console.error('[RAG] LLM Execution Error:', llmError.message);
     answer = `⚠️ **Sarathi Notification:**\n\nThe AI service could not respond right now (${llmError.message}).\n\nPlease try again in a moment.`;
+  }
+
+  // Guard: if LLM returned empty content log it clearly
+  if (!answer || answer.trim().length < 5) {
+    console.error('[RAG] LLM returned empty or near-empty answer. Model may have refused or timed out.');
+    answer = '⚠️ Sarathi received an empty response from the AI. Please try asking again — the service may be temporarily overloaded.';
   }
 
   // ── Step 7: Build citations from above-threshold verses ──────────────────
