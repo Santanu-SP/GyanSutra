@@ -218,7 +218,9 @@ export default function IlluminatedVerseCard({
       {/* Verse reference badge */}
       <div className="verse-card__ref">
         <span className="verse-card__ref-label">
-          Chapter {chapterNumber} · Verse {verseNumber}
+          {verse.book === 'ramayana' || verse.kanda
+            ? `${verse.kanda || 'Kanda ' + verse.kandaNumber} · Sarga ${verse.sarga} · Shloka ${verse.shlokaNumber}`
+            : `Chapter ${chapterNumber} · Verse ${verseNumber}`}
         </span>
         {similarity !== undefined && (
           <span className="verse-card__similarity" title="Relevance score">

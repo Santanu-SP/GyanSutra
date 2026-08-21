@@ -11,9 +11,10 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import './Search.css';
 
 export default function Search() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const q = searchParams.get('q') || '';
+  const filter = searchParams.get('filter') || 'all'; // 'all', 'gita', 'ramayana'
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,11 +33,45 @@ export default function Search() {
       .finally(() => setLoading(false));
   }, [q]);
 
+  const displayedResults = results.filter(v => {
+    if (filter === 'gita') return !v.id?.includes('ramayana');
+    if (filter === 'ramayana') return v.id?.includes('ramayana');
+    return true;
+  });
+
   return (
     <main className="search-page">
       <header className="search-page__header">
-        <h1 className="search-page__heading">Search the Gita</h1>
+        <h1 className="search-page__heading">Search Scriptures</h1>
         <SearchBar autoFocus={!q} placeholder="Search verses by meaning, concept, or keyword…" />
+        
+        <div className="search-page__filters" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+          {['all', 'gita', 'ramayana'].map(f => (
+            <button
+              key={f}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams);
+                params.set('filter', f);
+                setSearchParams(params);
+              }}
+              className={`search-page__filter-btn ${filter === f ? 'active' : ''}`}
+              style={{
+                padding: '0.4rem 1rem',
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                borderRadius: '20px',
+                border: `1px solid ${filter === f ? 'var(--amber-500)' : 'var(--border)'}`,
+                backgroundColor: filter === f ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                color: filter === f ? 'var(--amber-500)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {f === 'all' ? 'All Texts' : f === 'gita' ? 'Bhagavad Gita' : 'Ramayana'}
+            </button>
+          ))}
+        </div>
       </header>
 
       {/* Results */}
@@ -76,14 +111,14 @@ export default function Search() {
           </div>
         )}
 
-        {!loading && results.length > 0 && (
+        {!loading && displayedResults.length > 0 && (
           <>
             <p className="search-page__meta">
-              {results.length} {results.length === 1 ? 'verse' : 'verses'} matching
+              {displayedResults.length} {displayedResults.length === 1 ? 'verse' : 'verses'} matching
               "<em>{q}</em>" — ordered by relevance
             </p>
             <div className="search-page__list">
-              {results.map((verse) => (
+              {displayedResults.map((verse) => (
                 <IlluminatedVerseCard
                   key={verse.id}
                   verse={verse}
@@ -115,7 +150,7 @@ export default function Search() {
         {!q && !loading && (
           <div className="search-page__idle">
             <p className="search-page__idle-text">
-              Ask anything — the Gita likely has a teaching for it.
+              Ask anything — the scriptures likely have a teaching for it.
             </p>
             <div className="search-page__suggestions">
               {['What is the nature of the soul?', 'How to find peace?', 'What is duty?', 'Liberation from sorrow'].map(s => (
