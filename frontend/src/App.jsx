@@ -122,15 +122,20 @@ export default function App() {
     const trimmed = question.trim();
     if (!trimmed || isLoading) return;
 
-    setMessages((cur) => [
-      ...cur,
-      { id: `${Date.now()}-user`, role: 'user', content: trimmed },
-    ]);
+    const userMessage = { id: `${Date.now()}-user`, role: 'user', content: trimmed };
+    setMessages((cur) => [...cur, userMessage]);
     setQuestion('');
     setIsLoading(true);
 
     try {
-      const result = await askQuestion(trimmed);
+      // Build history from existing messages (exclude the welcome message and the one we just added).
+      // Only send the last 6 messages (3 exchanges) — enough for follow-ups without confusion.
+      const history = [...messages, userMessage]
+        .filter(m => m.id !== 'welcome')
+        .slice(-6)
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const result = await askQuestion(trimmed, history);
       setMessages((cur) => [
         ...cur,
         {

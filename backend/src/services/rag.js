@@ -138,9 +138,11 @@ function cleanResponse(raw) {
 }
 
 /**
- * Execute LLM call with rapid timeout and model fallback
+ * Execute LLM call with rapid timeout and model fallback.
+ * @param {Array<{role: string, content: string}>} chatMessages - Full chat messages array
+ * @param {boolean} isCompareMode
  */
-async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
+async function callLlmWithFallback(chatMessages, isCompareMode = false) {
   const openai = getOpenRouterClient();
 
   if (isCompareMode) {
@@ -152,7 +154,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
     const requests = compareModels.map(modelId =>
       openai.chat.completions.create({
         model: modelId,
-        messages: [{ role: 'user', content: fullPrompt }],
+        messages: chatMessages,
         temperature: 0.2,
         max_tokens: 1200, // compare mode — still needs reasonable length per model
       }).then(res => ({
@@ -173,7 +175,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
     try {
       const response = await openai.chat.completions.create({
         model,
-        messages: [{ role: 'user', content: fullPrompt }],
+        messages: chatMessages,
         temperature: 0.2,
         max_tokens: 900, // Enforces concise, complete answers — 900 tokens ≈ 600-700 words
       });
@@ -197,7 +199,7 @@ async function callLlmWithFallback(fullPrompt, isCompareMode = false) {
  * Speed optimisation: explicit-match doc lookups run in parallel with embedText(),
  * saving ~300-400ms on every request that contains a verse reference.
  */
-async function askRag(question) {
+async function askRag(question, history = []) {
 
   // ── Step 1: Parse explicit references synchronously (~0ms, no I/O) ────────
   const gitaMatch = question.match(/chapter\s+(\d+)(?:\s*,?\s*|\s+and\s+)verse\s+(\d+)/i);
@@ -347,11 +349,29 @@ async function askRag(question) {
   // ── Step 6: Build prompt and call LLM ────────────────────────────────────
   const isCompareMode  = question.toLowerCase().trim().startsWith('[compare]');
   const cleanQuestion  = isCompareMode ? question.replace(/^\[compare\]/i, '').trim() : question;
-  const fullPrompt     = `${SYSTEM_PROMPT}\n\n${contextLines}\n\nUser Question: ${cleanQuestion}`;
+
+  // Build chat messages:
+  //   1. System prompt (Sarathi identity + rules)
+  //   2. Recent conversation history (up to last 3 exchanges) for context
+  //   3. Final user message = grounded scripture context + current question
+  //
+  // The history is injected as real chat turns so the LLM natively understands
+  // follow-ups like "explain that in English" or "give more detail on the second point".
+  // 'sarathi' role maps to 'assistant' in the OpenAI chat format.
+  const chatMessages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    // Inject conversation history (last N exchanges)
+    ...history.map(m => ({
+      role: m.role === 'sarathi' ? 'assistant' : 'user',
+      content: m.content,
+    })),
+    // Final user turn = scripture context + current question
+    { role: 'user', content: `${contextLines}\n\nUser Question: ${cleanQuestion}` },
+  ];
 
   let answer = '';
   try {
-    answer = await callLlmWithFallback(fullPrompt, isCompareMode);
+    answer = await callLlmWithFallback(chatMessages, isCompareMode);
   } catch (llmError) {
     console.error('[RAG] LLM Execution Error:', llmError.message);
     answer = `⚠️ **Sarathi Notification:**\n\nThe AI service could not respond right now (${llmError.message}).\n\nPlease try again in a moment.`;

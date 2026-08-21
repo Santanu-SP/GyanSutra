@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * POST /api/ask
- * Body: { question: string }
+ * Body: { question: string, history?: Array<{ role: 'user'|'sarathi', content: string }> }
  *
  * The RAG endpoint — the core of Gyan Sutra's AI layer.
  *
@@ -25,7 +25,7 @@ const router = express.Router();
  */
 router.post('/', async (req, res, next) => {
   try {
-    const { question } = req.body;
+    const { question, history } = req.body;
 
     if (!question || typeof question !== 'string' || question.trim().length < 5) {
       return res.status(400).json({ error: 'Please provide a question (at least 5 characters).' });
@@ -35,8 +35,16 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'Question is too long (max 500 characters).' });
     }
 
+    // history is optional — validate shape if provided
+    // Only keep last 3 exchanges (6 messages) to avoid slow/confused responses
+    const safeHistory = Array.isArray(history)
+      ? history
+          .filter(m => m && (m.role === 'user' || m.role === 'sarathi') && typeof m.content === 'string')
+          .slice(-6)
+      : [];
+
     const trimmed = question.trim();
-    const result = await askRag(trimmed);
+    const result = await askRag(trimmed, safeHistory);
 
     // Fire-and-forget QA log — non-blocking
     logQaCall({
