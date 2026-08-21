@@ -198,6 +198,14 @@ export default function App() {
 
           {/* Right actions */}
           <div className="gs-header__actions">
+            <button
+              className="sarathi-trigger sarathi-trigger--header"
+              onClick={() => setIsSarathiOpen(true)}
+              aria-label="Open Sarathi companion"
+            >
+              <TriggerFlame />
+              <span className="sarathi-trigger__label">Ask Sarathi</span>
+            </button>
             <ThemeToggle />
           </div>
         </nav>
