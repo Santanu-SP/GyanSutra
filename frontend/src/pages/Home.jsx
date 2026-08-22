@@ -85,8 +85,8 @@ export default function Home({ onAskPrompt = () => {} }) {
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
       <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
-        <header ref={heroRef} className="reveal-hidden grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12 lg:items-center" aria-label="Hero introduction">
-          <div className="lg:col-span-7 space-y-3 sm:space-y-6">
+        <header ref={heroRef} className="reveal-hidden grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12" aria-label="Hero introduction">
+          <div className="lg:col-span-7 space-y-3 sm:space-y-6 lg:pt-8">
             <div className="space-y-2 sm:space-y-4">
               <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
                 Eternal Wisdom of Sanatana Dharma
