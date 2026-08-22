@@ -75,6 +75,7 @@ export default function AnimatedButton({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
     </motion.button>
   );
 }
