@@ -18,8 +18,8 @@ export default function SplashScreen({ children }) {
     const handleReduceMotionChange = (e) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener('change', handleReduceMotionChange);
 
-    // Give it enough time to play the flagship animation (3.2 seconds)
-    const timer = setTimeout(() => setShowSplash(false), 3200);
+    // Give it enough time to play the flagship animation (3.8 seconds)
+    const timer = setTimeout(() => setShowSplash(false), 3800);
 
     return () => {
       mediaQuery.removeEventListener('change', handleReduceMotionChange);
@@ -56,34 +56,27 @@ export default function SplashScreen({ children }) {
                 transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
                 style={{ width: '90px', height: '90px', margin: '0 auto' }}
               />
-              <motion.div 
-                className="gs-splash__text"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-              >
-                <span className="gs-splash__name">Gyan Sutra</span>
-                <span className="gs-splash__devanagari">ज्ञान सूत्र</span>
-              </motion.div>
-              <motion.div 
+
+              {/* ── Title: character-by-character stagger ── */}
+              <SplashTitle />
+
+              <motion.div
                 className="gs-splash__line"
                 aria-hidden="true"
                 initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "140px" }}
-                transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 1 }}
+                animate={{ opacity: 1, width: '140px' }}
+                transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 1.2 }}
                 style={{ originX: 0.5, overflow: 'hidden' }}
               >
-                <motion.div 
+                <motion.div
                   className="gs-splash__line-fill"
-                  animate={{ 
-                    x: ['-100%', '100%'],
-                  }}
+                  animate={{ x: ['-100%', '100%'] }}
                   transition={{
                     duration: 2.2,
-                    ease: "easeInOut",
+                    ease: 'easeInOut',
                     repeat: Infinity,
-                    repeatType: "loop",
-                    delay: 1.2
+                    repeatType: 'loop',
+                    delay: 1.6,
                   }}
                 />
               </motion.div>
@@ -91,7 +84,7 @@ export default function SplashScreen({ children }) {
           </motion.div>
         )}
       </AnimatePresence>
-      <motion.div 
+      <motion.div
         className="gs-app-fade"
         initial={{ opacity: 0 }}
         animate={{ opacity: showSplash ? 0 : 1 }}
@@ -100,5 +93,70 @@ export default function SplashScreen({ children }) {
         {children}
       </motion.div>
     </>
+  );
+}
+
+/* ── Character-by-character stagger ───────────────────────────────────── */
+const container = {
+  hidden: {},
+  visible: {
+    transition: {
+      delayChildren: 0.72,
+      staggerChildren: 0.055,
+    },
+  },
+};
+
+const letterVariant = {
+  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+// Sub-component for the animated title so the parent stays clean
+function SplashTitle() {
+  const name = 'GYAN SUTRA';
+
+  return (
+    <div className="gs-splash__text">
+      {/* English brand name — letter by letter */}
+      <motion.span
+        className="gs-splash__name"
+        variants={container}
+        initial="hidden"
+        animate="visible"
+        aria-label="Gyan Sutra"
+        style={{ display: 'flex', gap: '0.08em' }}
+      >
+        {name.split('').map((char, i) =>
+          char === ' ' ? (
+            <span key={i} style={{ display: 'inline-block', width: '0.5em' }} aria-hidden="true" />
+          ) : (
+            <motion.span
+              key={i}
+              variants={letterVariant}
+              style={{ display: 'inline-block', lineHeight: 1 }}
+              aria-hidden="true"
+            >
+              {char}
+            </motion.span>
+          )
+        )}
+      </motion.span>
+
+      {/* Devanagari subtitle — fades in as a whole after letters settle */}
+      <motion.span
+        className="gs-splash__devanagari"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 1.85 }}
+      >
+        ज्ञान सूत्र
+      </motion.span>
+    </div>
   );
 }

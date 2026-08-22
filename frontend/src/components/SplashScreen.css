@@ -39,12 +39,13 @@
 
 .gs-splash__name {
   font-family: 'Martel', Georgia, serif;
-  font-size: 1.625rem;
+  font-size: 1.875rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #EFE8F5;
   line-height: 1;
+  overflow: hidden; /* clips letters as they slide up */
 }
 
 .gs-splash__devanagari {
