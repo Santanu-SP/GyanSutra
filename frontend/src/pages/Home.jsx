@@ -105,17 +105,21 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="active-press flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)]"
+                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)] overflow-hidden"
               >
-                <span>Enter the Library</span>
-                <span className="text-[10px] font-normal opacity-60 tracking-wide normal-case">Sacred Manuscripts</span>
+                {/* Premium Shimmer Sweep */}
+                <span className="absolute inset-0 -translate-x-[150%] skew-x-[-15deg] bg-gradient-to-r from-transparent via-amber-200/20 to-transparent group-hover:animate-shimmer-sweep" />
+                
+                <span className="relative z-10">Enter the Library</span>
+                <span className="relative z-10 text-[10px] font-normal opacity-60 tracking-wide normal-case">Sacred Manuscripts</span>
               </AnimatedButton>
               <AnimatedButton
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="active-press inline-flex items-center gap-1 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4 whitespace-nowrap"
+                className="group inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4 whitespace-nowrap"
               >
-                Consult Sarathi →
+                Consult Sarathi
+                <span className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">→</span>
               </AnimatedButton>
             </div>
 
