@@ -130,7 +130,7 @@ function SplashTitle() {
         initial="hidden"
         animate="visible"
         aria-label="Gyan Sutra"
-        style={{ display: 'flex', gap: '0.08em' }}
+        style={{ display: 'flex' }}
       >
         {name.split('').map((char, i) =>
           char === ' ' ? (
