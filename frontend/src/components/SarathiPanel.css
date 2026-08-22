@@ -608,4 +608,55 @@
     transition: none;
     animation: none;
   }
+  .sarathi-msg-enter {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .shimmer-skeleton {
+    animation: none !important;
+  }
+}
+
+/* ── Chat Message Entrance Animation ── */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sarathi-msg-enter {
+  animation: messageSlideIn 300ms ease-out forwards;
+}
+
+/* ── Shimmer Skeleton (Loading state) ── */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer-skeleton {
+  background: linear-gradient(90deg, 
+    color-mix(in srgb, var(--border) 30%, transparent) 25%, 
+    color-mix(in srgb, var(--border) 60%, transparent) 50%, 
+    color-mix(in srgb, var(--border) 30%, transparent) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+  height: 1em;
+  margin-bottom: 0.5em;
+  width: 100%;
+}
+
+.shimmer-skeleton.short {
+  width: 60%;
 }

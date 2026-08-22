@@ -340,3 +340,109 @@ p {
   color: var(--text-muted);
   margin: 0;
 }
+
+/* ── Flip Text Animation (Vengeance UI style) ── */
+.flip-text-wrapper {
+  perspective: 1000px;
+}
+
+.flip-char {
+  animation: flip-char-anim var(--flip-duration) cubic-bezier(0.25, 0.8, 0.25, 1) var(--flip-delay) var(--flip-iteration) forwards;
+  display: inline-block;
+  transform-origin: 50% 50%;
+  transform: rotateX(-90deg);
+  opacity: 0;
+}
+
+@keyframes flip-char-anim {
+  0% { 
+    transform: rotateX(-90deg);
+    opacity: 0;
+  }
+  100% { 
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+/* ── Scroll Reveal ── */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.reveal-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-hidden {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-active {
+    transition: none;
+  }
+}
+
+/* ── Staggered List Entrance ── */
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  opacity: 0; /* Starts hidden */
+  animation: staggerFadeIn 300ms ease-out forwards;
+  /* Delay controlled via inline style --stagger-idx */
+  animation-delay: calc(var(--stagger-idx, 0) * 50ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Micro-Interactions ── */
+.hover-lift {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out !important;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15), 0 4px 8px -4px rgba(0, 0, 0, 0.1);
+}
+
+.active-press {
+  transition: transform 150ms ease-out !important;
+}
+
+.active-press:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift {
+    transition: none !important;
+  }
+  .hover-lift:hover {
+    transform: none;
+  }
+  .active-press {
+    transition: none !important;
+  }
+  .active-press:active {
+    transform: none;
+  }
+}

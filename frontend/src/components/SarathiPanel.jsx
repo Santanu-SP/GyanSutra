@@ -270,7 +270,7 @@ export default function SarathiPanel({
           <div className="sarathi-panel__size-btns" aria-label="Resize panel">
             <button
               type="button"
-              className={`sarathi-size-btn${panelSize === 'peek' ? ' sarathi-size-btn--active' : ''}`}
+              className={`active-press sarathi-size-btn${panelSize === 'peek' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('peek')}
               aria-label="Compact — peek view"
               title="Compact"
@@ -280,7 +280,7 @@ export default function SarathiPanel({
             </button>
             <button
               type="button"
-              className={`sarathi-size-btn${panelSize === 'normal' ? ' sarathi-size-btn--active' : ''}`}
+              className={`active-press sarathi-size-btn${panelSize === 'normal' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('normal')}
               aria-label="Normal — half screen view"
               title="Normal"
@@ -290,7 +290,7 @@ export default function SarathiPanel({
             </button>
             <button
               type="button"
-              className={`sarathi-size-btn${panelSize === 'full' ? ' sarathi-size-btn--active' : ''}`}
+              className={`active-press sarathi-size-btn${panelSize === 'full' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('full')}
               aria-label="Full — expanded view"
               title="Full"
@@ -303,7 +303,7 @@ export default function SarathiPanel({
           {/* Minimise button — triggers macOS-style animation ─────────── */}
           <button
             type="button"
-            className="sarathi-panel__close"
+            className="active-press sarathi-panel__close"
             onClick={handleClose}
             aria-label="Minimise Sarathi"
             id="close-sarathi-btn"
@@ -329,7 +329,7 @@ export default function SarathiPanel({
                 <button
                   key={prompt}
                   type="button"
-                  className="sarathi-panel__path-btn"
+                  className="active-press sarathi-panel__path-btn"
                   onClick={() => setQuestion(prompt)}
                 >
                   {prompt}
@@ -349,7 +349,7 @@ export default function SarathiPanel({
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`sarathi-msg sarathi-msg--${message.role}`}
+              className={`sarathi-msg sarathi-msg--${message.role} sarathi-msg-enter`}
             >
               <p className="sarathi-msg__label">
                 {message.role === 'user' ? 'Your Reflection' : 'Sarathi'}
@@ -361,8 +361,13 @@ export default function SarathiPanel({
           ))}
 
           {isLoading && (
-            <div className="sarathi-msg sarathi-msg--sarathi">
+            <div className="sarathi-msg sarathi-msg--sarathi sarathi-msg-enter">
               <p className="sarathi-msg__label">Sarathi</p>
+              <div className="sarathi-msg__content" style={{ border: 'none', background: 'transparent', padding: '0.5rem 0' }}>
+                <div className="shimmer-skeleton"></div>
+                <div className="shimmer-skeleton"></div>
+                <div className="shimmer-skeleton short"></div>
+              </div>
               <div className="sarathi-loader">
                 <div className="sarathi-loader__flame-container">
                   <div className="sarathi-loader__ring"></div>
@@ -442,7 +447,7 @@ export default function SarathiPanel({
               </p>
               <button
                 type="submit"
-                className="sarathi-panel__submit"
+                className="active-press sarathi-panel__submit"
                 disabled={isLoading || !question.trim()}
                 id="sarathi-submit-btn"
               >

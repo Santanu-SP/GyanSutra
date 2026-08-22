@@ -138,7 +138,7 @@ export default function TextReader() {
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: `Ask a question about the ${meta.title}` } }))}
-              className="inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/8 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 hover:text-[color:var(--accent)] transition"
+              className="active-press inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/8 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 hover:text-[color:var(--accent)] transition"
               style={{ cursor: 'pointer' }}
             >
               <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
@@ -170,7 +170,7 @@ export default function TextReader() {
             />
             <button
               type="submit"
-              className="text-reader__jump-btn"
+              className="active-press text-reader__jump-btn"
               id="chapter-jump-btn"
             >
               Go
@@ -196,14 +196,15 @@ export default function TextReader() {
             className="text-reader__chapter-list"
             aria-label="Chapters of the Bhagavad Gita"
           >
-            {chapters.map((chapter) => (
+            {chapters.map((chapter, idx) => (
               <li
                 key={chapter.id || chapter.number}
-                className="text-reader__chapter-item"
+                className="stagger-item text-reader__chapter-item"
+                style={{ '--stagger-idx': idx }}
               >
                 <Link
                   to={`/chapters/chapter_${chapter.number}`}
-                  className="text-reader__chapter-row"
+                  className="hover-lift text-reader__chapter-row"
                   id={`chapter-link-${chapter.number}`}
                   aria-label={`Chapter ${chapter.number}: ${chapter.titleEnglish}`}
                 >

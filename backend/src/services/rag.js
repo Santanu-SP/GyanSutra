@@ -76,7 +76,10 @@ STRICT RULES — FOLLOW WITHOUT EXCEPTION:
 
 5. **LANGUAGE**: English if asked in English. Pure Devanagari Hindi if asked in Hindi or Hinglish.
 
+6. **NO INTERNAL THOUGHTS (CRITICAL)**: NEVER output your internal thinking process, reasoning steps, or analysis. Output ONLY the final structured response starting directly with "### 📖 The Teaching". Do not use phrases like "Here's a thinking process" or "Analyze User Input".
+
 Retrieved Scripture Context:`;
+
 /**
  * Strip chain-of-thought reasoning artifacts from free model responses.
  *
@@ -99,40 +102,27 @@ function cleanResponse(raw) {
   text = text.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
 
   // 2. Strip "Here's a thinking process:" / "Here is my thinking:" preamble sections.
-  //    These models dump their reasoning as a prose block before the real answer.
-  //    Strategy: find the preamble marker, then skip everything until the first
-  //    real markdown heading or "📖" / "##" / "**" content starts.
-  const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–—]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
-  if (thinkingPreamblePattern.test(text)) {
-    // Find the first line that looks like real structured output (heading, bold, emoji section)
-    const realContentMatch = text.match(/(\n#{1,3} |\n\*{2}📖|\n📖|^\s*#{1,3} |\n---\n|\*{2}Scripture Reference|\*{2}Practical Life)/im);
-    if (realContentMatch && realContentMatch.index > 0) {
-      text = text.slice(realContentMatch.index).trim();
-    }
-  }
-
-  // 3. Strip "Analyze User Input:" / "Check Rules Applicability:" reasoning sections.
-  //    Pattern: line that starts with a step-label, followed by numbered reasoning.
-  //    These appear when the system prompt rules are interpreted as a reasoning template.
-  const metaSectionPattern = /^(analyze user input|check rules applicability|identify key constraints|step \d+:|user question:|user role:|rule \d+:|critical rules|output generation)/im;
-  if (metaSectionPattern.test(text)) {
-    // Find where actual answer content begins — after the meta-reasoning dump
-    const answerStart = text.match(/(\n#{1,3} |\n📖|\n\*{2}📖|^📖|^\s*#{1,3} )/im);
-    if (answerStart && answerStart.index > 0) {
-      text = text.slice(answerStart.index).trim();
-    } else {
-      // Fallback: split on double newline, drop lines that are pure meta-reasoning
-      const lines = text.split('\n');
-      const firstRealLine = lines.findIndex(l =>
-        /^#{1,3} |^📖|^\*{2}|^---$/.test(l.trim()) && l.trim().length > 3
-      );
-      if (firstRealLine > 0) {
-        text = lines.slice(firstRealLine).join('\n').trim();
+  // We split by "### 📖 The Teaching" to ensure we only keep the actual answer block.
+  // Because the model might mention the heading in its thought process (e.g., "Rule 1..."),
+  // we split the text and take the LAST chunk to guarantee we get the final output block.
+  const parts = text.split(/### 📖 The Teaching/i);
+  
+  if (parts.length > 1) {
+    // If the model leaked thoughts but eventually output the real answer, grab the real answer.
+    // By taking the last part and re-adding the heading, we discard any preliminary thoughts.
+    text = "### 📖 The Teaching" + parts[parts.length - 1];
+  } else {
+    // Fallback stripping if the exact heading isn't used
+    const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–—]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
+    if (thinkingPreamblePattern.test(text)) {
+      const realContentMatch = text.match(/(\n#{1,3} |\n\*{2}📖|\n📖|^\s*#{1,3} |\n---\n)/im);
+      if (realContentMatch && realContentMatch.index > 0) {
+        text = text.slice(realContentMatch.index).trim();
       }
     }
   }
 
-  // 4. Strip known OpenRouter / safety guard prefixes
+  // 3. Strip known OpenRouter / safety guard prefixes
   text = text
     .replace(/^User Safety:\s*safe\n*/i, '')
     .replace(/^Your Reflection\n*/i, '')

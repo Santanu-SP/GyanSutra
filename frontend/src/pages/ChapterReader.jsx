@@ -136,11 +136,12 @@ export default function ChapterReader() {
           className="chapter-strip"
           aria-label="Jump to chapter"
         >
-          {CHAPTERS.map((num) => (
+          {CHAPTERS.map((num, idx) => (
             <Link
               key={num}
               to={`/chapters/chapter_${num}`}
-              className={`chapter-strip__tab${chapter?.number === num ? ' chapter-strip__tab--active' : ''}`}
+              style={{ '--stagger-idx': idx }}
+              className={`stagger-item hover-lift chapter-strip__tab${chapter?.number === num ? ' chapter-strip__tab--active' : ''}`}
               aria-label={`Chapter ${num}`}
               aria-current={chapter?.number === num ? 'page' : undefined}
               id={`chapter-strip-tab-${num}`}
@@ -182,7 +183,7 @@ export default function ChapterReader() {
       {!loading && verses.length > 0 && (
         <nav className="chapter-reader__nav" aria-label="Verse navigation">
           <button
-            className="chapter-reader__nav-btn"
+            className="active-press chapter-reader__nav-btn"
             onClick={handlePrev}
             disabled={currentIndex === 0}
             id="prev-verse-btn"
@@ -215,7 +216,7 @@ export default function ChapterReader() {
           </div>
 
           <button
-            className={`chapter-reader__nav-btn chapter-reader__nav-btn--next${isLastVerse ? ' chapter-reader__nav-btn--finish' : ''}`}
+            className={`active-press chapter-reader__nav-btn chapter-reader__nav-btn--next${isLastVerse ? ' chapter-reader__nav-btn--finish' : ''}`}
             onClick={handleNext}
             id="next-verse-btn"
             aria-label={isLastVerse ? 'Finish chapter' : 'Next verse'}

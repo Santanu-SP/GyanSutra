@@ -12,6 +12,7 @@
 
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
@@ -54,6 +55,21 @@ const SARATHI_PROMPTS = [
 function PageLoader() {
   return (
     <LoadingSpinner fullPage={true} text="Loading..." />
+  );
+}
+
+// Wrapper for soft route transitions
+function PageTransition({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className="page-transition-wrapper"
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -215,23 +231,20 @@ export default function App() {
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route
-                path="/"
-                element={<Home onAskPrompt={handlePromptSelect} />}
-              />
-              {/* Search — must come before wildcard /:source_id */}
-              <Route path="/search" element={<Search />} />
-              {/* Individual verse — must come before wildcard /:source_id */}
-              <Route path="/verses/:id" element={<VerseDetail />} />
-              {/* Bhagavad Gita chapter navigator */}
-              <Route path="/chapters/:id" element={<ChapterReader />} />
-              {/* Ramayana Kanda navigator */}
-              <Route path="/ramayana" element={<Ramayana />} />
-              <Route path="/ramayana/:kandaNum" element={<KandaReader />} />
-              {/* Source pages (Bhagavad Gita, etc.) — wildcard, must be last */}
-              <Route path="/:source_id" element={<TextReader />} />
-            </Routes>
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route
+                  path="/"
+                  element={<PageTransition><Home onAskPrompt={handlePromptSelect} /></PageTransition>}
+                />
+                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+                <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
+                <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
+                <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
+                <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
+                <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
+              </Routes>
+            </AnimatePresence>
           </Suspense>
         </ErrorBoundary>
       </div>

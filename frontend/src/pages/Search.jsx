@@ -54,7 +54,7 @@ export default function Search() {
                 params.set('filter', f);
                 setSearchParams(params);
               }}
-              className={`search-page__filter-btn ${filter === f ? 'active' : ''}`}
+              className={`active-press search-page__filter-btn ${filter === f ? 'active' : ''}`}
               style={{
                 padding: '0.4rem 1rem',
                 fontSize: '0.8rem',
@@ -93,7 +93,7 @@ export default function Search() {
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: q } }))}
-                className="inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
+                className="active-press inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
                 style={{ cursor: 'pointer' }}
               >
                 <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
@@ -118,14 +118,15 @@ export default function Search() {
               "<em>{q}</em>" — ordered by relevance
             </p>
             <div className="search-page__list">
-              {displayedResults.map((verse) => (
-                <IlluminatedVerseCard
-                  key={verse.id}
-                  verse={verse}
-                  variant="compact"
-                  similarity={verse.similarity}
-                  onClick={(v) => navigate(`/verses/${v.id}`)}
-                />
+              {displayedResults.map((verse, idx) => (
+                <div key={verse.id} className="stagger-item" style={{ '--stagger-idx': idx }}>
+                  <IlluminatedVerseCard
+                    verse={verse}
+                    variant="compact"
+                    similarity={verse.similarity}
+                    onClick={(v) => navigate(`/verses/${v.id}`)}
+                  />
+                </div>
               ))}
             </div>
             <div className="search-page__sarathi-suggest" style={{ marginTop: '3rem', borderTop: '1px solid var(--border)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
@@ -135,7 +136,7 @@ export default function Search() {
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: q } }))}
-                className="inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
+                className="active-press inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
                 style={{ cursor: 'pointer' }}
               >
                 <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
@@ -153,10 +154,11 @@ export default function Search() {
               Ask anything — the scriptures likely have a teaching for it.
             </p>
             <div className="search-page__suggestions">
-              {['What is the nature of the soul?', 'How to find peace?', 'What is duty?', 'Liberation from sorrow'].map(s => (
+              {['What is the nature of the soul?', 'How to find peace?', 'What is duty?', 'Liberation from sorrow'].map((s, idx) => (
                 <button
                   key={s}
-                  className="search-page__suggestion"
+                  className="active-press stagger-item search-page__suggestion"
+                  style={{ '--stagger-idx': idx }}
                   onClick={() => navigate(`/search?q=${encodeURIComponent(s)}`)}
                 >
                   {s}
