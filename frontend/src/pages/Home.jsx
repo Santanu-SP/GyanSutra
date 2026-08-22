@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyVerse } from '../services/api';
-import FlipText from '../components/FlipText';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
 const SOURCE_STYLES = {
@@ -90,9 +89,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           <div className="lg:col-span-7 space-y-3 sm:space-y-6">
             <div className="space-y-2 sm:space-y-4">
               <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
-                <FlipText duration={1.2} delay={0.1}>
-                  Eternal Wisdom of Sanatan Dharma
-                </FlipText>
+                Eternal Wisdom of Sanatana Dharma
               </h1>
               <p className="max-w-2xl text-xs leading-5 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
