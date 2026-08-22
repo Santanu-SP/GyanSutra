@@ -105,36 +105,22 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-amber-500/30 bg-[color:var(--bg-surface)] px-5 py-2 sm:px-6 sm:py-3 transition-all duration-500 hover:border-amber-400/60 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.3)] overflow-hidden"
+                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] px-6 py-3 transition-colors duration-200 hover:bg-amber-500/[0.08] hover:border-amber-500/40"
               >
-                {/* Elegant pulsing glow background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-400/5 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Slow rotating radial highlight */}
-                <div className="absolute -inset-1/2 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.15),transparent_60%)] opacity-0 group-hover:opacity-100 mix-blend-screen transition-opacity duration-700 group-hover:animate-spin-slow pointer-events-none" />
-
-                <span className="relative z-10 text-sm font-medium text-[color:var(--accent)] drop-shadow-none group-hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all duration-500">
+                <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
                   Enter the Library
                 </span>
-                <span className="relative z-10 text-[10px] font-normal text-amber-500/60 tracking-[0.05em] group-hover:text-amber-400/80 transition-colors duration-500">
+                <span className="text-[10px] font-normal text-amber-500/50 tracking-wide group-hover:text-amber-500/70 transition-colors">
                   Sacred Manuscripts
                 </span>
               </AnimatedButton>
               <AnimatedButton
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="group relative inline-flex items-center gap-2 px-2 py-1 text-sm font-medium text-[color:var(--text-secondary)] hover:text-[color:var(--accent)] transition-colors duration-300"
+                className="group inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]"
               >
-                <span>Consult Sarathi</span>
-                
-                {/* Animated Arrow */}
-                <div className="relative flex h-4 w-4 items-center justify-center overflow-hidden">
-                  <span className="absolute transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[150%]">→</span>
-                  <span className="absolute -translate-x-[150%] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0">→</span>
-                </div>
-
-                {/* Animated Underline */}
-                <span className="absolute bottom-0 left-2 right-2 h-[1px] origin-left scale-x-0 bg-gradient-to-r from-amber-500/0 via-amber-500/70 to-amber-500/0 transition-transform duration-500 ease-out group-hover:scale-x-100" />
+                Consult Sarathi
+                <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">→</span>
               </AnimatedButton>
             </div>
 
