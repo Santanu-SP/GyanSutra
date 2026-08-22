@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getDailyVerse } from '../services/api';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import AnimatedButton from '../components/AnimatedButton';
@@ -71,10 +71,20 @@ const SOURCES = [
 
 export default function Home({ onAskPrompt = () => {} }) {
   const [dailyVerse, setDailyVerse] = useState(null);
+  const [isConsulting, setIsConsulting] = useState(false);
   
   const heroRef = useScrollReveal();
   const featuresRef = useScrollReveal();
   const libraryRef = useScrollReveal();
+
+  const handleConsultClick = () => {
+    if (isConsulting) return;
+    setIsConsulting(true);
+    setTimeout(() => {
+      onAskPrompt('What is the heart of Sanatan Dharma?');
+      setIsConsulting(false);
+    }, 600);
+  };
 
   useEffect(() => {
     getDailyVerse()
@@ -105,22 +115,30 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] px-6 py-3 transition-colors duration-200 hover:bg-amber-500/[0.08] hover:border-amber-500/40"
+                className="group relative flex-1 sm:flex-none inline-flex items-center justify-center p-[1px] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.25)]"
               >
-                <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
-                  Enter the Library
-                </span>
-                <span className="text-[10px] font-normal text-amber-500/50 tracking-wide group-hover:text-amber-500/70 transition-colors">
-                  Sacred Manuscripts
+                {/* The spinning gradient border (moving color around boundary) */}
+                <span className="absolute inset-[-100%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Inner button (masks the middle of the conic gradient, revealing only the border) */}
+                <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-[11px] bg-[color:var(--bg-surface)] px-6 py-3 transition-colors group-hover:bg-[color:var(--bg-elevated)]">
+                  <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
+                    Enter the Library
+                  </span>
+                  <span className="text-[10px] font-normal text-amber-500/50 tracking-wide group-hover:text-amber-500/70 transition-colors">
+                    Sacred Manuscripts
+                  </span>
                 </span>
               </AnimatedButton>
               <AnimatedButton
                 type="button"
-                onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="group inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]"
+                onClick={handleConsultClick}
+                className="group inline-flex items-center gap-2 text-sm font-medium text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]"
               >
                 Consult Sarathi
-                <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">→</span>
+                <div className="relative flex h-4 w-4 items-center justify-center overflow-hidden">
+                  <span className={`absolute transition-transform duration-500 ease-[cubic-bezier(0.8,0,0.2,1)] ${isConsulting ? 'translate-x-[200%] opacity-0' : 'group-hover:translate-x-1'}`}>→</span>
+                </div>
               </AnimatedButton>
             </div>
 

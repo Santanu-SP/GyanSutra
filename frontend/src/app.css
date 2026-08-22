@@ -21,6 +21,13 @@
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  transition: padding-right var(--transition-slow);
+}
+
+@media (min-width: 1024px) {
+  .gs-header--sarathi-open {
+    padding-right: 380px;
+  }
 }
 
 .gs-header__nav {

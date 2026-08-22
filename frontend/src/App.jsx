@@ -176,8 +176,8 @@ export default function App() {
   return (
     <div className="gs-app">
       <SEO />
-      {/* ── Header ──────────────────────────────────────────────────── */}
-      <header className="gs-header">
+      {/* ── Fixed Header ── */}
+      <header className={`gs-header${isSarathiOpen ? ' gs-header--sarathi-open' : ''}`}>
         <nav className="gs-header__nav">
           {/* Brand */}
           <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra — Home">

@@ -42,7 +42,7 @@ export default function AnimatedButton({
       onClick={handleClick}
       className={`relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent transition-colors duration-200 ease-out ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${cleanClassName}`}
       whileHover={!isDisabled ? { scale: 1.02 } : {}}
-      whileTap={!isDisabled ? { scale: 0.95, opacity: 0.85 } : {}}
+      whileTap={!isDisabled ? { scale: 0.95 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
       {...props}
     >
