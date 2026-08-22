@@ -218,7 +218,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </article>
         </section>
 
-        <section ref={libraryRef} id="text-library" aria-label="Text library" className="reveal-hidden space-y-4 sm:space-y-6">
+        <section ref={libraryRef} id="text-library" aria-label="Text library" className="reveal-hidden space-y-4 sm:space-y-6 scroll-mt-24">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
