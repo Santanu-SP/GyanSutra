@@ -457,6 +457,14 @@ p {
   animation: shimmerSweep 3s infinite;
 }
 
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
 @keyframes flameFlicker {
   0%, 100% { transform: scale(1) translateY(0); filter: brightness(1) drop-shadow(0 0 4px rgba(245, 158, 11, 0.4)); }
   25% { transform: scale(1.05) translateY(-1px); filter: brightness(1.2) drop-shadow(0 0 8px rgba(245, 158, 11, 0.6)); }

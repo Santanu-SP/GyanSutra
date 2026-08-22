@@ -105,21 +105,36 @@ export default function Home({ onAskPrompt = () => {} }) {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-300/10 px-5 py-2 sm:px-6 sm:py-3 text-sm font-medium text-[color:var(--accent)] transition hover:border-amber-400/60 hover:text-[color:var(--accent-hover)] overflow-hidden"
+                className="group relative flex-1 sm:flex-none inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-amber-500/30 bg-[color:var(--bg-surface)] px-5 py-2 sm:px-6 sm:py-3 transition-all duration-500 hover:border-amber-400/60 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.3)] overflow-hidden"
               >
-                {/* Premium Shimmer Sweep */}
-                <span className="absolute inset-0 -translate-x-[150%] skew-x-[-15deg] bg-gradient-to-r from-transparent via-amber-200/20 to-transparent group-hover:animate-shimmer-sweep" />
+                {/* Elegant pulsing glow background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-400/5 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                <span className="relative z-10">Enter the Library</span>
-                <span className="relative z-10 text-[10px] font-normal opacity-60 tracking-wide normal-case">Sacred Manuscripts</span>
+                {/* Slow rotating radial highlight */}
+                <div className="absolute -inset-1/2 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.15),transparent_60%)] opacity-0 group-hover:opacity-100 mix-blend-screen transition-opacity duration-700 group-hover:animate-spin-slow pointer-events-none" />
+
+                <span className="relative z-10 text-sm font-medium text-[color:var(--accent)] drop-shadow-none group-hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all duration-500">
+                  Enter the Library
+                </span>
+                <span className="relative z-10 text-[10px] font-normal text-amber-500/60 tracking-[0.05em] group-hover:text-amber-400/80 transition-colors duration-500">
+                  Sacred Manuscripts
+                </span>
               </AnimatedButton>
               <AnimatedButton
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
-                className="group inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4 whitespace-nowrap"
+                className="group relative inline-flex items-center gap-2 px-2 py-1 text-sm font-medium text-[color:var(--text-secondary)] hover:text-[color:var(--accent)] transition-colors duration-300"
               >
-                Consult Sarathi
-                <span className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">→</span>
+                <span>Consult Sarathi</span>
+                
+                {/* Animated Arrow */}
+                <div className="relative flex h-4 w-4 items-center justify-center overflow-hidden">
+                  <span className="absolute transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[150%]">→</span>
+                  <span className="absolute -translate-x-[150%] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0">→</span>
+                </div>
+
+                {/* Animated Underline */}
+                <span className="absolute bottom-0 left-2 right-2 h-[1px] origin-left scale-x-0 bg-gradient-to-r from-amber-500/0 via-amber-500/70 to-amber-500/0 transition-transform duration-500 ease-out group-hover:scale-x-100" />
               </AnimatedButton>
             </div>
 
