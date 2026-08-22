@@ -18,18 +18,13 @@ export default function AnimatedButton({
   type = 'button',
   ...props 
 }) {
-  const [isPulsing, setIsPulsing] = useState(false);
 
   const handleClick = async (e) => {
     if (disabled || isLoading) {
       e.preventDefault();
       return;
     }
-    
-    // Trigger pulse effect
-    setIsPulsing(true);
-    setTimeout(() => setIsPulsing(false), 400); // Pulse duration
-    
+
     if (onClick) {
       await onClick(e);
     }
@@ -45,10 +40,10 @@ export default function AnimatedButton({
       type={type}
       disabled={isDisabled}
       onClick={handleClick}
-      className={`relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${cleanClassName}`}
-      whileHover={!isDisabled ? { scale: 1.025 } : {}}
-      whileTap={!isDisabled ? { scale: 0.97 } : {}}
-      transition={{ type: "spring", stiffness: 450, damping: 25 }}
+      className={`relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent transition-colors duration-200 ease-out ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${cleanClassName}`}
+      whileHover={!isDisabled ? { scale: 1.02 } : {}}
+      whileTap={!isDisabled ? { scale: 0.95, opacity: 0.85 } : {}}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
       {...props}
     >
       <div className="relative flex items-center justify-center w-full h-full">
@@ -80,20 +75,6 @@ export default function AnimatedButton({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Subtle pulse feedback overlay on click */}
-      <AnimatePresence>
-        {isPulsing && (
-          <motion.div
-            initial={{ opacity: 0.2, scale: 0.95 }}
-            animate={{ opacity: 0, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="absolute inset-0 bg-current pointer-events-none rounded-inherit"
-          />
-        )}
-      </AnimatePresence>
     </motion.button>
   );
 }
