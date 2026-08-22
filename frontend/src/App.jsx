@@ -97,16 +97,7 @@ function TriggerFlame() {
   );
 }
 
-// Automatically scrolls to top when navigating to a new route
-function ScrollToTop() {
-  const { pathname } = useLocation();
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [pathname]);
-
-  return null;
-}
 
 export default function App() {
   const location = useLocation();
@@ -183,7 +174,6 @@ export default function App() {
   return (
     <div className="gs-app">
       <SEO />
-      <ScrollToTop />
       {/* ── Header ──────────────────────────────────────────────────── */}
       <header className="gs-header">
         <nav className="gs-header__nav">
@@ -231,7 +221,7 @@ export default function App() {
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}>
               <Routes location={location} key={location.pathname}>
                 <Route
                   path="/"
