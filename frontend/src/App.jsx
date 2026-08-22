@@ -22,6 +22,8 @@ import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import SEO from './components/SEO';
+import AnimatedButton from './components/AnimatedButton';
+
 import './app.css';
 
 // Helper to safely lazy load routes and auto-reload on chunk load failure (stale JS build)
@@ -204,14 +206,14 @@ export default function App() {
 
           {/* Right actions */}
           <div className="gs-header__actions">
-            <button
+            <AnimatedButton
               className="sarathi-trigger sarathi-trigger--header"
               onClick={() => setIsSarathiOpen(true)}
               aria-label="Open Sarathi companion"
             >
               <TriggerFlame />
               <span className="sarathi-trigger__label">Ask Sarathi</span>
-            </button>
+            </AnimatedButton>
             <ThemeToggle />
           </div>
         </nav>

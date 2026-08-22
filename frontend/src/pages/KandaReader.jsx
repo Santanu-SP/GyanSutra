@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getRamayanaSarga } from '../services/api';
+import AnimatedButton from '../components/AnimatedButton';
+
 import './ChapterReader.css';
 
 const KANDAS = [
@@ -162,34 +164,34 @@ export default function KandaReader() {
       {/* ── Floating Navigation Controls ──────────────────────── */}
       {!loading && verses.length > 0 && (
         <nav className="chapter-reader__controls" aria-label="Verse Navigation">
-          <button
+          <AnimatedButton
             onClick={handlePrev}
             disabled={currentIndex === 0 && currentSarga === 1}
             className="control-btn"
             aria-label="Previous shloka"
           >
             ←<span className="sr-only">Prev</span>
-          </button>
+          </AnimatedButton>
           
           <span className="control-progress">
             {currentIndex + 1} / {verses.length}
           </span>
           
-          <button
+          <AnimatedButton
             onClick={handleNext}
             disabled={currentIndex === verses.length - 1 && currentSarga === kanda.sargas}
             className="control-btn"
             aria-label="Next shloka"
           >
             <span className="sr-only">Next</span>→
-          </button>
+          </AnimatedButton>
         </nav>
       )}
 
       {/* Floating Side Navigation */}
       {!loading && verses.length > 0 && (
         <>
-          <button
+          <AnimatedButton
             className="floating-nav-btn floating-nav-btn--prev"
             onClick={handlePrev}
             disabled={currentIndex === 0 && currentSarga === 1}
@@ -199,8 +201,8 @@ export default function KandaReader() {
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-          </button>
-          <button
+          </AnimatedButton>
+          <AnimatedButton
             className="floating-nav-btn floating-nav-btn--next"
             onClick={handleNext}
             disabled={currentIndex === verses.length - 1 && currentSarga === kanda.sargas}
@@ -210,7 +212,7 @@ export default function KandaReader() {
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
-          </button>
+          </AnimatedButton>
         </>
       )}
     </main>

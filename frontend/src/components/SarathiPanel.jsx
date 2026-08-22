@@ -20,6 +20,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
+import AnimatedButton from './AnimatedButton';
+
 import './SarathiPanel.css';
 
 // Snap zone heights (dvh)
@@ -268,7 +270,7 @@ export default function SarathiPanel({
 
           {/* Size snap buttons — mobile only ────────────────────────── */}
           <div className="sarathi-panel__size-btns" aria-label="Resize panel">
-            <button
+            <AnimatedButton
               type="button"
               className={`active-press sarathi-size-btn${panelSize === 'peek' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('peek')}
@@ -277,8 +279,8 @@ export default function SarathiPanel({
               id="sarathi-size-peek"
             >
               <PeekIcon />
-            </button>
-            <button
+            </AnimatedButton>
+            <AnimatedButton
               type="button"
               className={`active-press sarathi-size-btn${panelSize === 'normal' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('normal')}
@@ -287,8 +289,8 @@ export default function SarathiPanel({
               id="sarathi-size-normal"
             >
               <NormalIcon />
-            </button>
-            <button
+            </AnimatedButton>
+            <AnimatedButton
               type="button"
               className={`active-press sarathi-size-btn${panelSize === 'full' ? ' sarathi-size-btn--active' : ''}`}
               onClick={() => setPanelSize('full')}
@@ -297,11 +299,11 @@ export default function SarathiPanel({
               id="sarathi-size-full"
             >
               <ExpandIcon />
-            </button>
+            </AnimatedButton>
           </div>
 
           {/* Minimise button — triggers macOS-style animation ─────────── */}
-          <button
+          <AnimatedButton
             type="button"
             className="active-press sarathi-panel__close"
             onClick={handleClose}
@@ -317,7 +319,7 @@ export default function SarathiPanel({
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </AnimatedButton>
         </header>
 
         {/* ── Suggested paths ──────────────────────────────────────────── */}
@@ -326,14 +328,14 @@ export default function SarathiPanel({
             <p className="sarathi-panel__paths-label">Paths to Explore</p>
             <div className="sarathi-panel__paths-list">
               {suggestedPrompts.map((prompt) => (
-                <button
+                <AnimatedButton
                   key={prompt}
                   type="button"
                   className="active-press sarathi-panel__path-btn"
                   onClick={() => setQuestion(prompt)}
                 >
                   {prompt}
-                </button>
+                </AnimatedButton>
               ))}
             </div>
           </div>
@@ -445,14 +447,14 @@ export default function SarathiPanel({
               <p className="sarathi-panel__grounded-note">
                 Responses cite chapter &amp; verse
               </p>
-              <button
+              <AnimatedButton
                 type="submit"
                 className="active-press sarathi-panel__submit"
                 disabled={isLoading || !question.trim()}
                 id="sarathi-submit-btn"
               >
                 {isLoading ? 'Seeking…' : 'Seek Guidance'}
-              </button>
+              </AnimatedButton>
             </div>
           </div>
         </form>

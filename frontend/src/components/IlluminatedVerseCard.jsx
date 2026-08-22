@@ -31,6 +31,8 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AnimatedButton from './AnimatedButton';
+
 import './IlluminatedVerseCard.css';
 
 // Helper component to format long commentary texts into readable paragraphs
@@ -242,18 +244,18 @@ export default function IlluminatedVerseCard({
         {(translationHindi || (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)) && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
             <div className="verse-card__lang-toggle" role="group" aria-label="Translation language" style={{ margin: 0 }}>
-              <button
+              <AnimatedButton
                 className={`verse-card__lang-btn ${lang === 'english' ? 'active' : ''}`}
                 onClick={(e) => { e.stopPropagation(); setLang('english'); }}
               >
                 English
-              </button>
-              <button
+              </AnimatedButton>
+              <AnimatedButton
                 className={`verse-card__lang-btn ${lang === 'hindi' ? 'active' : ''}`}
                 onClick={(e) => { e.stopPropagation(); setLang('hindi'); }}
               >
                 हिन्दी
-              </button>
+              </AnimatedButton>
             </div>
           </div>
         )}
@@ -420,7 +422,7 @@ export default function IlluminatedVerseCard({
                 ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथि से गहन मनन और जीवन-सूत्र प्राप्त करें।'
                 : 'How does this verse apply to modern life? Ask Sarathi for practical life lessons and personal reflections.'}
             </p>
-            <button
+            <AnimatedButton
               onClick={(e) => {
                 e.stopPropagation();
                 const sarathiPrompt = verse.book === 'ramayana'
@@ -438,7 +440,7 @@ export default function IlluminatedVerseCard({
                 <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
               </svg>
               {lang === 'hindi' ? 'सारथि के साथ मनन करें' : 'Reflect with Sarathi'}
-            </button>
+            </AnimatedButton>
           </section>
         )}
 

@@ -8,6 +8,8 @@ import { Link, useParams } from 'react-router-dom';
 import { getAllChapters } from '../services/api';
 import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import AnimatedButton from '../components/AnimatedButton';
+
 import './TextReader.css';
 
 // Static source metadata — avoids an extra backend round-trip
@@ -135,7 +137,7 @@ export default function TextReader() {
             <p className="text-reader__description">{meta.description}</p>
           )}
           <div style={{ marginTop: '1.5rem' }}>
-            <button
+            <AnimatedButton
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: `Ask a question about the ${meta.title}` } }))}
               className="active-press inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/8 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 hover:text-[color:var(--accent)] transition"
@@ -145,7 +147,7 @@ export default function TextReader() {
                 <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
               </svg>
               Consult Sarathi about {meta.title}
-            </button>
+            </AnimatedButton>
           </div>
         </header>
 
@@ -168,13 +170,13 @@ export default function TextReader() {
               aria-label="Chapter or verse reference"
               id="chapter-jump-input"
             />
-            <button
+            <AnimatedButton
               type="submit"
               className="active-press text-reader__jump-btn"
               id="chapter-jump-btn"
             >
               Go
-            </button>
+            </AnimatedButton>
           </form>
         </div>
 

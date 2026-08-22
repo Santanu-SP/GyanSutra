@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import AnimatedButton from './AnimatedButton';
+
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -50,7 +52,7 @@ export default class ErrorBoundary extends Component {
           <p style={{ color: 'var(--text-secondary, #A59BB0)', marginBottom: '1.5rem', maxWidth: '480px' }}>
             {this.state.error?.message || 'An unexpected error occurred while rendering.'}
           </p>
-          <button
+          <AnimatedButton
             onClick={() => window.location.reload()}
             style={{
               padding: '0.625rem 1.25rem',
@@ -64,7 +66,7 @@ export default class ErrorBoundary extends Component {
             }}
           >
             Reload Page
-          </button>
+          </AnimatedButton>
         </div>
       );
     }

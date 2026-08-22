@@ -18,6 +18,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendationsRail from '../components/RecommendationsRail';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { filterVerses } from '../utils/verseUtils';
+import AnimatedButton from '../components/AnimatedButton';
+
 import './ChapterReader.css';
 
 // All 18 chapter numbers for the strip
@@ -182,7 +184,7 @@ export default function ChapterReader() {
       {/* ── Verse navigation: prev / verse-jump select / next ─────── */}
       {!loading && verses.length > 0 && (
         <nav className="chapter-reader__nav" aria-label="Verse navigation">
-          <button
+          <AnimatedButton
             className="active-press chapter-reader__nav-btn"
             onClick={handlePrev}
             disabled={currentIndex === 0}
@@ -190,7 +192,7 @@ export default function ChapterReader() {
             aria-label="Previous verse"
           >
             ← Previous
-          </button>
+          </AnimatedButton>
 
           {/* Verse jump dropdown */}
           <div className="chapter-reader__jump-wrap">
@@ -215,7 +217,7 @@ export default function ChapterReader() {
             </span>
           </div>
 
-          <button
+          <AnimatedButton
             className={`active-press chapter-reader__nav-btn chapter-reader__nav-btn--next${isLastVerse ? ' chapter-reader__nav-btn--finish' : ''}`}
             onClick={handleNext}
             id="next-verse-btn"
@@ -224,7 +226,7 @@ export default function ChapterReader() {
             {isLastVerse
               ? (canInstall ? 'Finish & Install ✦' : 'Chapter Complete ✦')
               : 'Next →'}
-          </button>
+          </AnimatedButton>
         </nav>
       )}
 
@@ -269,7 +271,7 @@ export default function ChapterReader() {
       {/* Floating Side Navigation */}
       {!loading && verses.length > 0 && (
         <>
-          <button
+          <AnimatedButton
             className="floating-nav-btn floating-nav-btn--prev"
             onClick={handlePrev}
             disabled={currentIndex === 0}
@@ -279,8 +281,8 @@ export default function ChapterReader() {
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-          </button>
-          <button
+          </AnimatedButton>
+          <AnimatedButton
             className="floating-nav-btn floating-nav-btn--next"
             onClick={handleNext}
             disabled={isLastVerse}
@@ -290,7 +292,7 @@ export default function ChapterReader() {
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
-          </button>
+          </AnimatedButton>
         </>
       )}
     </main>

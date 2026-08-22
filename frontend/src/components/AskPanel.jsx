@@ -9,6 +9,8 @@
 import { useState, useRef } from 'react';
 import { askQuestion } from '../services/api';
 import IlluminatedVerseCard from './IlluminatedVerseCard';
+import AnimatedButton from './AnimatedButton';
+
 import './AskPanel.css';
 
 const DiyaIcon = ({ className = "diya-icon" }) => (
@@ -83,14 +85,14 @@ export default function AskPanel() {
             <span className="ask-panel__char-count text-muted">
               {question.length}/500
             </span>
-            <button
+            <AnimatedButton
               type="submit"
               className="ask-panel__submit"
               disabled={!canSubmit}
               id="ask-submit-btn"
             >
               {state === 'loading' ? 'Seeking…' : 'Ask'}
-            </button>
+            </AnimatedButton>
           </div>
         </div>
       </form>
@@ -142,13 +144,13 @@ export default function AskPanel() {
             </div>
           )}
 
-          <button
+          <AnimatedButton
             className="ask-panel__reset"
             onClick={handleReset}
             id="ask-new-question-btn"
           >
             Ask another question
-          </button>
+          </AnimatedButton>
         </div>
       )}
 
@@ -166,13 +168,13 @@ export default function AskPanel() {
           <p className="ask-panel__refusal-hint">
             Try exploring the chapters directly, or rephrase your question.
           </p>
-          <button
+          <AnimatedButton
             className="ask-panel__reset ask-panel__reset--outline"
             onClick={handleReset}
             id="ask-try-again-btn"
           >
             Try a different question
-          </button>
+          </AnimatedButton>
         </div>
       )}
 
@@ -180,9 +182,9 @@ export default function AskPanel() {
       {state === 'error' && (
         <div className="ask-panel__error" role="alert">
           <p>Something went wrong: {result?.error}</p>
-          <button className="ask-panel__reset ask-panel__reset--outline" onClick={handleReset}>
+          <AnimatedButton className="ask-panel__reset ask-panel__reset--outline" onClick={handleReset}>
             Try again
-          </button>
+          </AnimatedButton>
         </div>
       )}
     </section>

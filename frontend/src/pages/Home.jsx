@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyVerse } from '../services/api';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import AnimatedButton from '../components/AnimatedButton';
+
 
 const SOURCE_STYLES = {
   'bhagavad-gita': {
@@ -97,7 +99,7 @@ export default function Home({ onAskPrompt = () => {} }) {
             </div>
 
             <div className="flex flex-row flex-wrap items-center gap-3">
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={() => {
                   const librarySection = document.getElementById('text-library');
@@ -107,14 +109,14 @@ export default function Home({ onAskPrompt = () => {} }) {
               >
                 <span>Enter the Library</span>
                 <span className="text-[10px] font-normal opacity-60 tracking-wide normal-case">Sacred Manuscripts</span>
-              </button>
-              <button
+              </AnimatedButton>
+              <AnimatedButton
                 type="button"
                 onClick={() => onAskPrompt('What is the heart of Sanatan Dharma?')}
                 className="active-press inline-flex items-center gap-1 text-sm font-medium text-[color:var(--text-secondary)] transition hover:text-[color:var(--accent)] underline underline-offset-4 whitespace-nowrap"
               >
                 Consult Sarathi →
-              </button>
+              </AnimatedButton>
             </div>
 
             <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
@@ -157,7 +159,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 {dailyVerse && (
                   <div className="mt-2 flex items-center justify-between text-xs text-amber-500/80">
                     <span>Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}</span>
-                    <button
+                    <AnimatedButton
                       type="button"
                       onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { 
                         detail: { prompt: `What are the practical life lessons and reflection questions for Chapter ${dailyVerse.chapterNumber} Verse ${dailyVerse.verseNumber}?` } 
@@ -169,7 +171,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                         <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
                       </svg>
                       Ask Sarathi
-                    </button>
+                    </AnimatedButton>
                   </div>
                 )}
                 <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
@@ -208,13 +210,13 @@ export default function Home({ onAskPrompt = () => {} }) {
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
               Ask about karma, detachment, devotion, or interpretation — and receive responses rooted in your sacred library.
             </p>
-            <button
+            <AnimatedButton
               type="button"
               onClick={() => onAskPrompt('How should I understand karma without attachment?')}
               className="active-press mt-5 inline-flex items-center rounded border border-amber-500/30 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-amber-400/60 hover:bg-amber-500/10"
             >
               Open Sarathi
-            </button>
+            </AnimatedButton>
           </article>
         </section>
 

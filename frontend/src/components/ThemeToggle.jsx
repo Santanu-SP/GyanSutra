@@ -4,6 +4,8 @@
  */
 
 import { useTheme } from '../hooks/useTheme';
+import AnimatedButton from './AnimatedButton';
+
 import './ThemeToggle.css';
 
 const SunIcon = () => (
@@ -37,7 +39,7 @@ export default function ThemeToggle() {
   const isDark = theme === 'dark';
 
   return (
-    <button
+    <AnimatedButton
       className="theme-toggle"
       onClick={toggleTheme}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -46,6 +48,6 @@ export default function ThemeToggle() {
       title={isDark ? 'Light mode' : 'Dark mode'}
     >
       <span className="theme-toggle__icon">{isDark ? <SunIcon /> : <MoonIcon />}</span>
-    </button>
+    </AnimatedButton>
   );
 }

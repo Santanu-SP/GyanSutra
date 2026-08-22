@@ -8,6 +8,8 @@ import { searchVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import AnimatedButton from '../components/AnimatedButton';
+
 import './Search.css';
 
 export default function Search() {
@@ -47,7 +49,7 @@ export default function Search() {
         
         <div className="search-page__filters" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           {['all', 'gita', 'ramayana'].map(f => (
-            <button
+            <AnimatedButton
               key={f}
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
@@ -69,7 +71,7 @@ export default function Search() {
               }}
             >
               {f === 'all' ? 'All Texts' : f === 'gita' ? 'Bhagavad Gita' : 'Ramayana'}
-            </button>
+            </AnimatedButton>
           ))}
         </div>
       </header>
@@ -90,7 +92,7 @@ export default function Search() {
             </p>
             <div className="search-page__sarathi-suggest" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Or ask Sarathi directly about this concept:</p>
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: q } }))}
                 className="active-press inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
@@ -100,7 +102,7 @@ export default function Search() {
                   <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
                 </svg>
                 Ask Sarathi
-              </button>
+              </AnimatedButton>
             </div>
           </div>
         )}
@@ -133,7 +135,7 @@ export default function Search() {
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '440px' }}>
                 Still seeking more insights? Let Sarathi analyze the scriptures and give you a comprehensive answer.
               </p>
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: q } }))}
                 className="active-press inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
@@ -143,7 +145,7 @@ export default function Search() {
                   <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
                 </svg>
                 Ask Sarathi about "{q}"
-              </button>
+              </AnimatedButton>
             </div>
           </>
         )}
@@ -155,14 +157,14 @@ export default function Search() {
             </p>
             <div className="search-page__suggestions">
               {['What is the nature of the soul?', 'How to find peace?', 'What is duty?', 'Liberation from sorrow'].map((s, idx) => (
-                <button
+                <AnimatedButton
                   key={s}
                   className="active-press stagger-item search-page__suggestion"
                   style={{ '--stagger-idx': idx }}
                   onClick={() => navigate(`/search?q=${encodeURIComponent(s)}`)}
                 >
                   {s}
-                </button>
+                </AnimatedButton>
               ))}
             </div>
           </div>
