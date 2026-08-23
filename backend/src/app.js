@@ -12,6 +12,8 @@ const versesRouter = require('./routes/verses');
 const searchRouter = require('./routes/search');
 const askRouter = require('./routes/ask');
 const recommendationsRouter = require('./routes/recommendations');
+const sitemapRoute = require('./routes/sitemap');
+const robotsRoute = require('./routes/robots');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -84,6 +86,9 @@ app.use('/api/verses', versesRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/ask', askRouter);
 app.use('/api/recommendations', recommendationsRouter);
+
+app.use(sitemapRoute);
+app.use(robotsRoute);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
