@@ -117,6 +117,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 }}
                 className="group relative flex-1 sm:flex-none inline-flex items-center justify-center p-[1px] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.25)]"
               >
+              <div className="relative flex h-full w-full items-center justify-center">
                 {/* The spinning gradient border (moving color around boundary) */}
                 <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
@@ -129,6 +130,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                     Sacred Manuscripts
                   </span>
                 </span>
+              </div>
               </AnimatedButton>
               <AnimatedButton
                 type="button"
