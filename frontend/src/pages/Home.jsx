@@ -121,7 +121,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                 <span className="absolute inset-[-100%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 {/* Inner button (masks the middle of the conic gradient, revealing only the border) */}
-                <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-[11px] bg-[color:var(--bg-surface)] px-6 py-3 transition-colors group-hover:bg-[color:var(--bg-elevated)]">
+                <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-[11px] bg-[color:var(--bg-surface)] px-6 py-3 transition-colors">
                   <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
                     Enter the Library
                   </span>

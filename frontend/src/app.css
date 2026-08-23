@@ -180,7 +180,6 @@
 }
 
 .sarathi-trigger:hover {
-  background: color-mix(in srgb, var(--marigold) 8%, transparent);
   border-color: var(--marigold);
 }
 

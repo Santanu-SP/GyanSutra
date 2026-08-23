@@ -207,12 +207,18 @@ export default function App() {
           {/* Right actions */}
           <div className="gs-header__actions">
             <AnimatedButton
-              className="sarathi-trigger sarathi-trigger--header"
+              className="group relative overflow-hidden rounded-md p-[1px] transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.2)]"
               onClick={() => setIsSarathiOpen(true)}
               aria-label="Open Sarathi companion"
             >
-              <TriggerFlame />
-              <span className="sarathi-trigger__label">Ask Sarathi</span>
+              {/* Spinning gradient border */}
+              <span className="absolute inset-[-100%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Inner button surface */}
+              <span className="sarathi-trigger relative z-10 w-full h-full bg-[color:var(--bg)] border-transparent group-hover:bg-[color:var(--bg)]">
+                <TriggerFlame />
+                <span className="sarathi-trigger__label">Ask Sarathi</span>
+              </span>
             </AnimatedButton>
             <ThemeToggle />
           </div>
