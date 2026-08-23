@@ -211,16 +211,14 @@ export default function App() {
               onClick={() => setIsSarathiOpen(true)}
               aria-label="Open Sarathi companion"
             >
-              <div className="relative flex h-full w-full items-center justify-center">
-                {/* Spinning gradient border */}
-                <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Inner button surface */}
-                <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-[7px] bg-[color:var(--bg)] px-[0.875rem] py-[0.45rem] font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
-                  <TriggerFlame />
-                  <span className="sarathi-trigger__label">Ask Sarathi</span>
-                </span>
-              </div>
+              {/* Spinning gradient border */}
+              <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Inner button surface */}
+              <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-[7px] bg-[color:var(--bg)] px-[0.875rem] py-[0.45rem] font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
+                <TriggerFlame />
+                <span className="sarathi-trigger__label">Ask Sarathi</span>
+              </span>
             </AnimatedButton>
             <ThemeToggle />
           </div>
