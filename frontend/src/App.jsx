@@ -13,6 +13,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { HelmetProvider } from 'react-helmet-async';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
@@ -21,8 +22,9 @@ import ThemeToggle from './components/ThemeToggle';
 import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
-import SEO from './components/SEO';
+import SEOHead from './components/SEO/SEOHead';
 import AnimatedButton from './components/AnimatedButton';
+import Footer from './components/Footer';
 
 import './app.css';
 
@@ -45,6 +47,7 @@ const Search        = lazyWithRetry(() => import('./pages/Search'));
 const VerseDetail   = lazyWithRetry(() => import('./pages/VerseDetail'));
 const Ramayana      = lazyWithRetry(() => import('./pages/Ramayana'));
 const KandaReader   = lazyWithRetry(() => import('./pages/KandaReader'));
+const FAQ           = lazyWithRetry(() => import('./pages/FAQ'));
 
 // Suggested conversation starters — shown when panel is first opened
 const SARATHI_PROMPTS = [
@@ -174,9 +177,10 @@ export default function App() {
   }
 
   return (
-    <div className="gs-app">
-      <SEO />
-      {/* ── Fixed Header ── */}
+    <HelmetProvider>
+      <div className="gs-app">
+        <SEOHead />
+        {/* ── Fixed Header ── */}
       <header className={`gs-header${isSarathiOpen ? ' gs-header--sarathi-open' : ''}`}>
         <nav className="gs-header__nav">
           {/* Brand */}
@@ -197,6 +201,7 @@ export default function App() {
             <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
             <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
             <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
+            <Link to="/faq" className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
           </nav>
 
           {/* Global search — hidden on small mobile */}
@@ -240,11 +245,13 @@ export default function App() {
                 <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
                 <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
                 <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
+                <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
                 <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
               </Routes>
             </AnimatePresence>
           </Suspense>
         </ErrorBoundary>
+        <Footer />
       </div>
 
       {/* ── Sarathi companion — side panel on desktop, sheet on mobile ── */}
@@ -284,7 +291,20 @@ export default function App() {
           </svg>
           Search
         </Link>
+        <Link
+          to="/faq"
+          className={`gs-bottom-nav__item${location.pathname === '/faq' ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="FAQ"
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          FAQ
+        </Link>
       </nav>
     </div>
+    </HelmetProvider>
   );
 }
