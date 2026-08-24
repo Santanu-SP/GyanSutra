@@ -1,9 +1,33 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getDailyVerse } from '../services/api';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import AnimatedButton from '../components/AnimatedButton';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+
+const darshanCardVariants = {
+  hidden: { opacity: 0, scale: 0.95, rotate: 0 },
+  show: { 
+    opacity: 1, 
+    scale: 1, 
+    rotate: 1, 
+    transition: { type: "spring", stiffness: 150, damping: 20, delay: 0.4 } 
+  },
+  hover: { scale: 1.02, rotate: 0, transition: { duration: 0.4, ease: "easeOut" } }
+};
 
 const SOURCE_STYLES = {
   'bhagavad-gita': {
@@ -97,18 +121,24 @@ export default function Home({ onAskPrompt = () => {} }) {
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
       <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
-        <header ref={heroRef} className="reveal-hidden grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12" aria-label="Hero introduction">
+        <motion.header 
+          variants={containerVariants} 
+          initial="hidden" 
+          animate="show" 
+          className="grid gap-4 grid-cols-1 sm:gap-8 lg:grid-cols-12" 
+          aria-label="Hero introduction"
+        >
           <div className="lg:col-span-7 space-y-3 sm:space-y-6 lg:pt-8">
-            <div className="space-y-2 sm:space-y-4">
+            <motion.div variants={itemVariants} className="space-y-2 sm:space-y-4">
               <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
                 Eternal Wisdom of Sanatana Dharma
               </h1>
               <p className="max-w-2xl text-xs leading-5 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-row flex-wrap items-center gap-3">
+            <motion.div variants={itemVariants} className="flex flex-row flex-wrap items-center gap-3">
               <AnimatedButton
                 type="button"
                 onClick={() => {
@@ -117,10 +147,10 @@ export default function Home({ onAskPrompt = () => {} }) {
                 }}
                 className="group relative flex-1 sm:flex-none inline-flex items-center justify-center p-[1px] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.25)]"
               >
-                {/* The spinning gradient border (moving color around boundary) */}
+                {/* The spinning gradient border */}
                 <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                {/* Inner button (masks the middle of the conic gradient, revealing only the border) */}
+                {/* Inner button */}
                 <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-[11px] bg-[color:var(--bg-surface)] px-6 py-3 transition-colors">
                   <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
                     Enter the Library
@@ -140,9 +170,9 @@ export default function Home({ onAskPrompt = () => {} }) {
                   <span className={`absolute transition-transform duration-500 ease-[cubic-bezier(0.8,0,0.2,1)] ${isConsulting ? 'translate-x-[200%] opacity-0' : 'group-hover:translate-x-1'}`}>→</span>
                 </div>
               </AnimatedButton>
-            </div>
+            </motion.div>
 
-            <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
+            <motion.div variants={itemVariants} className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -161,10 +191,14 @@ export default function Home({ onAskPrompt = () => {} }) {
                 </svg>
                 AI Spiritual Guide
               </span>
-            </div>
+            </motion.div>
           </div>
 
-          <aside className="lg:col-span-5 relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-[color:var(--bg-surface)] p-3 sm:p-6 lg:rotate-1">
+          <motion.aside 
+            variants={darshanCardVariants}
+            whileHover="hover"
+            className="lg:col-span-5 relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-[color:var(--bg-surface)] p-3 sm:p-6 lg:rotate-1"
+          >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
@@ -198,13 +232,13 @@ export default function Home({ onAskPrompt = () => {} }) {
                   </div>
                 )}
                 <div className="flex items-center gap-3 border-t border-amber-700/10 pt-4 text-xs uppercase tracking-[0.28em] text-amber-500/80">
-                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
                   Contemplation for Today
                 </div>
               </div>
             </div>
-          </aside>
-        </header>
+          </motion.aside>
+        </motion.header>
 
         <section ref={featuresRef} aria-label="Feature highlights" className="reveal-hidden grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
           <article className="hover-lift rounded-2xl sm:rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
