@@ -202,7 +202,7 @@ export default function SarathiPanel({
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  const ESTIMATED_TOTAL = 18; // seconds — typical Sarathi response time
+  const ESTIMATED_TOTAL = 3; // seconds — typical native Gemini response time
   const remaining = Math.max(0, ESTIMATED_TOTAL - elapsedSeconds);
   const progress  = Math.min(100, (elapsedSeconds / ESTIMATED_TOTAL) * 100);
 
