@@ -20,7 +20,7 @@ const MAX_COMMENTARY_CHARS = 400;  // truncate per-guru commentary — keeps tok
 const OPENROUTER_MODELS = [
   'google/gemma-2-9b-it:free',                // Fast, reliable, no thoughts
   'meta-llama/llama-3.3-70b-instruct:free',   // Best free model, but often times out
-  'meta-llama/llama-3.1-8b-instruct:free',    // Lightweight fallback
+  'mistralai/mistral-nemo:free',              // Lightweight fallback
   'openrouter/free'                            // Last-resort wildcard
 ];
 
