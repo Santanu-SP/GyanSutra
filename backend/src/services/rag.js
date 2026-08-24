@@ -20,9 +20,9 @@ const MAX_COMMENTARY_CHARS = 400;  // truncate per-guru commentary — keeps tok
 // NOTE: Avoid thinking/reasoning models (e.g. gemini-flash-lite-preview, deepseek-r1)
 // — they leak their chain-of-thought into the response text and consume max_tokens.
 const FAST_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',   // Best free model — no thinking leakage, multilingual
+  'google/gemma-2-9b-it:free',                // Fast, reliable, no thoughts
+  'meta-llama/llama-3.3-70b-instruct:free',   // Best free model, but often times out
   'meta-llama/llama-3.1-8b-instruct:free',    // Lightweight fallback
-  'meta-llama/llama-3.2-3b-instruct:free',    // Smallest fallback
   'openrouter/free'                            // Last-resort wildcard
 ];
 
@@ -33,7 +33,7 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: process.env.GEMINI_API_KEY,
-      timeout: 20000, // 20-second hard timeout — if a model is slow, move on
+      timeout: 15000, // 15-second hard timeout — if a model is slow, move on
     });
   }
   return openaiClient;
@@ -50,7 +50,7 @@ STRICT RULES — FOLLOW WITHOUT EXCEPTION:
    (Core answer — 2–3 sentences max. Start directly, no preamble.)
 
    ### 🕉️ Key Verse(s)
-   (Cite 1–2 specific verses with reference. Bold the verse reference. Give the meaning in 1 sentence.)
+   (Cite 1–2 specific verses with reference. Bold the verse reference. Give the meaning in 1 sentence. If no specific verse exists, summarize the general teaching.)
 
    ### 🌿 Practical Takeaway
    (2–3 sentences on how to apply this in daily life.)
@@ -62,14 +62,15 @@ STRICT RULES — FOLLOW WITHOUT EXCEPTION:
 
    Never dump a flat wall of text. Always use the subheadings above. Never use markdown tables.
 
-2. **CONCISE & COMPLETE**:
-   - Total response: 150–280 words max.
-   - Never cut off mid-sentence or mid-thought.
+2. **COMPLETENESS & CLARITY**:
+   - Every answer MUST be a complete thought. Never leave a sentence unfinished.
+   - Total response: 150–400 words. Be thorough but concise.
    - Skip all preamble ("Great question", "Let me explain", etc.).
 
-3. **AUTHENTIC CITATIONS**:
-   - Always cite specific verses when possible: **Bhagavad Gita 3.19** says…
-   - NEVER fabricate verse numbers. If unsure, say: "The Gita broadly teaches…"
+3. **ABSOLUTE AUTHENTICITY & ZERO HALLUCINATION (CRITICAL)**:
+   - NEVER fabricate verse numbers, names, or events.
+   - STRICT SEPARATION: Never mix characters, weapons, or events from the Mahabharata into the Ramayana (or vice-versa) unless explicitly comparing them. For example, do not put Shakuni in the Ramayana, or Indrajit in the Mahabharata.
+   - If unsure of an exact verse, explicitly say: "The scriptures broadly teach…" instead of making up a verse number.
 
 4. **ALWAYS ANSWER** spiritual, dharmic, philosophical, or devotional questions.
    ONLY decline if completely outside scripture (e.g., sports, tech, politics). Then say: "This falls outside the Gita and Ramayana."
@@ -78,7 +79,10 @@ STRICT RULES — FOLLOW WITHOUT EXCEPTION:
 
 6. **NO INTERNAL THOUGHTS (CRITICAL)**: NEVER output your internal thinking process, reasoning steps, or analysis. Output ONLY the final structured response starting directly with "### 📖 The Teaching". Do not use phrases like "Here's a thinking process" or "Analyze User Input".
 
-Retrieved Scripture Context:`;
+7. **CONTEXT RELEVANCE (CRITICAL)**:
+   - You will receive a 'Retrieved Scripture Context' block. Evaluate if it actually matches the user's question.
+   - If the user asks a follow-up (e.g., using "he" or "it") and the retrieved context is completely unrelated, IGNORE THE CONTEXT entirely.
+   - Rely on your own deep knowledge of the Gita and Ramayana to answer follow-up questions accurately. DO NOT force a connection to irrelevant verses.`;
 
 /**
  * Strip chain-of-thought reasoning artifacts from free model responses.
@@ -171,7 +175,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 900, // Enforces concise, complete answers — 900 tokens ≈ 600-700 words
+        max_tokens: 1500, // Enforces complete answers and prevents truncation
       });
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
@@ -347,22 +351,22 @@ async function askRag(question, history = []) {
   const cleanQuestion  = isCompareMode ? question.replace(/^\[compare\]/i, '').trim() : question;
 
   // Build chat messages:
-  //   1. System prompt (Sarathi identity + rules)
+  //   1. System prompt (Sarathi identity + rules + current context)
   //   2. Recent conversation history (up to last 3 exchanges) for context
-  //   3. Final user message = grounded scripture context + current question
+  //   3. Final user message = current question
   //
   // The history is injected as real chat turns so the LLM natively understands
   // follow-ups like "explain that in English" or "give more detail on the second point".
   // 'sarathi' role maps to 'assistant' in the OpenAI chat format.
   const chatMessages = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: `${SYSTEM_PROMPT}\n\nRetrieved Scripture Context:\n${contextLines}` },
     // Inject conversation history (last N exchanges)
     ...history.map(m => ({
       role: m.role === 'sarathi' ? 'assistant' : 'user',
       content: m.content,
     })),
-    // Final user turn = scripture context + current question
-    { role: 'user', content: `${contextLines}\n\nUser Question: ${cleanQuestion}` },
+    // Final user turn = current question
+    { role: 'user', content: cleanQuestion },
   ];
 
   let answer = '';
