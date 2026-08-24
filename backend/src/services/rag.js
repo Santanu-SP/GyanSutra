@@ -56,21 +56,19 @@ const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spirit
 STRICT RULES — FOLLOW WITHOUT EXCEPTION:
 
 1. **FORMAT — ALWAYS USE STRUCTURED SUBHEADINGS**:
-   Every response must be organised with clear markdown subheadings. Use this structure:
+   Every response MUST use EXACTLY these subheadings in markdown. Replace the bracketed text with your actual response. DO NOT copy the bracketed instructions into your output!
 
    ### 📖 The Teaching
-   (Core answer — 2–3 sentences max. Start directly, no preamble.)
+   [Write your core answer here in 2-3 sentences. Start directly, no preamble.]
 
    ### 🕉️ Key Verse(s)
-   (Cite 1–2 specific verses with reference. Bold the verse reference. Give the meaning in 1 sentence. If no specific verse exists, summarize the general teaching.)
+   [Cite 1-2 specific verses. Bold the reference. Give meaning in 1 sentence. If no specific verse exists, summarize the general scripture teaching here.]
 
    ### 🌿 Practical Takeaway
-   (2–3 sentences on how to apply this in daily life.)
+   [Write 2-3 sentences on how to apply this in daily life.]
 
-   ### 🪔 Guru Perspectives  *(only include if relevant)*
-   - **Swami Chinmayananda**: ...
-   - **Swami Sivananda**: ...
-   (Maximum 2 gurus, 1 sentence each. Skip this section for simple factual questions.)
+   ### 🪔 Guru Perspectives
+   [List maximum 2 gurus, 1 sentence each. Skip this entire section if the question is a simple factual question.]
 
    Never dump a flat wall of text. Always use the subheadings above. Never use markdown tables.
 
@@ -89,7 +87,7 @@ STRICT RULES — FOLLOW WITHOUT EXCEPTION:
 
 5. **LANGUAGE**: English if asked in English. Pure Devanagari Hindi if asked in Hindi or Hinglish.
 
-6. **NO INTERNAL THOUGHTS (CRITICAL)**: NEVER output your internal thinking process, reasoning steps, or analysis. Output ONLY the final structured response starting directly with "### 📖 The Teaching". Do not use phrases like "Here's a thinking process" or "Analyze User Input".
+6. **NO INTERNAL THOUGHTS (CRITICAL)**: NEVER output your internal thinking process, reasoning steps, analysis, or internal monologue (e.g. "Let's re-read carefully...", "Wait, I should skip..."). Output ONLY the final user-facing response starting directly with "### 📖 The Teaching".
 
 7. **CONTEXT RELEVANCE (CRITICAL)**:
    - You will receive a 'Retrieved Scripture Context' block. Evaluate if it actually matches the user's question.
@@ -117,16 +115,20 @@ function cleanResponse(raw) {
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '');
   text = text.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
 
-  // 2. Strip "Here's a thinking process:" / "Here is my thinking:" preamble sections.
-  // We split by "### 📖 The Teaching" to ensure we only keep the actual answer block.
-  // Because the model might mention the heading in its thought process (e.g., "Rule 1..."),
-  // we split the text and take the LAST chunk to guarantee we get the final output block.
-  const parts = text.split(/### 📖 The Teaching/i);
+  // 2. Strip internal monologues or preamble sections.
+  // We split by "📖 The Teaching" (making the ### optional) to ensure we only keep the actual answer block.
+  const parts = text.split(/(?:###\s*)?📖 The Teaching/i);
   
   if (parts.length > 1) {
     // If the model leaked thoughts but eventually output the real answer, grab the real answer.
-    // By taking the last part and re-adding the heading, we discard any preliminary thoughts.
     text = "### 📖 The Teaching" + parts[parts.length - 1];
+    
+    // Sometimes the model talks to itself INSIDE the teaching block (e.g. echoing the bracketed instructions)
+    // We strip out the bracketed template instructions if the model accidentally copied them.
+    text = text.replace(/\[Write your core answer here.*?\]/g, '');
+    text = text.replace(/\[Cite 1-2 specific verses.*?\]/g, '');
+    text = text.replace(/\[Write 2-3 sentences.*?\]/g, '');
+    text = text.replace(/\[List maximum 2 gurus.*?\]/g, '');
   } else {
     // Fallback stripping if the exact heading isn't used
     const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–—]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
