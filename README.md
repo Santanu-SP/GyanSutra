@@ -33,7 +33,7 @@ Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommen
 ### 📋 Prerequisites
 - **Node.js** (v18 or higher recommended)
 - A **Firebase/Firestore** project in Native mode with Email Auth enabled.
-- An **OpenRouter API Key** (for querying Llama-3.3-70b-instruct).
+- An **OpenRouter API Key** (for querying Gemma-2-9b-it).
 
 ### 1. Backend Configuration
 Navigate to the backend directory, clone the template, and populate it with your credentials:
@@ -201,10 +201,10 @@ We wanted our vector embeddings to be **100% free and offline**, so we chose the
 * **The Fix**: We downloaded the `gte-small` model binaries locally and committed them to the repository inside `backend/models`. We then forced `env.allowRemoteModels = false` in code so the model would always be loaded strictly from local memory.
 * **Memory Limits**: Since Render's free tier is limited to 512MB RAM, loading even a small transformer model alongside Express and Firebase Admin required fine-grained garbage collection and lazy-loading of the ONNX pipeline instance.
 
-### 4. OpenRouter Free Tier Glitches & Multilingual Hallucinations
-When launching the RAG pipeline, we initially routed queries through a wildcard `openrouter/free` endpoint.
-* **The Tamasic Food Glitch**: A natural-language query asking *"Is tamasic food good in any way according to Gita"* returned a chaotic, corrupted response. The free-tier router had assigned a low-tier model that could not comprehend regional script requests, leading it to hallucinate a garbled mix of Hindi, Marathi, and random characters (like `dijo`, `へぇ`, and Arabic words).
-* **The Fix**: We overrode the wildcard router and locked the pipeline to **Llama-3.3-70b-instruct:free**. This model has top-tier multilingual capabilities, ensuring answers are returned in pure, eloquent English (or Devanagari Hindi if requested).
+### 4. OpenRouter Free Tier Glitches & Latency
+When launching the RAG pipeline, we initially relied on `Llama-3.3-70b-instruct:free`.
+* **The Timeout Glitch**: Heavy rate-limiting on OpenRouter's free tier for 70B models caused severe latency (>50 seconds) and cascading timeouts. This forced the system to fall back to smaller 3B models, which hallucinates on follow-up questions and struggles with multi-turn context.
+* **The Fix**: We overhauled the pipeline to prioritize **Gemma-2-9b-it:free** and reduced the hard timeouts. This model offers near-instantaneous responses, excellent reasoning, and zero cross-scripture hallucinations, completely eliminating the latency bottlenecks. We also injected explicit anti-hallucination guardrails directly into the System Prompt.
 
 ### 5. Mobile UX Overhaul: Reclaiming the Scripture
 The **Sarathi** chat UI was designed as a sliding bottom sheet on mobile screens. 
