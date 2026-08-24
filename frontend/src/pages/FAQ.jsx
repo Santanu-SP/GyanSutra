@@ -66,7 +66,7 @@ const FAQ_DATA = [
     id: "ai-1",
     category: "Sarathi AI",
     question: "Does Sarathi know everything in the world?",
-    answer: "No. Sarathi is an AI spiritual guide powered by Gemma 2 models through a RAG system that searches our scripture database. It does not have real-time internet access, cannot predict the future, and should not replace professional advice for medical, legal, or financial matters."
+    answer: "No. Sarathi is an AI spiritual guide powered by Google Gemini models through a RAG system that searches our scripture database. It does not have real-time internet access, cannot predict the future, and should not replace professional advice for medical, legal, or financial matters."
   },
   {
     id: "ai-2",

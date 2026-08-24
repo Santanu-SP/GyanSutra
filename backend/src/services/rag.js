@@ -17,23 +17,34 @@ const TOP_CONTEXT          = 3;    // max verses sent to LLM — keeps prompt co
 const MAX_COMMENTARY_CHARS = 400;  // truncate per-guru commentary — keeps token budget tight
 
 // Primary + fallback model chain (ordered by quality → reliability)
-// NOTE: Avoid thinking/reasoning models (e.g. gemini-flash-lite-preview, deepseek-r1)
-// — they leak their chain-of-thought into the response text and consume max_tokens.
-const FAST_MODELS = [
+const OPENROUTER_MODELS = [
   'google/gemma-2-9b-it:free',                // Fast, reliable, no thoughts
   'meta-llama/llama-3.3-70b-instruct:free',   // Best free model, but often times out
   'meta-llama/llama-3.1-8b-instruct:free',    // Lightweight fallback
   'openrouter/free'                            // Last-resort wildcard
 ];
 
+const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash'
+];
+
 // ── OpenRouter Client Initialization ──────────────────────────────────────────
 let openaiClient;
 function getOpenRouterClient() {
   if (!openaiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    const isOpenRouter = apiKey.startsWith('sk-or-');
+    
     openaiClient = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: process.env.GEMINI_API_KEY,
-      timeout: 15000, // 15-second hard timeout — if a model is slow, move on
+      baseURL: isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://generativelanguage.googleapis.com/v1beta/openai/',
+      apiKey: apiKey,
+      timeout: 15000, // 15-second hard timeout
+      defaultHeaders: isOpenRouter ? {
+        'HTTP-Referer': 'https://gyansutraapp.pages.dev/', // Required by OpenRouter for priority
+        'X-Title': 'Gyan Sutra',
+      } : undefined,
     });
   }
   return openaiClient;
@@ -169,7 +180,10 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
 
   // Fast sequential fallback through optimized models
   let lastError = null;
-  for (const model of FAST_MODELS) {
+  const apiKey = process.env.GEMINI_API_KEY || '';
+  const modelsToTry = apiKey.startsWith('sk-or-') ? OPENROUTER_MODELS : GEMINI_MODELS;
+
+  for (const model of modelsToTry) {
     try {
       const response = await openai.chat.completions.create({
         model,
