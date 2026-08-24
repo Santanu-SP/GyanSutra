@@ -25,9 +25,9 @@ const OPENROUTER_MODELS = [
 ];
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash'
+  'gemini-3.6-flash',
+  'gemini-3.1-pro',
+  'gemini-2.5-flash'
 ];
 
 // ── OpenRouter Client Initialization ──────────────────────────────────────────
@@ -40,7 +40,8 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://generativelanguage.googleapis.com/v1beta/openai/',
       apiKey: apiKey,
-      timeout: 15000, // 15-second hard timeout
+      timeout: 10000, // 10-second hard timeout
+      maxRetries: 0, // Disable automatic SDK retries to fail fast
       defaultHeaders: isOpenRouter ? {
         'HTTP-Referer': 'https://gyansutraapp.pages.dev/', // Required by OpenRouter for priority
         'X-Title': 'Gyan Sutra',
