@@ -268,58 +268,36 @@ export default function SarathiPanel({
             </div>
           </div>
 
-          {/* Size snap buttons — mobile only ────────────────────────── */}
-          <div className="sarathi-panel__size-btns" aria-label="Resize panel">
+          {/* Header Controls (Mobile & Desktop) ────────────────────────── */}
+          <div className="sarathi-panel__header-btns">
+            {/* Maximise / Restore button (Mobile only, Desktop is fixed) */}
+            <div className="sarathi-panel__size-btns" aria-label="Resize panel">
+              <AnimatedButton
+                type="button"
+                className="active-press sarathi-panel__header-btn"
+                onClick={() => setPanelSize(panelSize === 'full' ? 'normal' : 'full')}
+                aria-label={panelSize === 'full' ? "Restore panel size" : "Maximise panel"}
+                title={panelSize === 'full' ? "Restore" : "Maximise"}
+              >
+                {panelSize === 'full' ? <NormalIcon /> : <ExpandIcon />}
+              </AnimatedButton>
+            </div>
+
+            {/* Minimise button — triggers fast creative animation ─────────── */}
             <AnimatedButton
               type="button"
-              className={`active-press sarathi-size-btn${panelSize === 'peek' ? ' sarathi-size-btn--active' : ''}`}
-              onClick={() => setPanelSize('peek')}
-              aria-label="Compact — peek view"
-              title="Compact"
-              id="sarathi-size-peek"
+              className="active-press sarathi-panel__header-btn"
+              onClick={handleClose}
+              aria-label="Minimise Sarathi"
+              title="Minimise"
+              id="close-sarathi-btn"
             >
-              <PeekIcon />
-            </AnimatedButton>
-            <AnimatedButton
-              type="button"
-              className={`active-press sarathi-size-btn${panelSize === 'normal' ? ' sarathi-size-btn--active' : ''}`}
-              onClick={() => setPanelSize('normal')}
-              aria-label="Normal — half screen view"
-              title="Normal"
-              id="sarathi-size-normal"
-            >
-              <NormalIcon />
-            </AnimatedButton>
-            <AnimatedButton
-              type="button"
-              className={`active-press sarathi-size-btn${panelSize === 'full' ? ' sarathi-size-btn--active' : ''}`}
-              onClick={() => setPanelSize('full')}
-              aria-label="Full — expanded view"
-              title="Full"
-              id="sarathi-size-full"
-            >
-              <ExpandIcon />
+              {/* Horizontal bar = minimise metaphor */}
+              <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" width="14" height="14">
+                <path d="M3 9H15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
             </AnimatedButton>
           </div>
-
-          {/* Minimise button — triggers macOS-style animation ─────────── */}
-          <AnimatedButton
-            type="button"
-            className="active-press sarathi-panel__close"
-            onClick={handleClose}
-            aria-label="Minimise Sarathi"
-            id="close-sarathi-btn"
-          >
-            {/* Horizontal bar = macOS minimise metaphor */}
-            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path
-                d="M4 9H14"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </AnimatedButton>
         </header>
 
         {/* ── Suggested paths ──────────────────────────────────────────── */}

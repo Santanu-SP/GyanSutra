@@ -47,12 +47,14 @@
     border-radius: 18px 18px 0 0;
     transform: translateY(110%);
     opacity: 0;
+    /* Extra padding at bottom to prevent overlap with the translucent bottom navigation bar */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
     /* Spring easing for open/close and height snaps */
     transition:
-      transform   0.4s  cubic-bezier(0.34, 1.4, 0.64, 1),
-      opacity     0.3s  ease,
-      height      0.35s cubic-bezier(0.34, 1.4, 0.64, 1),
-      border-radius 0.35s ease;
+      transform   0.3s  cubic-bezier(0.34, 1.4, 0.64, 1),
+      opacity     0.25s  ease,
+      height      0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+      border-radius 0.3s ease;
     /* Minimize shrinks toward bottom-right (where the pill lives) */
     transform-origin: bottom right;
     box-shadow:
@@ -71,14 +73,14 @@
   /* ── macOS-style minimize animation ─────────────────────────────── */
   /* Applied while minimizing — panel collapses toward bottom-right pill */
   .sarathi-panel--open.sarathi-panel--minimizing {
-    transform: scale(0.06) !important;
+    transform: scale(0.04) rotate(-5deg) translateY(20px) !important;
     transform-origin: bottom right !important;
     border-radius: 999px !important;
     opacity: 0 !important;
     transition:
-      transform     0.38s cubic-bezier(0.4, 0, 1, 1),
-      opacity       0.3s  cubic-bezier(0.4, 0, 1, 1),
-      border-radius 0.38s cubic-bezier(0.4, 0, 1, 1) !important;
+      transform     0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+      opacity       0.2s  ease-out,
+      border-radius 0.25s ease-out !important;
   }
 
   /* Disable transitions during drag — height follows finger in real time */
@@ -103,10 +105,21 @@
     opacity: 0;
     z-index: 45;
     transition:
-      transform var(--transition-slow),
-      opacity var(--transition-slow);
+      transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+      opacity 0.25s ease;
     box-shadow: -4px 0 40px rgba(0, 0, 0, 0.25);
     overflow: hidden;
+  }
+  
+  .sarathi-panel--open.sarathi-panel--minimizing {
+    transform: scale(0.04) translateX(50%) !important;
+    transform-origin: center right !important;
+    border-radius: 999px !important;
+    opacity: 0 !important;
+    transition:
+      transform     0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+      opacity       0.2s  ease-out,
+      border-radius 0.25s ease-out !important;
   }
 
   .sarathi-panel--open {
@@ -208,56 +221,14 @@
   margin: 0;
 }
 
-/* ── Size snap buttons — mobile header controls ──────────────────────── */
-.sarathi-panel__size-btns {
-  display: none;
-}
-
-@media (max-width: 1023px) {
-  .sarathi-panel__size-btns {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    flex-shrink: 0;
-  }
-}
-
-.sarathi-size-btn {
-  width: 30px;
-  height: 30px;
+/* ── Header Buttons ─────────────────────────────────────────── */
+.sarathi-panel__header-btns {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    color        var(--transition-fast),
-    background   var(--transition-fast),
-    transform    0.15s ease;
-  flex-shrink: 0;
+  gap: 0.4rem;
 }
 
-.sarathi-size-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.sarathi-size-btn:active {
-  transform: scale(0.92);
-}
-
-.sarathi-size-btn--active {
-  border-color: var(--marigold);
-  color: var(--marigold);
-  background: color-mix(in srgb, var(--marigold) 10%, transparent);
-}
-
-/* ── Close / minimise button ─────────────────────────────────────────── */
-.sarathi-panel__close {
+.sarathi-panel__header-btn {
   width: 34px;
   height: 34px;
   display: flex;
@@ -271,20 +242,21 @@
   transition:
     border-color var(--transition-fast),
     color        var(--transition-fast),
-    transform    0.15s ease;
+    transform    0.15s cubic-bezier(0.34, 1.4, 0.64, 1);
   flex-shrink: 0;
 }
 
-.sarathi-panel__close:hover {
+.sarathi-panel__header-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  transform: scale(1.05);
 }
 
-.sarathi-panel__close:active {
-  transform: scale(0.9);
+.sarathi-panel__header-btn:active {
+  transform: scale(0.85);
 }
 
-.sarathi-panel__close svg {
+.sarathi-panel__header-btn svg {
   width: 14px;
   height: 14px;
 }
