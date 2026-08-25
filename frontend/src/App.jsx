@@ -196,36 +196,39 @@ export default function App() {
             </span>
           </Link>
 
-          {/* Desktop nav links */}
-          <nav className="gs-header__nav-links" aria-label="Primary navigation">
-            <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
-            <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
-            <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
-            <Link to="/faq" className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
-          </nav>
+          {/* Right Side Elements */}
+          <div className="gs-header__right">
+            {/* Desktop nav links */}
+            <nav className="gs-header__nav-links" aria-label="Primary navigation">
+              <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
+              <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
+              <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
+              <Link to="/faq" className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
+            </nav>
 
-          {/* Global search — hidden on small mobile */}
-          <div className="gs-header__search-wrap">
-            <SearchBar placeholder="Search scripture… (⌘K)" />
-          </div>
+            {/* Global search — hidden on small mobile */}
+            <div className="gs-header__search-wrap">
+              <SearchBar placeholder="Search scripture… (⌘K)" />
+            </div>
 
-          {/* Right actions */}
-          <div className="gs-header__actions">
-            <AnimatedButton
-              className="group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
-              onClick={() => setIsSarathiOpen(true)}
-              aria-label="Open Sarathi companion"
-            >
-              {/* Spinning gradient border */}
-              <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_40%,transparent_60%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Inner button surface */}
-              <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-full bg-[color:var(--bg)] px-4 py-2 font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
-                <TriggerFlame />
-                <span className="sarathi-trigger__label">Ask Sarathi</span>
-              </span>
-            </AnimatedButton>
-            <ThemeToggle />
+            {/* Right actions */}
+            <div className="gs-header__actions">
+              <AnimatedButton
+                className="group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
+                onClick={() => setIsSarathiOpen(true)}
+                aria-label="Open Sarathi companion"
+              >
+                {/* Spinning gradient border */}
+                <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_40%,transparent_60%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Inner button surface */}
+                <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-full bg-[color:var(--bg)] px-4 py-2 font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
+                  <TriggerFlame />
+                  <span className="sarathi-trigger__label">Ask Sarathi</span>
+                </span>
+              </AnimatedButton>
+              <ThemeToggle />
+            </div>
           </div>
         </nav>
       </header>

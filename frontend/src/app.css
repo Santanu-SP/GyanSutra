@@ -36,12 +36,26 @@
   padding: 0.875rem 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1.25rem;
 }
 
 @media (max-width: 640px) {
   .gs-header__nav {
     padding: 0.6rem 1rem;
+    gap: 0.5rem;
+  }
+}
+
+/* ── Right Side Elements Container ──────────────────────────────────── */
+.gs-header__right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .gs-header__right {
     gap: 0.5rem;
   }
 }
@@ -140,7 +154,6 @@
 
 /* ── Search area in header ─────────────────────────────────────────── */
 .gs-header__search-wrap {
-  margin-left: auto;
   max-width: 320px;
 }
 
@@ -153,7 +166,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: 1rem;
   flex-shrink: 0;
 }
 
