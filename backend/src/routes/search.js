@@ -1,6 +1,6 @@
 const express = require('express');
 const { embedText } = require('../services/embedding');
-const { findNearestVerses, getDoc } = require('../services/firestore');
+const { findNearestVerses, getDoc, collections } = require('../services/firestore');
 
 const router = express.Router();
 
@@ -84,8 +84,41 @@ router.get('/', async (req, res, next) => {
       }
     }
 
+    // INTERCEPT 3: Exact Sanskrit match attempt
+    const hasDevanagari = /[\u0900-\u097F]/.test(q);
+    if (hasDevanagari) {
+      // Try an exact match on the sanskrit field first (in case they copy-pasted directly)
+      const versesCol = collections.verses();
+      const exactQuery = await versesCol.where('sanskrit', '==', q.trim()).limit(1).get();
+      if (!exactQuery.empty) {
+        const exactDocSnap = exactQuery.docs[0];
+        const exactDoc = exactDocSnap.data();
+        results = results.filter(v => v.id !== exactDocSnap.id);
+        results.unshift({
+          id: exactDocSnap.id,
+          similarity: 1.0,
+          chapterNumber: exactDoc.chapterNumber,
+          verseNumber: exactDoc.verseNumber,
+          book: exactDoc.book,
+          kanda: exactDoc.kanda,
+          kandaNumber: exactDoc.kandaNumber,
+          sarga: exactDoc.sarga,
+          shlokaNumber: exactDoc.shlokaNumber,
+          sanskrit: exactDoc.sanskrit,
+          transliteration: exactDoc.transliteration,
+          translationEnglish: exactDoc.translationEnglish,
+          translationHindi: exactDoc.translationHindi,
+          wordMeanings: exactDoc.wordMeanings,
+          detailedExplanations: exactDoc.detailedExplanations,
+          tags: exactDoc.tags || []
+        });
+      }
+    }
+
     // Apply a softer threshold for search (more permissive than /ask)
-    const SEARCH_THRESHOLD = 0.55;
+    // If it's a Sanskrit query, we lower the threshold significantly because 
+    // gte-small is an English-focused model and gives low scores for Devanagari.
+    const SEARCH_THRESHOLD = hasDevanagari ? 0.35 : 0.55;
     const filtered = results
       .filter(v => v.similarity >= SEARCH_THRESHOLD)
       .slice(0, limit);
