@@ -36,11 +36,11 @@ router.post('/', async (req, res, next) => {
     }
 
     // history is optional — validate shape if provided
-    // Only keep last 3 exchanges (6 messages) to avoid slow/confused responses
+    // Only keep last 2 exchanges (4 messages) to save input tokens while preserving follow-up context
     const safeHistory = Array.isArray(history)
       ? history
           .filter(m => m && (m.role === 'user' || m.role === 'sarathi') && typeof m.content === 'string')
-          .slice(-6)
+          .slice(-4)
       : [];
 
     const trimmed = question.trim();

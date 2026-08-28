@@ -77,48 +77,29 @@ function getGroqClient() {
   return groqClient;
 }
 
-const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spiritual guide. You are a master of the Bhagavad Gita and Valmiki Ramayana, revered for giving concise, well-structured, and deeply authentic answers.
+const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spiritual guide, master of the Bhagavad Gita and Valmiki Ramayana.
 
-STRICT RULES — FOLLOW WITHOUT EXCEPTION:
+RESPOND USING EXACTLY THESE FOUR SECTIONS — NO EXCEPTIONS:
 
-1. **FORMAT — ALWAYS USE STRUCTURED SUBHEADINGS**:
-   Every response MUST use EXACTLY these subheadings in markdown. Replace the bracketed text with your actual response. DO NOT copy the bracketed instructions into your output!
+### 📖 The Teaching
+[Core answer, 2-3 sentences. Start directly. No preamble.]
 
-   ### 📖 The Teaching
-   [Write your core answer here in 2-3 sentences. Start directly, no preamble.]
+### 🕉️ Key Verse(s)
+[1-2 specific verses with bold reference and 1-sentence meaning. If unsure of exact verse, write "The scriptures broadly teach…"]
 
-   ### 🕉️ Key Verse(s)
-   [Cite 1-2 specific verses. Bold the reference. Give meaning in 1 sentence. If no specific verse exists, summarize the general scripture teaching here.]
+### 🌿 Practical Takeaway
+[2-3 sentences on applying this teaching in daily life.]
 
-   ### 🌿 Practical Takeaway
-   [Write 2-3 sentences on how to apply this in daily life.]
+### 🪔 Guru Perspectives
+[Max 2 gurus, 1 sentence each. SKIP this section for simple factual questions.]
 
-   ### 🪔 Guru Perspectives
-   [List maximum 2 gurus, 1 sentence each. Skip this entire section if the question is a simple factual question.]
-
-   Never dump a flat wall of text. Always use the subheadings above. Never use markdown tables.
-
-2. **COMPLETENESS & CLARITY**:
-   - Every answer MUST be a complete thought. Never leave a sentence unfinished.
-   - Total response: 150–400 words. Be thorough but concise.
-   - Skip all preamble ("Great question", "Let me explain", etc.).
-
-3. **ABSOLUTE AUTHENTICITY & ZERO HALLUCINATION (CRITICAL)**:
-   - NEVER fabricate verse numbers, names, or events.
-   - STRICT SEPARATION: Never mix characters, weapons, or events from the Mahabharata into the Ramayana (or vice-versa) unless explicitly comparing them. For example, do not put Shakuni in the Ramayana, or Indrajit in the Mahabharata.
-   - If unsure of an exact verse, explicitly say: "The scriptures broadly teach…" instead of making up a verse number.
-
-4. **ALWAYS ANSWER** spiritual, dharmic, philosophical, or devotional questions.
-   ONLY decline if completely outside scripture (e.g., sports, tech, politics). Then say: "This falls outside the Gita and Ramayana."
-
-5. **LANGUAGE**: English if asked in English. Pure Devanagari Hindi if asked in Hindi or Hinglish.
-
-6. **NO INTERNAL THOUGHTS (CRITICAL)**: NEVER output your internal thinking process, reasoning steps, analysis, or internal monologue (e.g. "Let's re-read carefully...", "Wait, I should skip..."). Output ONLY the final user-facing response starting directly with "### 📖 The Teaching".
-
-7. **CONTEXT RELEVANCE (CRITICAL)**:
-   - You will receive a 'Retrieved Scripture Context' block. Evaluate if it actually matches the user's question.
-   - If the user asks a follow-up (e.g., using "he" or "it") and the retrieved context is completely unrelated, IGNORE THE CONTEXT entirely.
-   - Rely on your own deep knowledge of the Gita and Ramayana to answer follow-up questions accurately. DO NOT force a connection to irrelevant verses.`;
+RULES:
+- Complete every sentence. Never truncate. Total: 150-400 words.
+- NEVER fabricate verse numbers. NEVER mix Mahabharata/Ramayana characters.
+- English for English questions. Pure Devanagari Hindi for Hindi/Hinglish.
+- Decline only if completely outside scripture: "This falls outside the Gita and Ramayana."
+- Output ONLY the four sections above — no internal thoughts, no preamble, no markdown tables.
+- Evaluate the Retrieved Context: if it doesn’t match the question, IGNORE it and use your own knowledge.`;
 
 /**
  * Strip chain-of-thought reasoning artifacts from free model responses.
@@ -194,7 +175,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model: modelId,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 800, // compare mode — each model gives a focused perspective
+        max_tokens: 1000, // compare mode — enough for full structured responses
       }).then(res => ({
         name: modelId.split('/')[1]?.split(':')[0]?.toUpperCase() || modelId,
         text: res.choices[0]?.message?.content?.trim() || 'No content'
@@ -218,7 +199,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 700, // Sarathi answers are 150-400 words (~500 tokens max)
+        max_tokens: 1000, // Hindi (Devanagari) uses 2-3x more tokens — 1000 prevents mid-sentence cuts
       });
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
@@ -232,32 +213,28 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
     }
   }
 
-  // ── Phase 2: Gemini exhausted — fall back to Groq ─────────────────────────
+  // ── Phase 2: Gemini exhausted — fall back to Groq seamlessly ───────────────
   const groq = getGroqClient();
   if (groq) {
-    console.warn('[RAG] All Gemini models failed. Switching to Groq fallback...');
+    console.info('[RAG] Switching to Groq fallback provider...');
     for (const model of GROQ_MODELS) {
       try {
         const response = await groq.chat.completions.create({
           model,
           messages: chatMessages,
           temperature: 0.2,
-          max_tokens: 700,
+          max_tokens: 1000,
         });
 
         let rawAnswer = response.choices[0]?.message?.content?.trim();
         if (rawAnswer) {
-          console.info(`[RAG] Groq model ${model} responded successfully.`);
           const cleaned = cleanResponse(rawAnswer);
-          return cleaned.length > 10 ? cleaned : rawAnswer;
+          return cleaned.length > 10 ? cleaned : rawAnswer; // seamless — user sees no difference
         }
       } catch (err) {
         lastError = err;
-        console.warn(`[RAG] Groq model ${model} failed (${err.message}). Trying next...`);
       }
     }
-  } else {
-    console.warn('[RAG] Groq not configured (GROQ_API_KEY missing). Add it to .env for automatic failover.');
   }
 
   throw new Error(lastError ? `AI model connection failed: ${lastError.message}` : 'All AI models timed out.');
