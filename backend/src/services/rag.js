@@ -33,9 +33,9 @@ const GEMINI_MODELS = [
 // Groq free-tier models — used automatically when all Gemini models fail
 // Get a free key at: https://console.groq.com/keys
 const GROQ_MODELS = [
-  'llama-3.3-70b-versatile',  // Best quality on Groq — matches Gemini Flash quality
-  'llama3-70b-8192',          // Reliable fallback
-  'gemma2-9b-it',             // Lightweight last resort
+  'openai/gpt-oss-120b',  // Best quality on Groq (120B params)
+  'groq/compound',        // Groq's own reliable compound model
+  'qwen/qwen3.6-27b',     // Lightweight but capable fallback
 ];
 
 // ── Primary Client (Gemini / OpenRouter) ─────────────────────────────────────
