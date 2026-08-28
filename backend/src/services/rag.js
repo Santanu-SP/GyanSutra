@@ -30,25 +30,51 @@ const GEMINI_MODELS = [
   'gemini-2.5-flash',         // Stable proven fallback — still supported
 ];
 
-// ── OpenRouter Client Initialization ──────────────────────────────────────────
+// Groq free-tier models — used automatically when all Gemini models fail
+// Get a free key at: https://console.groq.com/keys
+const GROQ_MODELS = [
+  'llama-3.3-70b-versatile',  // Best quality on Groq — matches Gemini Flash quality
+  'llama3-70b-8192',          // Reliable fallback
+  'gemma2-9b-it',             // Lightweight last resort
+];
+
+// ── Primary Client (Gemini / OpenRouter) ─────────────────────────────────────
 let openaiClient;
 function getOpenRouterClient() {
   if (!openaiClient) {
     const apiKey = process.env.GEMINI_API_KEY || '';
     const isOpenRouter = apiKey.startsWith('sk-or-');
-    
+
     openaiClient = new OpenAI({
       baseURL: isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://generativelanguage.googleapis.com/v1beta/openai/',
       apiKey: apiKey,
       timeout: 10000, // 10-second hard timeout
-      maxRetries: 0, // Disable automatic SDK retries to fail fast
+      maxRetries: 0,  // Disable automatic SDK retries to fail fast
       defaultHeaders: isOpenRouter ? {
-        'HTTP-Referer': 'https://gyansutraapp.pages.dev/', // Required by OpenRouter for priority
+        'HTTP-Referer': 'https://gyansutraapp.pages.dev/',
         'X-Title': 'Gyan Sutra',
       } : undefined,
     });
   }
   return openaiClient;
+}
+
+// ── Secondary Client (Groq) ───────────────────────────────────────────────────
+// Groq is used automatically when ALL Gemini models fail (quota / key expiry).
+// Groq free tier: https://console.groq.com/keys
+let groqClient;
+function getGroqClient() {
+  if (!groqClient) {
+    const groqKey = process.env.GROQ_API_KEY || '';
+    if (!groqKey) return null; // Groq not configured — skip silently
+    groqClient = new OpenAI({
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: groqKey,
+      timeout: 10000,
+      maxRetries: 0,
+    });
+  }
+  return groqClient;
 }
 
 const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spiritual guide. You are a master of the Bhagavad Gita and Valmiki Ramayana, revered for giving concise, well-structured, and deeply authentic answers.
@@ -181,7 +207,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
     return responses.map(r => `## 🤖 Perspective from ${r.name}\n\n${r.text}`).join('\n\n---\n\n');
   }
 
-  // Fast sequential fallback through optimized models
+  // ── Phase 1: Try primary provider (Gemini or OpenRouter) ──────────────────
   let lastError = null;
   const apiKey = process.env.GEMINI_API_KEY || '';
   const modelsToTry = apiKey.startsWith('sk-or-') ? OPENROUTER_MODELS : GEMINI_MODELS;
@@ -198,13 +224,40 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
       let rawAnswer = response.choices[0]?.message?.content?.trim();
       if (rawAnswer) {
         const cleaned = cleanResponse(rawAnswer);
-        // Safety: if cleanResponse strips everything, return the raw answer
         return cleaned.length > 10 ? cleaned : rawAnswer;
       }
     } catch (err) {
       lastError = err;
-      console.warn(`[RAG] Model ${model} failed or timed out (${err.message}). Trying next...`);
+      console.warn(`[RAG] Gemini model ${model} failed (${err.message}). Trying next...`);
     }
+  }
+
+  // ── Phase 2: Gemini exhausted — fall back to Groq ─────────────────────────
+  const groq = getGroqClient();
+  if (groq) {
+    console.warn('[RAG] All Gemini models failed. Switching to Groq fallback...');
+    for (const model of GROQ_MODELS) {
+      try {
+        const response = await groq.chat.completions.create({
+          model,
+          messages: chatMessages,
+          temperature: 0.2,
+          max_tokens: 700,
+        });
+
+        let rawAnswer = response.choices[0]?.message?.content?.trim();
+        if (rawAnswer) {
+          console.info(`[RAG] Groq model ${model} responded successfully.`);
+          const cleaned = cleanResponse(rawAnswer);
+          return cleaned.length > 10 ? cleaned : rawAnswer;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`[RAG] Groq model ${model} failed (${err.message}). Trying next...`);
+      }
+    }
+  } else {
+    console.warn('[RAG] Groq not configured (GROQ_API_KEY missing). Add it to .env for automatic failover.');
   }
 
   throw new Error(lastError ? `AI model connection failed: ${lastError.message}` : 'All AI models timed out.');
