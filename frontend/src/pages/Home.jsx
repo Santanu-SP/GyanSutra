@@ -120,7 +120,7 @@ export default function Home({ onAskPrompt = () => {} }) {
     <main className="relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(79,70,229,0.16),transparent_28%)]" />
 
-      <section className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
+      <section className="gs-home mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-10 pt-3 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:px-8 lg:pb-20 lg:pt-10">
         <motion.header 
           variants={containerVariants} 
           initial="hidden" 
@@ -130,22 +130,22 @@ export default function Home({ onAskPrompt = () => {} }) {
         >
           <div className="lg:col-span-7 space-y-3 sm:space-y-6 lg:pt-8">
             <motion.div variants={itemVariants} className="space-y-2 sm:space-y-4">
-              <h1 className="max-w-3xl font-serif text-xl font-normal leading-snug text-[color:var(--text-primary)] sm:text-4xl lg:text-5xl">
+              <h1 className="gs-home__heading max-w-3xl font-serif font-normal leading-snug text-[color:var(--text-primary)]">
                 Eternal Wisdom of Sanatana Dharma
               </h1>
-              <p className="max-w-2xl text-xs leading-5 text-[color:var(--text-secondary)] sm:text-base sm:leading-8">
+              <p className="gs-home__subheading max-w-2xl leading-5 text-[color:var(--text-secondary)]">
                 Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
               </p>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="flex flex-row flex-wrap items-center gap-3">
+            <motion.div variants={itemVariants} className="gs-home__cta-row flex flex-row flex-wrap items-center gap-3">
               <AnimatedButton
                 type="button"
                 onClick={() => {
                   const librarySection = document.getElementById('text-library');
                   librarySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="group relative flex-1 sm:flex-none inline-flex items-center justify-center p-[1px] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.25)]"
+                className="gs-home__cta-primary group relative flex-1 sm:flex-none inline-flex items-center justify-center p-[1px] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_2rem_-0.5rem_rgba(245,158,11,0.25)]"
               >
                 {/* The spinning gradient border */}
                 <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_30%,transparent_70%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -172,7 +172,7 @@ export default function Home({ onAskPrompt = () => {} }) {
               </AnimatedButton>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
+            <motion.div variants={itemVariants} className="gs-home__badges pt-2 sm:pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-[color:var(--text-muted)]">
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -197,7 +197,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           <motion.aside 
             variants={darshanCardVariants}
             whileHover="hover"
-            className="lg:col-span-5 relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-[color:var(--bg-surface)] p-3 sm:p-6 lg:rotate-1"
+            className="gs-home__darshan lg:col-span-5 relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-[color:var(--bg-surface)] p-3 sm:p-6 lg:rotate-1"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
@@ -208,10 +208,10 @@ export default function Home({ onAskPrompt = () => {} }) {
 
               <div className="space-y-3 rounded-xl sm:rounded-[1.75rem] border border-amber-700/20 bg-[color:var(--bg)] p-4 sm:p-6">
                 <p className="font-serif text-xl leading-relaxed text-[color:var(--text-primary)] devanagari-hero" style={{ fontSize: '1.4rem' }}>
-                  {dailyVerse ? dailyVerse.sanskrit : "“Within stillness, the eternal thread of knowledge reveals itself.”"}
+                  {dailyVerse ? dailyVerse.sanskrit : "\u201CWithin stillness, the eternal thread of knowledge reveals itself.\u201D"}
                 </p>
                 <p className="text-sm leading-7 text-[color:var(--text-muted)] italic">
-                  {dailyVerse ? `— ${dailyVerse.translationEnglish}` : "Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom."}
+                  {dailyVerse ? `\u2014 ${dailyVerse.translationEnglish}` : "Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom."}
                 </p>
                 {dailyVerse && (
                   <div className="mt-2 flex items-center justify-between text-xs text-amber-500/80">
@@ -240,8 +240,8 @@ export default function Home({ onAskPrompt = () => {} }) {
           </motion.aside>
         </motion.header>
 
-        <section ref={featuresRef} aria-label="Feature highlights" className="reveal-hidden grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-          <article className="hover-lift rounded-2xl sm:rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
+        <section ref={featuresRef} aria-label="Feature highlights" className="gs-home__features reveal-hidden grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+          <article className="gs-home__feature-card hover-lift rounded-2xl sm:rounded-[2rem] border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 shadow-[0_25px_60px_rgba(0,0,0,0.28)] sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
@@ -257,7 +257,7 @@ export default function Home({ onAskPrompt = () => {} }) {
             </div>
           </article>
 
-          <article className="hover-lift rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
+          <article className="gs-home__feature-card hover-lift rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.22)]">
             <p className="text-xs uppercase tracking-[0.35em] text-indigo-300/80">
               Your Companion
             </p>
@@ -277,7 +277,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </article>
         </section>
 
-        <section ref={libraryRef} id="text-library" aria-label="Text library" className="reveal-hidden space-y-4 sm:space-y-6 scroll-mt-24">
+        <section ref={libraryRef} id="text-library" aria-label="Text library" className="gs-home__library reveal-hidden space-y-4 sm:space-y-6 scroll-mt-24">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
@@ -293,7 +293,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           </div>
 
           {/* Source cards grid — rendered immediately from static data */}
-          <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
+          <div className="gs-home__cards-grid grid gap-5 grid-cols-1 md:grid-cols-2">
             {SOURCES.map((source, idx) => {
                   const style = SOURCE_STYLES[source.id] || {
                     accent: 'from-amber-500/15 via-transparent to-transparent',
@@ -306,7 +306,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                       key={source.id}
                       to={`/${source.id}`}
                       style={{ '--stagger-idx': idx }}
-                      className="stagger-item hover-lift group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20"
+                      className={`stagger-item hover-lift group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20${!source.available ? ' gs-home__card--coming-soon' : ''}`}
                     >
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    SarathiPanel — spiritual companion
    Desktop: fixed right side panel (380px)
-   Mobile/Tablet: resizable bottom sheet with drag handle + macOS minimize
+   Mobile/Tablet: resizable bottom sheet with drag handle + smooth animations
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Mobile backdrop ─────────────────────────────────────────────────── */
@@ -15,10 +15,10 @@
     position: fixed;
     inset: 0;
     z-index: 48;
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    animation: backdrop-in 0.25s ease forwards;
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(6px) saturate(1.2);
+    -webkit-backdrop-filter: blur(6px) saturate(1.2);
+    animation: backdrop-in 0.35s ease forwards;
   }
 
   @keyframes backdrop-in {
@@ -41,49 +41,56 @@
     inset-x: 0;
     bottom: 0;
     z-index: 49;
-    /* Height is driven by JS via --sarathi-panel-h; default 55dvh */
-    height: var(--sarathi-panel-h, 55dvh);
+    /* Height driven by JS via --sarathi-panel-h; default 90dvh (fullscreen) */
+    height: var(--sarathi-panel-h, 90dvh);
     border-top: 1px solid var(--border);
-    border-radius: 18px 18px 0 0;
-    transform: translateY(110%);
+    border-radius: 20px 20px 0 0;
+    /* Closed state: hidden below */
+    transform: translateY(105%);
     opacity: 0;
-    /* Extra padding at bottom to prevent overlap with the translucent bottom navigation bar */
+    /* Extra padding at bottom for translucent bottom nav bar */
     padding-bottom: calc(60px + env(safe-area-inset-bottom));
-    /* Spring easing for open/close and height snaps */
+    /* Smooth spring for open/close + height snaps */
     transition:
-      transform   0.3s  cubic-bezier(0.34, 1.4, 0.64, 1),
-      opacity     0.25s  ease,
-      height      0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
-      border-radius 0.3s ease;
-    /* Minimize shrinks toward bottom-right (where the pill lives) */
+      transform   0.4s  cubic-bezier(0.32, 0.72, 0, 1),
+      opacity     0.3s  ease,
+      height      0.35s cubic-bezier(0.32, 0.72, 0, 1),
+      border-radius 0.3s ease,
+      box-shadow  0.3s  ease;
     transform-origin: bottom right;
     box-shadow:
-      0 -12px 48px rgba(0, 0, 0, 0.4),
-      0 -1px  0    rgba(255, 255, 255, 0.04);
+      0 -8px 40px rgba(0, 0, 0, 0.35),
+      0 -1px  0   rgba(255, 255, 255, 0.04);
     will-change: transform, opacity, height;
     overflow: hidden;
   }
 
-  /* Open state */
+  /* Open state — smooth spring from below */
   .sarathi-panel--open {
     transform: translateY(0);
     opacity: 1;
+    box-shadow:
+      0 -12px 60px rgba(0, 0, 0, 0.4),
+      0 -2px  0    rgba(255, 255, 255, 0.05);
   }
 
-  /* ── macOS-style minimize animation ─────────────────────────────── */
-  /* Applied while minimizing — panel collapses toward bottom-right pill */
+  /* ── Minimize-to-dismiss animation ─────────────────────────────── */
   .sarathi-panel--open.sarathi-panel--minimizing {
-    transform: scale(0.04) rotate(-5deg) translateY(20px) !important;
-    transform-origin: bottom right !important;
+    transform: scale(0.06) translateY(30px) !important;
+    transform-origin: calc(100% - 2rem) calc(100% - 2rem) !important;
     border-radius: 999px !important;
     opacity: 0 !important;
+    box-shadow:
+      0 0 0 rgba(0, 0, 0, 0),
+      0 0 40px rgba(232, 163, 61, 0.15) !important;
     transition:
-      transform     0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-      opacity       0.2s  ease-out,
-      border-radius 0.25s ease-out !important;
+      transform     0.4s  cubic-bezier(0.55, 0, 0.1, 1),
+      opacity       0.35s ease-out,
+      border-radius 0.3s  ease-out,
+      box-shadow    0.4s  ease-out !important;
   }
 
-  /* Disable transitions during drag — height follows finger in real time */
+  /* Disable transitions during drag */
   .sarathi-panel--dragging {
     transition: none !important;
     user-select: none;
@@ -105,7 +112,7 @@
     opacity: 0;
     z-index: 45;
     transition:
-      transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+      transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
       opacity 0.25s ease;
     box-shadow: -4px 0 40px rgba(0, 0, 0, 0.25);
     overflow: hidden;
@@ -117,8 +124,8 @@
     border-radius: 999px !important;
     opacity: 0 !important;
     transition:
-      transform     0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-      opacity       0.2s  ease-out,
+      transform     0.3s cubic-bezier(0.55, 0, 0.1, 1),
+      opacity       0.25s ease-out,
       border-radius 0.25s ease-out !important;
   }
 
@@ -136,7 +143,6 @@
   flex-shrink: 0;
   cursor: ns-resize;
   touch-action: none;
-  /* Larger hit area for easy grab */
   position: relative;
   z-index: 2;
 }
@@ -144,13 +150,13 @@
 .sarathi-panel__handle-bar {
   display: block;
   width: 40px;
-  height: 4px;
+  height: 4.5px;
   background: var(--border);
   border-radius: 3px;
   margin: 0 auto;
   transition:
-    width      0.2s ease,
-    background 0.2s ease;
+    width      0.25s ease,
+    background 0.25s ease;
 }
 
 @media (max-width: 1023px) {
@@ -262,7 +268,6 @@
 }
 
 /* ── Floating Sarathi Pill ───────────────────────────────────────────── */
-/* Shown on mobile when the panel is closed — acts as a persistent FAB */
 .sarathi-pill {
   display: none;
 }
@@ -289,7 +294,6 @@
     box-shadow:
       0 4px 24px rgba(0, 0, 0, 0.35),
       0 1px  6px  rgba(0, 0, 0, 0.2);
-    /* Hidden by default — revealed via .sarathi-pill--visible */
     pointer-events: none;
     opacity: 0;
     transform: scale(0.65) translateY(12px);
@@ -298,9 +302,6 @@
       transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.25s ease,
       border-color 0.25s ease;
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
   }
 
   .sarathi-pill--visible {
@@ -321,7 +322,7 @@
   }
 }
 
-/* Ambient glow ring that pulses */
+/* Ambient glow ring */
 .sarathi-pill__glow {
   display: none;
 }
@@ -348,7 +349,7 @@
   height: 18px;
   color: var(--marigold);
   flex-shrink: 0;
-  position: relative; /* above glow */
+  position: relative;
 }
 
 .sarathi-pill__label {
@@ -404,13 +405,13 @@
 /* ── Messages ────────────────────────────────────────────────────────── */
 .sarathi-panel__messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   scroll-behavior: smooth;
-  /* Prevent rubber-band scroll from triggering panel drag */
   overscroll-behavior: contain;
 }
 

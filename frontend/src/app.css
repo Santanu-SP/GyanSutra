@@ -207,11 +207,15 @@
   .sarathi-trigger { padding: 0.45rem 0.6rem; }
 }
 
-/* On mobile the floating pill inside SarathiPanel acts as the Sarathi trigger.
-   Hide the header button so there's one clear entry point on small screens. */
+/* On mobile, show a compact version of the header Sarathi trigger */
 @media (max-width: 1023px) {
-  .sarathi-trigger--header { display: none; }
+  .sarathi-trigger {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
 }
+
+
 
 /* ── App body ───────────────────────────────────────────────────────── */
 .gs-body {

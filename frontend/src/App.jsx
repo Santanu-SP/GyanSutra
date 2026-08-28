@@ -214,7 +214,7 @@ export default function App() {
             {/* Right actions */}
             <div className="gs-header__actions">
               <AnimatedButton
-                className="group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
+                className="sarathi-trigger group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
                 onClick={() => setIsSarathiOpen(true)}
                 aria-label="Open Sarathi companion"
               >
@@ -224,7 +224,7 @@ export default function App() {
                 {/* Inner button surface */}
                 <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-full bg-[color:var(--bg)] px-4 py-2 font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
                   <TriggerFlame />
-                  <span className="sarathi-trigger__label">Ask Sarathi</span>
+                  <span className="sarathi-trigger__label">Sarathi</span>
                 </span>
               </AnimatedButton>
               <ThemeToggle />
@@ -294,6 +294,26 @@ export default function App() {
           </svg>
           Search
         </Link>
+        <button
+          type="button"
+          className={`gs-bottom-nav__item${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
+          onClick={() => setIsSarathiOpen(true)}
+          aria-label="Open Sarathi"
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M12 3C12 3 6 8.5 6 14C6 17.314 8.686 20 12 20C15.314 20 18 17.314 18 14C18 8.5 12 3 12 3Z"
+              fill="currentColor"
+              opacity="0.85"
+            />
+            <path
+              d="M12 8C12 8 9.5 11 9.5 14C9.5 15.381 10.619 16.5 12 16.5C13.381 16.5 14.5 15.381 14.5 14C14.5 11 12 8 12 8Z"
+              fill="var(--bg)"
+              opacity="0.5"
+            />
+          </svg>
+          Sarathi
+        </button>
         <Link
           to="/faq"
           className={`gs-bottom-nav__item${location.pathname === '/faq' ? ' gs-bottom-nav__item--active' : ''}`}

@@ -7,9 +7,9 @@
  * Layout behavior:
  *   Desktop (≥1024px) : Fixed right side panel, 380px. Content shifts left. (unchanged)
  *   Mobile  (<1024px) :
+ *     - Opens FULLSCREEN (90dvh) on first open — user drags handle to resize
  *     - Resizable bottom sheet (drag handle → snap zones: peek 28dvh / normal 55dvh / full 90dvh)
- *     - macOS-style minimize animation — panel shrinks to bottom-right floating pill
- *     - Floating Sarathi pill — persists when panel is closed, springs back on tap
+ *     - Smooth spring open animation + polished minimize-to-pill close
  *     - Size-snap buttons in header for quick height switching
  *
  * Props:
@@ -69,6 +69,13 @@ const ExpandIcon = () => (
   </svg>
 );
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** True when viewport is mobile-width (<1024px). Checked once per open. */
+function isMobileViewport() {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function SarathiPanel({
@@ -86,9 +93,11 @@ export default function SarathiPanel({
   const textareaRef    = useRef(null);
   const dragStartRef   = useRef(null);          // { y: number, startH: number }
   const dynamicHRef    = useRef(null);          // live dvh value during drag
-  const panelSizeRef   = useRef('normal');      // shadow of panelSize for stable callbacks
+  const panelSizeRef   = useRef('full');        // shadow of panelSize for stable callbacks
+  const hasOpenedRef   = useRef(false);         // tracks if panel has been opened before
 
-  const [panelSize, _setPanelSize]       = useState('normal'); // 'peek' | 'normal' | 'full'
+  // Mobile opens fullscreen by default; desktop ignores this (fixed width)
+  const [panelSize, _setPanelSize]       = useState('full'); // 'peek' | 'normal' | 'full'
   const [isMinimizing, setIsMinimizing]  = useState(false);
   const [isDragging, setIsDragging]      = useState(false);
   const [dynamicHeight, setDynamicHeight] = useState(null);    // dvh number during drag; null = use snap
@@ -101,13 +110,21 @@ export default function SarathiPanel({
   // Current height in dvh — dynamic during drag, snap zone otherwise
   const currentDvh = isDragging && dynamicHeight !== null ? dynamicHeight : SNAP[panelSize];
 
+  // ── Reset to full on mobile when panel opens for the first time ───────
+  useEffect(() => {
+    if (isOpen && isMobileViewport() && !hasOpenedRef.current) {
+      setPanelSize('full');
+      hasOpenedRef.current = true;
+    }
+  }, [isOpen]);
+
   // ── macOS-style minimize close ─────────────────────────────────────────
   function handleClose() {
     setIsMinimizing(true);
     setTimeout(() => {
       onClose();
       setIsMinimizing(false);
-    }, 400); // matches the CSS transition duration
+    }, 450); // slightly longer for smoother feel
   }
 
   // ── Drag handle: start ─────────────────────────────────────────────────
@@ -131,6 +148,16 @@ export default function SarathiPanel({
   // ── Drag handle: end + snap ────────────────────────────────────────────
   const onDragEnd = useCallback(() => {
     const h = dynamicHRef.current ?? SNAP[panelSizeRef.current];
+    // If dragged below 18dvh, close the panel entirely (swipe-to-dismiss)
+    if (h < 18) {
+      setPanelSize('peek');
+      setDynamicHeight(null);
+      dynamicHRef.current  = null;
+      dragStartRef.current = null;
+      setIsDragging(false);
+      handleClose();
+      return;
+    }
     // Find nearest snap zone
     const nearest = (Object.keys(SNAP)).reduce((best, name) =>
       Math.abs(SNAP[name] - h) < Math.abs(SNAP[best] - h) ? name : best,
@@ -176,7 +203,7 @@ export default function SarathiPanel({
   // ── Focus textarea when panel opens ───────────────────────────────────
   useEffect(() => {
     if (!isOpen || !textareaRef.current) return;
-    const t = setTimeout(() => textareaRef.current?.focus(), 150);
+    const t = setTimeout(() => textareaRef.current?.focus(), 250);
     return () => clearTimeout(t);
   }, [isOpen]);
 
@@ -226,7 +253,6 @@ export default function SarathiPanel({
 
   return (
     <>
-
 
       {/* ── Mobile backdrop — only for normal/full sizes (peek lets user see screen) ── */}
       {isOpen && panelSize !== 'peek' && (
@@ -283,7 +309,7 @@ export default function SarathiPanel({
               </AnimatedButton>
             </div>
 
-            {/* Minimise button — triggers fast creative animation ─────────── */}
+            {/* Minimise button — triggers smooth close animation ──────────── */}
             <AnimatedButton
               type="button"
               className="active-press sarathi-panel__header-btn"

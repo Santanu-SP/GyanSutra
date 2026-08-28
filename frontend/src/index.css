@@ -493,3 +493,115 @@ p {
     transform: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Mobile Home Page — responsive refinements
+   Makes the Home page comfortable, thumb-friendly, and naturally
+   proportioned on small screens. Desktop remains unchanged.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Hero heading — fluid typography ─────────────────────────────────── */
+.gs-home__heading {
+  font-size: clamp(1.35rem, 5vw, 3.052rem);
+  line-height: 1.25;
+}
+
+.gs-home__subheading {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  line-height: 1.6;
+}
+
+/* ── Mobile-specific home adjustments ────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Tighter section spacing on mobile */
+  .gs-home {
+    gap: 1.5rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Darshan card — no rotation, compact padding */
+  .gs-home__darshan {
+    transform: rotate(0) !important;
+    border-radius: 1rem !important;
+    padding: 0.875rem !important;
+  }
+
+  /* CTAs — stretch to full width for easy thumb reach */
+  .gs-home__cta-row {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .gs-home__cta-primary {
+    width: 100% !important;
+    flex: unset !important;
+  }
+
+  /* Trust badges — tighter gap, smaller on mobile */
+  .gs-home__badges {
+    gap: 0.75rem !important;
+    padding-top: 0.5rem !important;
+  }
+
+  /* Feature cards — compact mobile layout */
+  .gs-home__feature-card {
+    padding: 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .gs-home__features {
+    gap: 0.75rem !important;
+  }
+
+  /* Library section — tighter spacing */
+  .gs-home__library {
+    gap: 1rem !important;
+  }
+
+  .gs-home__cards-grid {
+    gap: 0.75rem !important;
+  }
+
+  /* Coming-soon cards — dimmed with visual indicator */
+  .gs-home__card--coming-soon {
+    opacity: 0.55;
+    pointer-events: none;
+    filter: saturate(0.5);
+  }
+
+  .gs-home__card--coming-soon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, transparent 60%, rgba(0, 0, 0, 0.12) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* ── Tablet adjustments (768px-1023px) ───────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .gs-home__darshan {
+    transform: rotate(0) !important;
+  }
+
+  .gs-home__card--coming-soon {
+    opacity: 0.6;
+    filter: saturate(0.6);
+  }
+}
+
+/* ── Desktop — Coming Soon cards subtle treatment ────────────────────── */
+@media (min-width: 1024px) {
+  .gs-home__card--coming-soon {
+    opacity: 0.7;
+    filter: saturate(0.7);
+  }
+
+  .gs-home__card--coming-soon:hover {
+    opacity: 0.85;
+    filter: saturate(0.85);
+  }
+}
