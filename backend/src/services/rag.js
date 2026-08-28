@@ -199,10 +199,19 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 1000, // Hindi (Devanagari) uses 2-3x more tokens — 1000 prevents mid-sentence cuts
+        max_tokens: 1200,
       });
 
-      let rawAnswer = response.choices[0]?.message?.content?.trim();
+      const choice = response.choices[0];
+      const finishReason = choice?.finish_reason;
+      let rawAnswer = choice?.message?.content?.trim();
+
+      // Skip if model was cut off mid-response by the token limit
+      if (finishReason === 'length') {
+        console.warn(`[RAG] Model ${model} hit token limit (finish_reason=length). Trying next model...`);
+        continue;
+      }
+
       if (rawAnswer) {
         const cleaned = cleanResponse(rawAnswer);
         return cleaned.length > 10 ? cleaned : rawAnswer;
@@ -223,13 +232,16 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
           model,
           messages: chatMessages,
           temperature: 0.2,
-          max_tokens: 1000,
+          max_tokens: 1200,
         });
 
-        let rawAnswer = response.choices[0]?.message?.content?.trim();
+        const choice = response.choices[0];
+        if (choice?.finish_reason === 'length') continue; // skip truncated
+
+        let rawAnswer = choice?.message?.content?.trim();
         if (rawAnswer) {
           const cleaned = cleanResponse(rawAnswer);
-          return cleaned.length > 10 ? cleaned : rawAnswer; // seamless — user sees no difference
+          return cleaned.length > 10 ? cleaned : rawAnswer;
         }
       } catch (err) {
         lastError = err;
