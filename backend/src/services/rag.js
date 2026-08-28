@@ -27,7 +27,6 @@ const OPENROUTER_MODELS = [
 const GEMINI_MODELS = [
   'gemini-3.6-flash',         // Latest frontier model (Aug 2026) — best quality
   'gemini-3.5-flash',         // High-performance, widely used fallback
-  'gemini-2.5-flash',         // Stable proven fallback — still supported
 ];
 
 // Groq free-tier models — used automatically when all Gemini models fail
@@ -48,7 +47,7 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://generativelanguage.googleapis.com/v1beta/openai/',
       apiKey: apiKey,
-      timeout: 10000, // 10-second hard timeout
+      timeout: 25000, // Increased to 25s to prevent false timeouts on heavy generation
       maxRetries: 0,  // Disable automatic SDK retries to fail fast
       defaultHeaders: isOpenRouter ? {
         'HTTP-Referer': 'https://gyansutraapp.pages.dev/',
@@ -70,7 +69,7 @@ function getGroqClient() {
     groqClient = new OpenAI({
       baseURL: 'https://api.groq.com/openai/v1',
       apiKey: groqKey,
-      timeout: 10000,
+      timeout: 25000,
       maxRetries: 0,
     });
   }
