@@ -13,8 +13,8 @@ const { findNearestVerses, collections, getDoc } = require('./firestore');
 // Set lower than 0.72 so more queries get verse-grounded answers.
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.55');
 const TOP_K                = parseInt(process.env.RAG_TOP_K || '6', 10);
-const TOP_CONTEXT          = 3;    // max verses sent to LLM — keeps prompt compact
-const MAX_COMMENTARY_CHARS = 400;  // truncate per-guru commentary — keeps token budget tight
+const TOP_CONTEXT          = 2;    // max verses sent to LLM — 2 is enough for grounding
+const MAX_COMMENTARY_CHARS = 200;  // truncate per-guru commentary — keeps token budget tight
 
 // Primary + fallback model chain (ordered by quality → reliability)
 const OPENROUTER_MODELS = [
@@ -25,9 +25,9 @@ const OPENROUTER_MODELS = [
 ];
 
 const GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.1-pro',
-  'gemini-2.5-flash'
+  'gemini-3.6-flash',         // Latest frontier model (Aug 2026) — best quality
+  'gemini-3.5-flash',         // High-performance, widely used fallback
+  'gemini-2.5-flash',         // Stable proven fallback — still supported
 ];
 
 // ── OpenRouter Client Initialization ──────────────────────────────────────────
@@ -168,7 +168,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model: modelId,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 1200, // compare mode — still needs reasonable length per model
+        max_tokens: 800, // compare mode — each model gives a focused perspective
       }).then(res => ({
         name: modelId.split('/')[1]?.split(':')[0]?.toUpperCase() || modelId,
         text: res.choices[0]?.message?.content?.trim() || 'No content'
@@ -192,7 +192,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 1500, // Enforces complete answers and prevents truncation
+        max_tokens: 700, // Sarathi answers are 150-400 words (~500 tokens max)
       });
 
       let rawAnswer = response.choices[0]?.message?.content?.trim();
