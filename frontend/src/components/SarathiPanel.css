@@ -50,14 +50,14 @@
     opacity: 0;
     /* Extra padding at bottom for translucent bottom nav bar */
     padding-bottom: calc(60px + env(safe-area-inset-bottom));
-    /* Smooth spring for open/close + height snaps */
+    /* Spring easing for open/close and height snaps */
     transition:
-      transform   0.4s  cubic-bezier(0.32, 0.72, 0, 1),
-      opacity     0.3s  ease,
-      height      0.35s cubic-bezier(0.32, 0.72, 0, 1),
+      transform   0.3s  cubic-bezier(0.34, 1.4, 0.64, 1),
+      opacity     0.25s  ease,
+      height      0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
       border-radius 0.3s ease,
       box-shadow  0.3s  ease;
-    transform-origin: bottom right;
+    /* Minimize shrinks toward bottom-right (where the pill lives) */
     box-shadow:
       0 -8px 40px rgba(0, 0, 0, 0.35),
       0 -1px  0   rgba(255, 255, 255, 0.04);
@@ -74,20 +74,21 @@
       0 -2px  0    rgba(255, 255, 255, 0.05);
   }
 
-  /* ── Minimize-to-dismiss animation ─────────────────────────────── */
+  /* ── macOS-style minimize animation ─────────────────────────────── */
+  /* Applied while minimizing — panel collapses toward bottom-right pill */
   .sarathi-panel--open.sarathi-panel--minimizing {
-    transform: scale(0.06) translateY(30px) !important;
-    transform-origin: calc(100% - 2rem) calc(100% - 2rem) !important;
+    transform: scale(0.04) rotate(-5deg) translateY(20px) !important;
+    transform-origin: bottom right !important;
     border-radius: 999px !important;
     opacity: 0 !important;
     box-shadow:
       0 0 0 rgba(0, 0, 0, 0),
       0 0 40px rgba(232, 163, 61, 0.15) !important;
     transition:
-      transform     0.4s  cubic-bezier(0.55, 0, 0.1, 1),
-      opacity       0.35s ease-out,
-      border-radius 0.3s  ease-out,
-      box-shadow    0.4s  ease-out !important;
+      transform     0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+      opacity       0.25s ease-out,
+      border-radius 0.25s  ease-out,
+      box-shadow    0.25s  ease-out !important;
   }
 
   /* Disable transitions during drag */
