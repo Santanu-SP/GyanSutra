@@ -16,7 +16,7 @@ const TOP_K                = parseInt(process.env.RAG_TOP_K || '6', 10);
 const TOP_CONTEXT          = 2;    // max verses sent to LLM — 2 is enough for grounding
 const MAX_COMMENTARY_CHARS = 200;  // truncate per-guru commentary — keeps token budget tight
 
-// Primary + fallback model chain (ordered by quality → reliability)
+// Primary + fallback model chain (ordered by reliability → quality)
 const OPENROUTER_MODELS = [
   'google/gemma-2-9b-it:free',                // Fast, reliable, no thoughts
   'meta-llama/llama-3.3-70b-instruct:free',   // Best free model, but often times out
@@ -24,10 +24,24 @@ const OPENROUTER_MODELS = [
   'openrouter/free'                            // Last-resort wildcard
 ];
 
+// Non-thinking model FIRST — gemini-3.5-flash doesn't waste tokens on reasoning.
+// gemini-3.6-flash is a thinking model whose internal reasoning consumes the
+// max_tokens budget, causing finish_reason='length' on complex prompts.
 const GEMINI_MODELS = [
-  'gemini-3.6-flash',         // Latest frontier model (Aug 2026) — best quality
-  'gemini-3.5-flash',         // High-performance, widely used fallback
+  'gemini-3.5-flash',         // Fast, reliable, no thinking overhead — PRIMARY
+  'gemini-3.6-flash',         // Thinking model — higher quality but needs more tokens
 ];
+
+// Per-model token budget. Thinking models need much more headroom because their
+// internal chain-of-thought counts against max_tokens in the OpenAI compat layer.
+const MODEL_MAX_TOKENS = {
+  'gemini-3.5-flash': 2048,
+  'gemini-3.6-flash': 8192,   // Extra room for thinking + response
+};
+const DEFAULT_MAX_TOKENS = 2048;
+
+// Per-model timeout (ms). Fail fast so fallbacks get a chance.
+const MODEL_TIMEOUT_MS = 15000;
 
 // Groq free-tier models — used automatically when all Gemini models fail
 // Get a free key at: https://console.groq.com/keys
@@ -47,7 +61,7 @@ function getOpenRouterClient() {
     openaiClient = new OpenAI({
       baseURL: isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://generativelanguage.googleapis.com/v1beta/openai/',
       apiKey: apiKey,
-      timeout: 25000, // Increased to 25s to prevent false timeouts on heavy generation
+      timeout: MODEL_TIMEOUT_MS,
       maxRetries: 0,  // Disable automatic SDK retries to fail fast
       defaultHeaders: isOpenRouter ? {
         'HTTP-Referer': 'https://gyansutraapp.pages.dev/',
@@ -69,7 +83,7 @@ function getGroqClient() {
     groqClient = new OpenAI({
       baseURL: 'https://api.groq.com/openai/v1',
       apiKey: groqKey,
-      timeout: 25000,
+      timeout: MODEL_TIMEOUT_MS,
       maxRetries: 0,
     });
   }
@@ -160,6 +174,51 @@ function cleanResponse(raw) {
  * @param {Array<{role: string, content: string}>} chatMessages - Full chat messages array
  * @param {boolean} isCompareMode
  */
+/**
+ * Try a single model call with its own AbortController timeout.
+ * Returns { answer: string|null, error: Error|null, truncated: boolean }
+ */
+async function tryModel(client, model, chatMessages, maxTokens) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+
+  try {
+    const response = await client.chat.completions.create(
+      {
+        model,
+        messages: chatMessages,
+        temperature: 0.2,
+        max_tokens: maxTokens,
+      },
+      { signal: controller.signal },
+    );
+
+    const choice = response.choices[0];
+    const finishReason = choice?.finish_reason;
+    const rawAnswer = choice?.message?.content?.trim() || '';
+
+    if (finishReason === 'length') {
+      console.warn(`[RAG] Model ${model} hit token limit (finish_reason=length, content=${rawAnswer.length} chars).`);
+      // DON'T discard — use the partial response if it has meaningful content
+      if (rawAnswer.length > 80) {
+        return { answer: rawAnswer, error: null, truncated: true };
+      }
+      return { answer: null, error: null, truncated: true };
+    }
+
+    if (rawAnswer) {
+      return { answer: rawAnswer, error: null, truncated: false };
+    }
+    return { answer: null, error: null, truncated: false };
+  } catch (err) {
+    const msg = controller.signal.aborted ? `timeout after ${MODEL_TIMEOUT_MS}ms` : err.message;
+    console.warn(`[RAG] Model ${model} failed: ${msg}`);
+    return { answer: null, error: err, truncated: false };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function callLlmWithFallback(chatMessages, isCompareMode = false) {
   const openai = getOpenRouterClient();
 
@@ -174,7 +233,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
         model: modelId,
         messages: chatMessages,
         temperature: 0.2,
-        max_tokens: 1000, // compare mode — enough for full structured responses
+        max_tokens: 1000,
       }).then(res => ({
         name: modelId.split('/')[1]?.split(':')[0]?.toUpperCase() || modelId,
         text: res.choices[0]?.message?.content?.trim() || 'No content'
@@ -189,35 +248,26 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
 
   // ── Phase 1: Try primary provider (Gemini or OpenRouter) ──────────────────
   let lastError = null;
+  let bestPartialAnswer = null; // Keep the best truncated answer as safety net
   const apiKey = process.env.GEMINI_API_KEY || '';
   const modelsToTry = apiKey.startsWith('sk-or-') ? OPENROUTER_MODELS : GEMINI_MODELS;
 
   for (const model of modelsToTry) {
-    try {
-      const response = await openai.chat.completions.create({
-        model,
-        messages: chatMessages,
-        temperature: 0.2,
-        max_tokens: 1200,
-      });
+    const maxTokens = MODEL_MAX_TOKENS[model] || DEFAULT_MAX_TOKENS;
+    const result = await tryModel(openai, model, chatMessages, maxTokens);
 
-      const choice = response.choices[0];
-      const finishReason = choice?.finish_reason;
-      let rawAnswer = choice?.message?.content?.trim();
+    if (result.error) lastError = result.error;
 
-      // Skip if model was cut off mid-response by the token limit
-      if (finishReason === 'length') {
-        console.warn(`[RAG] Model ${model} hit token limit (finish_reason=length). Trying next model...`);
-        continue;
+    if (result.answer) {
+      const cleaned = cleanResponse(result.answer);
+      if (!result.truncated) {
+        // Clean, complete response — return immediately
+        return cleaned.length > 10 ? cleaned : result.answer;
       }
-
-      if (rawAnswer) {
-        const cleaned = cleanResponse(rawAnswer);
-        return cleaned.length > 10 ? cleaned : rawAnswer;
+      // Truncated but has content — save as fallback, try next model for a complete one
+      if (!bestPartialAnswer || cleaned.length > bestPartialAnswer.length) {
+        bestPartialAnswer = cleaned.length > 10 ? cleaned : result.answer;
       }
-    } catch (err) {
-      lastError = err;
-      console.warn(`[RAG] Gemini model ${model} failed (${err.message}). Trying next...`);
     }
   }
 
@@ -226,26 +276,26 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
   if (groq) {
     console.info('[RAG] Switching to Groq fallback provider...');
     for (const model of GROQ_MODELS) {
-      try {
-        const response = await groq.chat.completions.create({
-          model,
-          messages: chatMessages,
-          temperature: 0.2,
-          max_tokens: 1200,
-        });
+      const result = await tryModel(groq, model, chatMessages, DEFAULT_MAX_TOKENS);
 
-        const choice = response.choices[0];
-        if (choice?.finish_reason === 'length') continue; // skip truncated
+      if (result.error) lastError = result.error;
 
-        let rawAnswer = choice?.message?.content?.trim();
-        if (rawAnswer) {
-          const cleaned = cleanResponse(rawAnswer);
-          return cleaned.length > 10 ? cleaned : rawAnswer;
+      if (result.answer) {
+        const cleaned = cleanResponse(result.answer);
+        if (!result.truncated) {
+          return cleaned.length > 10 ? cleaned : result.answer;
         }
-      } catch (err) {
-        lastError = err;
+        if (!bestPartialAnswer || cleaned.length > bestPartialAnswer.length) {
+          bestPartialAnswer = cleaned.length > 10 ? cleaned : result.answer;
+        }
       }
     }
+  }
+
+  // ── Phase 3: Use best partial answer if all complete attempts failed ────────
+  if (bestPartialAnswer) {
+    console.warn('[RAG] All models truncated. Using best partial response.');
+    return bestPartialAnswer;
   }
 
   throw new Error(lastError ? `AI model connection failed: ${lastError.message}` : 'All AI models timed out.');
