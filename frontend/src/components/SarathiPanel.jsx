@@ -5,11 +5,11 @@
  * This is not a chatbot. It is a companion for scripture reflection.
  *
  * Layout behavior:
- *   Desktop (≥1024px) : Fixed right side panel, 380px. Content shifts left. (unchanged)
+ *   Desktop (≥1024px) : Fixed right side panel. Content shifts left.
  *   Mobile  (<1024px) :
- *     - Opens FULLSCREEN (90dvh) on first open — user drags handle to resize
- *     - Resizable bottom sheet (drag handle → snap zones: peek 28dvh / normal 55dvh / full 90dvh)
- *     - Smooth spring open animation + polished minimize-to-pill close
+ *     - Opens at a comfortable reading height and can expand to full height
+ *     - Resizable bottom sheet with three snap zones
+ *     - Smooth open, resize, and minimize motion
  *     - Size-snap buttons in header for quick height switching
  *
  * Props:
@@ -25,7 +25,7 @@ import AnimatedButton from './AnimatedButton';
 import './SarathiPanel.css';
 
 // Snap zone heights (dvh)
-const SNAP = { peek: 28, normal: 55, full: 90 };
+const SNAP = { peek: 32, normal: 72, full: 94 };
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -46,17 +46,15 @@ const SarathiFlame = ({ className = 'sarathi-flame' }) => (
 );
 
 const NormalIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="13" height="13">
-    <rect x="1" y="6"  width="14" height="9" rx="1.5" fill="currentColor" opacity="0.9" />
-    <rect x="4" y="3"  width="8"  height="2" rx="1"   fill="currentColor" opacity="0.4" />
+  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <path d="M4 8.5h12v7H4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    <path d="M7 4.5h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
 
 const ExpandIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="13" height="13">
-    <rect x="1" y="1"  width="14" height="14" rx="1.5" fill="currentColor" opacity="0.9" />
-    <path d="M5.5 6L8 3.5L10.5 6" stroke="white" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
-    <path d="M5.5 10L8 12.5L10.5 10" stroke="white" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
+  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <path d="M4 7V4h3M13 4h3v3M16 13v3h-3M7 16H4v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -83,11 +81,11 @@ export default function SarathiPanel({
   const textareaRef    = useRef(null);
   const dragStartRef   = useRef(null);          // { y: number, startH: number }
   const dynamicHRef    = useRef(null);          // live dvh value during drag
-  const panelSizeRef   = useRef('full');        // shadow of panelSize for stable callbacks
+  const panelSizeRef   = useRef('normal');      // shadow of panelSize for stable callbacks
   const hasOpenedRef   = useRef(false);         // tracks if panel has been opened before
 
-  // Mobile opens fullscreen by default; desktop ignores this (fixed width)
-  const [panelSize, _setPanelSize]       = useState('full'); // 'peek' | 'normal' | 'full'
+  // Desktop ignores panel height; mobile opens at a comfortable reading height.
+  const [panelSize, _setPanelSize]       = useState('normal'); // 'peek' | 'normal' | 'full'
   const [isMinimizing, setIsMinimizing]  = useState(false);
   const [isDragging, setIsDragging]      = useState(false);
   const [dynamicHeight, setDynamicHeight] = useState(null);    // dvh number during drag; null = use snap
@@ -98,21 +96,21 @@ export default function SarathiPanel({
   // Current height in dvh — dynamic during drag, snap zone otherwise
   const currentDvh = isDragging && dynamicHeight !== null ? dynamicHeight : SNAP[panelSize];
 
-  // ── Reset to full on mobile when panel opens for the first time ───────
+  // ── Set a comfortable initial height on mobile ───────────────────────
   useEffect(() => {
     if (isOpen && isMobileViewport() && !hasOpenedRef.current) {
-      setPanelSize('full');
+      setPanelSize('normal');
       hasOpenedRef.current = true;
     }
   }, [isOpen]);
 
-  // ── macOS-style minimize close ─────────────────────────────────────────
+  // ── Minimize panel ────────────────────────────────────────────────────
   const handleClose = useCallback(() => {
     setIsMinimizing(true);
     setTimeout(() => {
       onClose();
       setIsMinimizing(false);
-    }, 450); // slightly longer for smoother feel
+    }, 260);
   }, [onClose]);
 
   // ── Drag handle: start ─────────────────────────────────────────────────
@@ -250,18 +248,20 @@ export default function SarathiPanel({
           <div className="sarathi-panel__identity">
             <SarathiFlame />
             <div className="sarathi-panel__identity-text">
-              <h2 className="sarathi-panel__title">Sarathi</h2>
-              <p className="sarathi-panel__title-devanagari">सारथि</p>
+              <h2 className="sarathi-panel__title">
+                Sarathi <span lang="hi">सारथि</span>
+              </h2>
+              <p className="sarathi-panel__subtitle">Scripture guide</p>
             </div>
           </div>
 
           {/* Header Controls (Mobile & Desktop) ────────────────────────── */}
           <div className="sarathi-panel__header-btns">
             {/* Maximise / Restore button (Mobile only, Desktop is fixed) */}
-            <div className="sarathi-panel__size-btns" aria-label="Resize panel">
+            <div className="sarathi-panel__size-btns" role="group" aria-label="Resize panel">
               <AnimatedButton
                 type="button"
-                className="active-press sarathi-panel__header-btn"
+                className="active-press sarathi-panel__header-btn sarathi-panel__header-btn--resize"
                 onClick={() => setPanelSize(panelSize === 'full' ? 'normal' : 'full')}
                 aria-label={panelSize === 'full' ? "Restore panel size" : "Maximise panel"}
                 title={panelSize === 'full' ? "Restore" : "Maximise"}
@@ -273,15 +273,18 @@ export default function SarathiPanel({
             {/* Close button */}
             <AnimatedButton
               type="button"
-              className="active-press sarathi-panel__header-btn"
+              className="active-press sarathi-panel__header-btn sarathi-panel__header-btn--minimize"
               onClick={handleClose}
-              aria-label="Close Sarathi"
-              title="Close"
+              aria-label="Minimize Sarathi"
+              title="Minimize Sarathi"
               id="close-sarathi-btn"
             >
-              {/* Horizontal bar = minimise metaphor */}
-              <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" width="14" height="14">
-                <path d="M3 9H15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <svg className="sarathi-panel__minimize-icon sarathi-panel__minimize-icon--mobile" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <svg className="sarathi-panel__minimize-icon sarathi-panel__minimize-icon--desktop" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 4h5v12H4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                <path d="M11 10h5M13.5 7.5L16 10l-2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </AnimatedButton>
           </div>
@@ -299,7 +302,10 @@ export default function SarathiPanel({
                   className="active-press sarathi-panel__path-btn"
                   onClick={() => setQuestion(prompt)}
                 >
-                  {prompt}
+                  <span>{prompt}</span>
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M6 10h8M11 7l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </AnimatedButton>
               ))}
             </div>
@@ -316,7 +322,7 @@ export default function SarathiPanel({
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`sarathi-msg sarathi-msg--${message.role} sarathi-msg-enter`}
+              className={`sarathi-msg sarathi-msg--${message.role}${message.id === 'welcome' ? ' sarathi-msg--welcome' : ''} sarathi-msg-enter`}
             >
               <p className="sarathi-msg__label">
                 {message.role === 'user' ? 'You' : 'Sarathi'}
@@ -357,7 +363,7 @@ export default function SarathiPanel({
               className="sarathi-panel__textarea"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              rows={3}
+              rows={2}
               placeholder="Ask about a verse or idea"
               disabled={isLoading}
               aria-label="Your question for Sarathi"
@@ -370,7 +376,7 @@ export default function SarathiPanel({
             />
             <div className="sarathi-panel__form-footer">
               <p className="sarathi-panel__grounded-note">
-                Responses cite chapter &amp; verse
+                Answers include chapter and verse
               </p>
               <AnimatedButton
                 type="submit"

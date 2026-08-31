@@ -54,18 +54,19 @@ export default function Home() {
           >
             <p className="gs-home__eyebrow">Gyan Sutra Library</p>
             <h1 className="gs-home__heading">
-              Read the Bhagavad Gita and Ramayana
+              Read the <span>Bhagavad Gita</span> and Ramayana
             </h1>
             <p className="gs-home__subheading">
-              Sanskrit text, transliteration, translation, and commentary in one focused reading space.
+              Original Sanskrit with transliteration, English translation, and clear commentary.
             </p>
             <div className="gs-home__cta-row">
               <Link to="/bhagavad-gita" className="gs-home__cta-primary">
-                Start with the Gita
+                Read the Bhagavad Gita
                 <span aria-hidden="true">→</span>
               </Link>
               <a href="#text-library" className="gs-home__text-link">
-                View both texts
+                Browse the library
+                <span aria-hidden="true">↓</span>
               </a>
             </div>
           </motion.div>

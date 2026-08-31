@@ -113,7 +113,7 @@ export default function App() {
       id: 'welcome',
       role: 'sarathi',
       content:
-        'Ask about a verse or idea. I will answer from the texts in this library.',
+        'Ask about a verse, teaching, or difficult idea. I will answer from the texts in this library.',
     },
   ]);
 
