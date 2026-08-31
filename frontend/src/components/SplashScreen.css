@@ -74,3 +74,9 @@
   /* Opacity handled by framer-motion */
   min-height: 100vh;
 }
+
+@media (display-mode: standalone) {
+  .gs-splash {
+    display: none;
+  }
+}

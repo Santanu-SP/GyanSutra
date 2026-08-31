@@ -174,7 +174,6 @@ export default function IlluminatedVerseCard({
     chapterNumber,
     verseNumber,
     sanskrit,
-    transliteration,
     translationEnglish,
     translationHindi,
     explanationEnglish,

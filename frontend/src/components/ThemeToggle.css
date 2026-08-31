@@ -28,3 +28,17 @@
   width: 16px;
   height: 16px;
 }
+
+@media (max-width: 767px) {
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+    border-color: transparent;
+    border-radius: 999px;
+  }
+
+  .theme-toggle__icon svg {
+    width: 19px;
+    height: 19px;
+  }
+}

@@ -8,7 +8,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './SplashScreen.css';
 
 export default function SplashScreen({ children }) {
-  const [showSplash, setShowSplash] = useState(true);
+  const [shouldAnimateSplash] = useState(
+    () => !window.matchMedia('(display-mode: standalone)').matches && sessionStorage.getItem('gyansutra-splash-seen') !== 'true'
+  );
+  const [showSplash, setShowSplash] = useState(shouldAnimateSplash);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -18,14 +21,16 @@ export default function SplashScreen({ children }) {
     const handleReduceMotionChange = (e) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener('change', handleReduceMotionChange);
 
-    // Give it enough time to play the flagship animation (3.8 seconds)
-    const timer = setTimeout(() => setShowSplash(false), 3800);
+    if (!showSplash) return () => mediaQuery.removeEventListener('change', handleReduceMotionChange);
+
+    sessionStorage.setItem('gyansutra-splash-seen', 'true');
+    const timer = setTimeout(() => setShowSplash(false), 950);
 
     return () => {
       mediaQuery.removeEventListener('change', handleReduceMotionChange);
       clearTimeout(timer);
     };
-  }, []);
+  }, [showSplash]);
 
   if (prefersReducedMotion) {
     return (
@@ -33,6 +38,10 @@ export default function SplashScreen({ children }) {
         {children}
       </div>
     );
+  }
+
+  if (!shouldAnimateSplash) {
+    return children;
   }
 
   return (

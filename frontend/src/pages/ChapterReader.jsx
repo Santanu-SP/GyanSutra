@@ -17,7 +17,6 @@ import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendationsRail from '../components/RecommendationsRail';
 import { usePWAInstall } from '../hooks/usePWAInstall';
-import { filterVerses } from '../utils/verseUtils';
 import AnimatedButton from '../components/AnimatedButton';
 
 import './ChapterReader.css';

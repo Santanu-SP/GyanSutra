@@ -26,6 +26,13 @@ import './SarathiPanel.css';
 
 // Snap zone heights (dvh)
 const SNAP = { peek: 28, normal: 55, full: 90 };
+const LOADING_STAGES = [
+  'Searching the scriptures…',
+  'Retrieving relevant verses…',
+  'Consulting the Bhagavad Gita…',
+  'Reflecting on the teaching…',
+  'Composing the answer…',
+];
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -42,15 +49,6 @@ const SarathiFlame = ({ className = 'sarathi-flame' }) => (
       opacity="0.5"
     />
     <ellipse cx="16" cy="28" rx="7" ry="1.75" fill="currentColor" opacity="0.2" />
-  </svg>
-);
-
-// Size snap button icons
-const PeekIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="13" height="13">
-    <rect x="1" y="11" width="14" height="4" rx="1.5" fill="currentColor" opacity="0.9" />
-    <rect x="4" y="8"  width="8"  height="2" rx="1"   fill="currentColor" opacity="0.4" />
-    <rect x="6" y="5"  width="4"  height="2" rx="1"   fill="currentColor" opacity="0.2" />
   </svg>
 );
 
@@ -81,7 +79,6 @@ function isMobileViewport() {
 export default function SarathiPanel({
   isOpen,
   onClose,
-  onOpen,
   messages,
   question,
   setQuestion,
@@ -119,13 +116,13 @@ export default function SarathiPanel({
   }, [isOpen]);
 
   // ── macOS-style minimize close ─────────────────────────────────────────
-  function handleClose() {
+  const handleClose = useCallback(() => {
     setIsMinimizing(true);
     setTimeout(() => {
       onClose();
       setIsMinimizing(false);
     }, 450); // slightly longer for smoother feel
-  }
+  }, [onClose]);
 
   // ── Drag handle: start ─────────────────────────────────────────────────
   function startDrag(clientY) {
@@ -168,7 +165,7 @@ export default function SarathiPanel({
     dynamicHRef.current  = null;
     dragStartRef.current = null;
     setIsDragging(false);
-  }, []);
+  }, [handleClose]);
 
   // Attach document-level move/up listeners only while dragging
   useEffect(() => {
@@ -208,14 +205,6 @@ export default function SarathiPanel({
   }, [isOpen]);
 
   // ── Live elapsed timer + rotating stage messages while loading ───────────
-  const LOADING_STAGES = [
-    'Searching the scriptures…',
-    'Retrieving relevant verses…',
-    'Consulting the Bhagavad Gita…',
-    'Reflecting on the teaching…',
-    'Composing the answer…',
-  ];
-
   useEffect(() => {
     if (!isLoading) {
       setElapsedSeconds(0);
@@ -238,8 +227,7 @@ export default function SarathiPanel({
     const handler = (e) => { if (e.key === 'Escape' && isOpen) handleClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   const showSuggestions = messages.length <= 1;
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getDailyVerse } from '../services/api';
 import { useScrollReveal } from '../hooks/useScrollReveal';
@@ -95,19 +95,12 @@ const SOURCES = [
 
 export default function Home({ onAskPrompt = () => {} }) {
   const [dailyVerse, setDailyVerse] = useState(null);
-  const [isConsulting, setIsConsulting] = useState(false);
-  
-  const heroRef = useScrollReveal();
+
   const featuresRef = useScrollReveal();
   const libraryRef = useScrollReveal();
 
   const handleConsultClick = () => {
-    if (isConsulting) return;
-    setIsConsulting(true);
-    setTimeout(() => {
-      onAskPrompt('What is the heart of Sanatan Dharma?');
-      setIsConsulting(false);
-    }, 600);
+    onAskPrompt('What is the heart of Sanatan Dharma?');
   };
 
   useEffect(() => {
@@ -131,10 +124,10 @@ export default function Home({ onAskPrompt = () => {} }) {
           <div className="lg:col-span-7 space-y-3 sm:space-y-6 lg:pt-8">
             <motion.div variants={itemVariants} className="space-y-2 sm:space-y-4">
               <h1 className="gs-home__heading max-w-3xl font-serif font-normal leading-snug text-[color:var(--text-primary)]">
-                Eternal Wisdom of Sanatana Dharma
+                Read timeless wisdom with clarity
               </h1>
               <p className="gs-home__subheading max-w-2xl leading-5 text-[color:var(--text-secondary)]">
-                Enter a contemplative library of living scripture, where every text is presented like a revered manuscript and every inquiry unfolds with stillness, depth, and grace.
+                Explore the Bhagavad Gita and Ramayana in a calm, focused reading space—then ask Sarathi when a verse needs context.
               </p>
             </motion.div>
 
@@ -153,10 +146,10 @@ export default function Home({ onAskPrompt = () => {} }) {
                 {/* Inner button */}
                 <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-[11px] bg-[color:var(--bg-surface)] px-6 py-3 transition-colors">
                   <span className="text-sm font-medium text-amber-500/90 group-hover:text-amber-400 transition-colors">
-                    Enter the Library
+                    Browse the library
                   </span>
                   <span className="text-[10px] font-normal text-amber-500/50 tracking-wide group-hover:text-amber-500/70 transition-colors">
-                    Sacred Manuscripts
+                    Gita · Ramayana
                   </span>
                 </span>
               </AnimatedButton>
@@ -166,8 +159,8 @@ export default function Home({ onAskPrompt = () => {} }) {
                 className="group inline-flex items-center gap-2 text-sm font-medium text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]"
               >
                 Consult Sarathi
-                <div className="relative flex h-4 w-4 items-center justify-center overflow-hidden">
-                  <span className={`absolute transition-transform duration-500 ease-[cubic-bezier(0.8,0,0.2,1)] ${isConsulting ? 'translate-x-[200%] opacity-0' : 'group-hover:translate-x-1'}`}>→</span>
+                <div className="relative flex h-4 w-4 items-center justify-center overflow-hidden" aria-hidden="true">
+                  <span className="absolute transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </div>
               </AnimatedButton>
             </motion.div>
@@ -177,19 +170,19 @@ export default function Home({ onAskPrompt = () => {} }) {
                 <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                 </svg>
-                Ad-Free & Private
+                Private by design
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                Complete Scriptures
+                Source-led reading
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                AI Spiritual Guide
+                Guided explanations
               </span>
             </motion.div>
           </div>
@@ -201,7 +194,7 @@ export default function Home({ onAskPrompt = () => {} }) {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_35%)]" />
             <div className="relative space-y-5">
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
+              <div className="gs-home__darshan-label flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
                 <span>Daily Darshan</span>
                 <span className="text-amber-400">Featured Sutra</span>
               </div>
@@ -214,7 +207,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                   {dailyVerse ? `\u2014 ${dailyVerse.translationEnglish}` : "Begin with one sacred text, return each day, and let disciplined reflection become lived wisdom."}
                 </p>
                 {dailyVerse && (
-                  <div className="mt-2 flex items-center justify-between text-xs text-amber-500/80">
+                  <div className="gs-home__darshan-actions mt-2 flex items-center justify-between text-xs text-amber-500/80">
                     <span>Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}</span>
                     <AnimatedButton
                       type="button"
@@ -245,14 +238,14 @@ export default function Home({ onAskPrompt = () => {} }) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-amber-500/80">
-                  Curated Journey
+                  Begin your study
                 </p>
                 <h2 className="mt-2 font-serif text-2xl font-normal text-[color:var(--text-primary)]">
-                  A Living Sanctuary of Texts
+                  Scripture, made easier to return to
                 </h2>
               </div>
               <p className="max-w-md text-sm leading-7 text-[color:var(--text-muted)]">
-                Move from dialogue to revelation, from epic action to inward inquiry, through a library shaped for reverence and study.
+                Move chapter by chapter, keep your place, and focus on the text without visual noise.
               </p>
             </div>
           </article>
@@ -288,7 +281,7 @@ export default function Home({ onAskPrompt = () => {} }) {
               </h2>
             </div>
             <p className="max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
-              Explore each text through an immersive reading experience designed with quiet depth, ceremonial restraint, and precise modern craft.
+              Choose a text and continue at your own pace. More collections will be added as reliable editions are prepared.
             </p>
           </div>
 
@@ -301,12 +294,14 @@ export default function Home({ onAskPrompt = () => {} }) {
                     label: 'Sacred Text',
                   };
 
+                  const SourceCard = source.available ? Link : 'article';
+
                   return (
-                    <Link
+                    <SourceCard
                       key={source.id}
-                      to={`/${source.id}`}
+                      {...(source.available ? { to: `/${source.id}` } : { 'aria-disabled': true })}
                       style={{ '--stagger-idx': idx }}
-                      className={`stagger-item hover-lift group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20${!source.available ? ' gs-home__card--coming-soon' : ''}`}
+                      className={`stagger-item group relative overflow-hidden rounded-xl border border-amber-700/20 bg-[color:var(--bg-surface)] p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.24)] transition duration-300${source.available ? ' hover-lift hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-amber-900/20' : ' gs-home__card--coming-soon'}`}
                     >
                       <div className={`absolute inset-0 bg-gradient-to-br ${style.accent} opacity-80 transition duration-300 group-hover:opacity-100`} />
                       <div className="absolute inset-[1px] rounded-[calc(2rem-1px)] border border-white/[0.04]" />
@@ -348,7 +343,7 @@ export default function Home({ onAskPrompt = () => {} }) {
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </SourceCard>
                   );
                 })}
           </div>

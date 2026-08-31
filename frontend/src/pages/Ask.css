@@ -1,7 +1,20 @@
 .ask-page {
   max-width: var(--max-width-prose);
   margin: 0 auto;
+  padding-inline: var(--space-6);
   padding-bottom: var(--space-16);
+}
+
+@media (max-width: 767px) {
+  .ask-page {
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-bottom: var(--space-10);
+  }
+
+  .ask-page__header {
+    padding-top: var(--space-6);
+  }
 }
 
 .ask-page__header {

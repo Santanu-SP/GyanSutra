@@ -1,9 +1,12 @@
 {
   "name": "Gyan Sutra — Thread of Knowledge",
   "short_name": "Gyan Sutra",
+  "id": "./",
+  "scope": "./",
   "description": "Explore the Bhagavad Gita and Valmiki Ramayana through authentic texts, semantic search, related verses, commentaries, and Sarathi.",
   "start_url": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#3B2245",
   "background_color": "#F6EFDD",
   "orientation": "portrait-primary",

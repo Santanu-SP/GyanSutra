@@ -10,7 +10,7 @@
  * @param {Object} [filters] - Optional filter criteria
  * @returns {Array} Filtered verses
  */
-export function filterVerses(verses, filters = {}) {
+export function filterVerses(verses, _filters = {}) {
   if (!verses || !Array.isArray(verses)) return [];
   return verses;
 }

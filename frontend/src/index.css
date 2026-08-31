@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Martel:wght@300;400;600;700;900&family=Hind:wght@300;400;500;600&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
 @import "tailwindcss";
 @import './design-system/tokens.css';
 
@@ -502,8 +503,10 @@ p {
 
 /* ── Hero heading — fluid typography ─────────────────────────────────── */
 .gs-home__heading {
-  font-size: clamp(1.35rem, 5vw, 3.052rem);
-  line-height: 1.25;
+  font-size: clamp(2rem, 7.5vw, 3.052rem);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
 .gs-home__subheading {
@@ -515,9 +518,18 @@ p {
 @media (max-width: 767px) {
   /* Tighter section spacing on mobile */
   .gs-home {
-    gap: 1.5rem !important;
-    padding-top: 0.75rem !important;
-    padding-bottom: 2rem !important;
+    gap: 1.75rem !important;
+    padding: 1.25rem max(1rem, env(safe-area-inset-right)) 2.5rem max(1rem, env(safe-area-inset-left)) !important;
+  }
+
+  .gs-home__heading {
+    font-size: clamp(2.05rem, 9.2vw, 2.8rem);
+  }
+
+  .gs-home__subheading {
+    max-width: 35rem;
+    font-size: 1rem;
+    line-height: 1.55;
   }
 
   /* Darshan card — no rotation, compact padding */
@@ -525,6 +537,24 @@ p {
     transform: rotate(0) !important;
     border-radius: 1rem !important;
     padding: 0.875rem !important;
+    border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .gs-home__darshan-label {
+    gap: 0.75rem;
+    letter-spacing: 0.14em !important;
+  }
+
+  .gs-home__darshan-actions {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .gs-home__darshan-actions button {
+    min-height: 40px;
+    padding-inline: 0.875rem;
   }
 
   /* CTAs — stretch to full width for easy thumb reach */
@@ -536,18 +566,36 @@ p {
   .gs-home__cta-primary {
     width: 100% !important;
     flex: unset !important;
+    min-height: 54px;
+  }
+
+  .gs-home__cta-row > button:last-child {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
   }
 
   /* Trust badges — tighter gap, smaller on mobile */
   .gs-home__badges {
-    gap: 0.75rem !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem 0.75rem !important;
     padding-top: 0.5rem !important;
+  }
+
+  .gs-home__badges > span {
+    min-width: 0;
   }
 
   /* Feature cards — compact mobile layout */
   .gs-home__feature-card {
-    padding: 1rem !important;
+    padding: 1.125rem !important;
     border-radius: 1rem !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .gs-home__feature-card button {
+    min-height: 44px;
   }
 
   .gs-home__features {
@@ -560,14 +608,20 @@ p {
   }
 
   .gs-home__cards-grid {
-    gap: 0.75rem !important;
+    gap: 0.875rem !important;
+  }
+
+  .gs-home__cards-grid > * {
+    padding: 1.125rem !important;
+    border-radius: 1rem !important;
+    box-shadow: var(--shadow-sm) !important;
   }
 
   /* Coming-soon cards — dimmed with visual indicator */
   .gs-home__card--coming-soon {
-    opacity: 0.55;
-    pointer-events: none;
-    filter: saturate(0.5);
+    opacity: 0.62;
+    cursor: default;
+    filter: saturate(0.55);
   }
 
   .gs-home__card--coming-soon::after {
@@ -578,6 +632,16 @@ p {
     background: linear-gradient(135deg, transparent 60%, rgba(0, 0, 0, 0.12) 100%);
     pointer-events: none;
     z-index: 1;
+  }
+}
+
+@media (max-width: 360px) {
+  .gs-home__badges {
+    grid-template-columns: 1fr;
+  }
+
+  .gs-home__darshan-label span:last-child {
+    display: none;
   }
 }
 

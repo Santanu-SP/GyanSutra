@@ -48,6 +48,7 @@ const VerseDetail   = lazyWithRetry(() => import('./pages/VerseDetail'));
 const Ramayana      = lazyWithRetry(() => import('./pages/Ramayana'));
 const KandaReader   = lazyWithRetry(() => import('./pages/KandaReader'));
 const FAQ           = lazyWithRetry(() => import('./pages/FAQ'));
+const Ask           = lazyWithRetry(() => import('./pages/Ask'));
 
 // Suggested conversation starters — shown when panel is first opened
 const SARATHI_PROMPTS = [
@@ -182,7 +183,7 @@ export default function App() {
         <SEOHead />
         {/* ── Fixed Header ── */}
       <header className={`gs-header${isSarathiOpen ? ' gs-header--sarathi-open' : ''}`}>
-        <nav className="gs-header__nav">
+        <div className="gs-header__nav">
           {/* Brand */}
           <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra — Home">
             <img
@@ -200,10 +201,10 @@ export default function App() {
           <div className="gs-header__right">
             {/* Desktop nav links */}
             <nav className="gs-header__nav-links" aria-label="Primary navigation">
-              <Link to="/" className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
-              <Link to="/bhagavad-gita" className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
-              <Link to="/ramayana" className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
-              <Link to="/faq" className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
+              <Link to="/" aria-current={location.pathname === '/' ? 'page' : undefined} className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
+              <Link to="/bhagavad-gita" aria-current={location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
+              <Link to="/ramayana" aria-current={location.pathname.startsWith('/ramayana') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
+              <Link to="/faq" aria-current={location.pathname.startsWith('/faq') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
             </nav>
 
             {/* Global search — hidden on small mobile */}
@@ -213,6 +214,17 @@ export default function App() {
 
             {/* Right actions */}
             <div className="gs-header__actions">
+              <Link
+                to="/search"
+                className="gs-header__mobile-search"
+                aria-label="Search scripture"
+                aria-current={location.pathname === '/search' ? 'page' : undefined}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+                </svg>
+              </Link>
               <AnimatedButton
                 className="sarathi-trigger group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
                 onClick={() => setIsSarathiOpen(true)}
@@ -230,7 +242,7 @@ export default function App() {
               <ThemeToggle />
             </div>
           </div>
-        </nav>
+        </div>
       </header>
 
       {/* ── App body — shifts right on desktop when Sarathi is open ── */}
@@ -249,6 +261,7 @@ export default function App() {
                 <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
                 <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
                 <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
+                <Route path="/ask" element={<PageTransition><Ask /></PageTransition>} />
                 <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
               </Routes>
             </AnimatePresence>
@@ -261,7 +274,6 @@ export default function App() {
       <SarathiPanel
         isOpen={isSarathiOpen}
         onClose={() => setIsSarathiOpen(false)}
-        onOpen={() => setIsSarathiOpen(true)}
         messages={messages}
         question={question}
         setQuestion={setQuestion}
@@ -276,6 +288,7 @@ export default function App() {
           to="/"
           className={`gs-bottom-nav__item${location.pathname === '/' ? ' gs-bottom-nav__item--active' : ''}`}
           aria-label="Home"
+          aria-current={location.pathname === '/' ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25a.75.75 0 00-.75-.75h-6a.75.75 0 00-.75.75V21.75H3.75A.75.75 0 013 21V9.75z" />
@@ -284,21 +297,23 @@ export default function App() {
         </Link>
 
         <Link
-          to="/search"
-          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Search"
+          to="/bhagavad-gita"
+          className={`gs-bottom-nav__item${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') || location.pathname.startsWith('/verses') ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Read the Bhagavad Gita"
+          aria-current={location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') || location.pathname.startsWith('/verses') ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25A2.25 2.25 0 016.75 3H12v16.5H6.75a2.25 2.25 0 00-2.25 1.125V5.25zM19.5 5.25A2.25 2.25 0 0017.25 3H12v16.5h5.25a2.25 2.25 0 012.25 1.125V5.25z" />
           </svg>
-          Search
+          Gita
         </Link>
+
         <button
           type="button"
-          className={`gs-bottom-nav__item${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
-          onClick={() => setIsSarathiOpen(true)}
-          aria-label="Open Sarathi"
+          className={`gs-bottom-nav__item gs-bottom-nav__item--sarathi${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
+          onClick={() => setIsSarathiOpen((open) => !open)}
+          aria-label={isSarathiOpen ? 'Close Sarathi' : 'Open Sarathi'}
+          aria-expanded={isSarathiOpen}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -315,9 +330,22 @@ export default function App() {
           Sarathi
         </button>
         <Link
+          to="/search"
+          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Search"
+          aria-current={location.pathname === '/search' ? 'page' : undefined}
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+          </svg>
+          Search
+        </Link>
+        <Link
           to="/faq"
           className={`gs-bottom-nav__item${location.pathname === '/faq' ? ' gs-bottom-nav__item--active' : ''}`}
           aria-label="FAQ"
+          aria-current={location.pathname === '/faq' ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <circle cx="12" cy="12" r="10" />
