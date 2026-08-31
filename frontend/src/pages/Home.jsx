@@ -74,15 +74,18 @@ export default function Home() {
 
             {dailyVerseState === 'loading' && (
               <div className="gs-home__darshan-status gs-home__darshan-status--loading" role="status">
-                <span className="gs-home__darshan-loader" aria-hidden="true" />
-                <span>Preparing today’s verse</span>
+                <span className="sr-only">Preparing today’s verse</span>
+                <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--sanskrit" aria-hidden="true" />
+                <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--translation" aria-hidden="true" />
+                <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--action" aria-hidden="true" />
               </div>
             )}
 
             {dailyVerseState === 'unavailable' && (
               <div className="gs-home__darshan-status">
-                <p>Today’s verse is not available right now.</p>
-                <Link to="/bhagavad-gita">Browse the Gita</Link>
+                <p className="gs-home__darshan-status-title">Today’s verse will return soon.</p>
+                <p>You can continue reading the Bhagavad Gita in the meantime.</p>
+                <Link to="/bhagavad-gita">Browse the Bhagavad Gita <span aria-hidden="true">→</span></Link>
               </div>
             )}
 
@@ -91,16 +94,24 @@ export default function Home() {
                 <p className="gs-home__darshan-sanskrit devanagari">
                   {dailyVerse.sanskrit}
                 </p>
-                <p className="gs-home__darshan-translation">
-                  {dailyVerse.translationEnglish}
-                </p>
+                <div className="gs-home__darshan-meaning">
+                  <span>Meaning</span>
+                  <p className="gs-home__darshan-translation">
+                    {dailyVerse.translationEnglish}
+                  </p>
+                </div>
                 <div className="gs-home__darshan-actions">
                   <Link
                     to={`/chapters/chapter_${dailyVerse.chapterNumber}?verse=${dailyVerse.verseNumber}`}
                     className="gs-home__darshan-reference"
                     aria-label={`Read Bhagavad Gita ${dailyVerse.chapterNumber}.${dailyVerse.verseNumber}`}
                   >
-                    Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}
+                    <span className="gs-home__darshan-citation">
+                      Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}
+                    </span>
+                    <span className="gs-home__darshan-read">
+                      Read full verse <span aria-hidden="true">→</span>
+                    </span>
                   </Link>
                   <button
                     type="button"
@@ -108,7 +119,7 @@ export default function Home() {
                       detail: { prompt: `Explain Bhagavad Gita ${dailyVerse.chapterNumber}.${dailyVerse.verseNumber} in simple terms.` },
                     }))}
                   >
-                    Explain this verse
+                    Ask Sarathi <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </div>
