@@ -45,6 +45,7 @@
     <!-- Prevent flash of wrong theme - apply before first paint -->
     <script>
       (function() {
+        window.__gyanSutraBootStartedAt = performance.now();
         var stored = localStorage.getItem('gyansutra-theme');
         var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
@@ -61,20 +62,39 @@
         place-items: center;
         background: #f6efdd;
         opacity: 1;
-        transition: opacity 220ms ease, visibility 220ms ease;
+        visibility: visible;
+        transition:
+          opacity 160ms cubic-bezier(.2,.7,.2,1),
+          visibility 0s linear 160ms;
       }
       [data-theme="dark"] #gs-boot-splash { background: #1c1420; }
       #gs-boot-splash.is-leaving { opacity: 0; visibility: hidden; }
       .gs-boot-splash__content {
         display: grid;
         justify-items: center;
-        gap: 0.7rem;
-        animation: gs-boot-arrive 180ms cubic-bezier(.2,.8,.2,1) both;
+        gap: 0.65rem;
+        animation: gs-boot-arrive 240ms cubic-bezier(.2,.8,.2,1) both;
+      }
+      .gs-boot-splash__mark {
+        position: relative;
+        width: 74px;
+        height: 74px;
+        display: grid;
+        place-items: center;
+      }
+      .gs-boot-splash__mark::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(190, 106, 46, .18);
+        border-top-color: #be6a2e;
+        border-radius: 50%;
+        animation: gs-boot-turn 760ms linear infinite;
       }
       .gs-boot-splash__logo {
-        width: 62px;
-        height: 62px;
-        filter: drop-shadow(0 5px 14px rgba(190, 106, 46, .18));
+        width: 56px;
+        height: 56px;
+        filter: drop-shadow(0 4px 12px rgba(190, 106, 46, .16));
       }
       .gs-boot-splash__name {
         margin: 0;
@@ -85,11 +105,13 @@
       }
       [data-theme="dark"] .gs-boot-splash__name { color: #efe8f5; }
       @keyframes gs-boot-arrive {
-        from { opacity: 0; transform: translateY(5px) scale(.96); }
+        from { opacity: 0; transform: translateY(4px) scale(.97); }
         to { opacity: 1; transform: translateY(0) scale(1); }
       }
+      @keyframes gs-boot-turn { to { transform: rotate(360deg); } }
       @media (prefers-reduced-motion: reduce) {
         .gs-boot-splash__content { animation: none; }
+        .gs-boot-splash__mark::before { animation: none; }
         #gs-boot-splash { transition-duration: 80ms; }
       }
     </style>
@@ -116,7 +138,9 @@
   <body>
     <div id="gs-boot-splash" aria-hidden="true">
       <div class="gs-boot-splash__content">
-        <img class="gs-boot-splash__logo" src="%BASE_URL%icons/logo.svg" alt="" width="62" height="62" />
+        <div class="gs-boot-splash__mark">
+          <img class="gs-boot-splash__logo" src="%BASE_URL%icons/logo.svg" alt="" width="56" height="56" />
+        </div>
         <p class="gs-boot-splash__name">Gyan Sutra</p>
       </div>
     </div>

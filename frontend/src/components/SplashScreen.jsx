@@ -5,18 +5,28 @@ export default function SplashScreen({ children }) {
     const splash = document.getElementById('gs-boot-splash');
     if (!splash) return undefined;
 
-    // The splash only covers bundle startup. Once React is ready, reveal the
-    // app on the next frame and remove the layer completely.
-    const revealFrame = window.requestAnimationFrame(() => {
-      splash.classList.add('is-leaving');
-    });
-    const removeTimer = window.setTimeout(() => {
-      splash.remove();
-    }, 220);
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const bootStartedAt = window.__gyanSutraBootStartedAt ?? window.performance.now();
+    const elapsed = window.performance.now() - bootStartedAt;
+    const minimumVisibleTime = prefersReducedMotion ? 0 : 260;
+    const exitDuration = prefersReducedMotion ? 80 : 160;
+    const exitDelay = Math.max(0, minimumVisibleTime - elapsed);
+
+    let revealFrame;
+    let removeTimer;
+
+    // Finish the short brand motion before revealing fully rendered content.
+    const exitTimer = window.setTimeout(() => {
+      revealFrame = window.requestAnimationFrame(() => {
+        splash.classList.add('is-leaving');
+        removeTimer = window.setTimeout(() => splash.remove(), exitDuration);
+      });
+    }, exitDelay);
 
     return () => {
-      window.cancelAnimationFrame(revealFrame);
+      window.clearTimeout(exitTimer);
       window.clearTimeout(removeTimer);
+      if (revealFrame) window.cancelAnimationFrame(revealFrame);
     };
   }, []);
 

@@ -12,7 +12,6 @@
 
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
@@ -74,17 +73,12 @@ function PageLoader() {
   );
 }
 
-// A quick opacity change avoids leaving decorative rules from the old page on screen.
+// Keep route content fully visible so it does not compete with the boot reveal.
 function PageTransition({ children }) {
   return (
-    <motion.div
-      initial={{ opacity: 0.82 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.12, ease: 'easeOut' }}
-      className="page-transition-wrapper"
-    >
+    <div className="page-transition-wrapper">
       {children}
-    </motion.div>
+    </div>
   );
 }
 

@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { getDailyVerse } from '../services/api';
-
-const reveal = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
-};
 
 const SOURCES = [
   {
@@ -46,12 +40,7 @@ export default function Home() {
     <main className="gs-home-page">
       <section className="gs-home">
         <header className="gs-home__hero">
-          <motion.div
-            variants={reveal}
-            initial="hidden"
-            animate="show"
-            className="gs-home__intro"
-          >
+          <div className="gs-home__intro">
             <p className="gs-home__eyebrow">Gyan Sutra Library</p>
             <h1 className="gs-home__heading">
               Read the <span>Bhagavad Gita</span> and Ramayana
@@ -69,12 +58,9 @@ export default function Home() {
                 <span aria-hidden="true">↓</span>
               </a>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.aside
-            variants={reveal}
-            initial="hidden"
-            animate="show"
+          <aside
             className="gs-home__darshan"
             aria-labelledby="daily-verse-title"
           >
@@ -121,7 +107,7 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </motion.aside>
+          </aside>
         </header>
 
         <section id="text-library" className="gs-home__library" aria-labelledby="library-title">
