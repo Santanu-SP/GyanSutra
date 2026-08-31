@@ -13,11 +13,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { HelmetProvider } from 'react-helmet-async';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
-import SearchBar from './components/SearchBar';
 import ThemeToggle from './components/ThemeToggle';
 import SarathiPanel from './components/SarathiPanel';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -54,7 +52,7 @@ const Ask           = lazyWithRetry(() => import('./pages/Ask'));
 const SARATHI_PROMPTS = [
   'What does the Gita teach about duty?',
   'Explain detachment in simple words.',
-  'How does Sanatan wisdom guide daily life?',
+  'Which verses can help with a difficult decision?',
 ];
 
 // Premium page loading state
@@ -115,7 +113,7 @@ export default function App() {
       id: 'welcome',
       role: 'sarathi',
       content:
-        'I am here to illuminate what the scripture holds. Ask anything from the verses you are reading.',
+        'Ask about a verse or idea. I will answer from the texts in this library.',
     },
   ]);
 
@@ -129,6 +127,10 @@ export default function App() {
     window.addEventListener('open-sarathi', handleOpenSarathi);
     return () => window.removeEventListener('open-sarathi', handleOpenSarathi);
   }, []);
+
+  useEffect(() => {
+    setIsSarathiOpen(false);
+  }, [location.pathname]);
 
   async function handleAsk(event) {
     event.preventDefault();
@@ -171,21 +173,19 @@ export default function App() {
     }
   }
 
-  // Called from Home page prompt buttons — pre-fills question and opens panel
-  function handlePromptSelect(prompt) {
-    setQuestion(prompt);
-    setIsSarathiOpen(true);
-  }
+  const isGitaRoute = location.pathname.startsWith('/bhagavad-gita')
+    || location.pathname.startsWith('/chapters')
+    || location.pathname.startsWith('/verses');
+  const isRamayanaRoute = location.pathname.startsWith('/ramayana');
 
   return (
-    <HelmetProvider>
-      <div className="gs-app">
+    <div className="gs-app">
         <SEOHead />
         {/* ── Fixed Header ── */}
       <header className={`gs-header${isSarathiOpen ? ' gs-header--sarathi-open' : ''}`}>
         <div className="gs-header__nav">
           {/* Brand */}
-          <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra — Home">
+          <Link to="/" className="gs-header__brand" aria-label="Gyan Sutra home">
             <img
               src={`${import.meta.env.BASE_URL}icons/logo.svg`}
               alt="Gyan Sutra"
@@ -193,7 +193,7 @@ export default function App() {
             />
             <span className="gs-header__brand-text">
               <span className="gs-header__name">Gyan Sutra</span>
-              <span className="gs-header__tagline">Sacred Library</span>
+              <span className="gs-header__tagline">Scripture Library</span>
             </span>
           </Link>
 
@@ -201,24 +201,19 @@ export default function App() {
           <div className="gs-header__right">
             {/* Desktop nav links */}
             <nav className="gs-header__nav-links" aria-label="Primary navigation">
-              <Link to="/" aria-current={location.pathname === '/' ? 'page' : undefined} className={`gs-header__nav-link${location.pathname === '/' ? ' gs-header__nav-link--active' : ''}`}>Home</Link>
-              <Link to="/bhagavad-gita" aria-current={location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') ? ' gs-header__nav-link--active' : ''}`}>Gita</Link>
-              <Link to="/ramayana" aria-current={location.pathname.startsWith('/ramayana') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/ramayana') ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
-              <Link to="/faq" aria-current={location.pathname.startsWith('/faq') ? 'page' : undefined} className={`gs-header__nav-link${location.pathname.startsWith('/faq') ? ' gs-header__nav-link--active' : ''}`}>FAQ</Link>
+              <span className="gs-header__nav-label">Read</span>
+              <Link to="/bhagavad-gita" aria-current={isGitaRoute ? 'page' : undefined} className={`gs-header__nav-link${isGitaRoute ? ' gs-header__nav-link--active' : ''}`}>Bhagavad Gita</Link>
+              <Link to="/ramayana" aria-current={isRamayanaRoute ? 'page' : undefined} className={`gs-header__nav-link${isRamayanaRoute ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
             </nav>
-
-            {/* Global search — hidden on small mobile */}
-            <div className="gs-header__search-wrap">
-              <SearchBar placeholder="Search scripture… (⌘K)" />
-            </div>
 
             {/* Right actions */}
             <div className="gs-header__actions">
               <Link
                 to="/search"
-                className="gs-header__mobile-search"
+                className="gs-header__search-action"
                 aria-label="Search scripture"
                 aria-current={location.pathname === '/search' ? 'page' : undefined}
+                title="Search"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
                   <circle cx="10.5" cy="10.5" r="6.5" />
@@ -226,18 +221,12 @@ export default function App() {
                 </svg>
               </Link>
               <AnimatedButton
-                className="sarathi-trigger group relative inline-flex items-center justify-center p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_1rem_-0.25rem_rgba(245,158,11,0.25)]"
+                className="sarathi-trigger"
                 onClick={() => setIsSarathiOpen(true)}
-                aria-label="Open Sarathi companion"
+                aria-label="Open Sarathi"
               >
-                {/* Spinning gradient border */}
-                <span className="absolute left-1/2 top-1/2 aspect-square w-[400%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,transparent_40%,transparent_60%,#f59e0b_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Inner button surface */}
-                <span className="relative z-10 flex h-full w-full items-center gap-[0.4rem] rounded-full bg-[color:var(--bg)] px-4 py-2 font-body text-[length:var(--text-sm)] font-medium tracking-[0.04em] text-[color:var(--marigold)]">
-                  <TriggerFlame />
-                  <span className="sarathi-trigger__label">Sarathi</span>
-                </span>
+                <TriggerFlame />
+                <span className="sarathi-trigger__label">Ask Sarathi</span>
               </AnimatedButton>
               <ThemeToggle />
             </div>
@@ -253,7 +242,7 @@ export default function App() {
               <Routes location={location} key={location.pathname}>
                 <Route
                   path="/"
-                  element={<PageTransition><Home onAskPrompt={handlePromptSelect} /></PageTransition>}
+                  element={<PageTransition><Home /></PageTransition>}
                 />
                 <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
                 <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
@@ -298,9 +287,9 @@ export default function App() {
 
         <Link
           to="/bhagavad-gita"
-          className={`gs-bottom-nav__item${location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') || location.pathname.startsWith('/verses') ? ' gs-bottom-nav__item--active' : ''}`}
+          className={`gs-bottom-nav__item${isGitaRoute ? ' gs-bottom-nav__item--active' : ''}`}
           aria-label="Read the Bhagavad Gita"
-          aria-current={location.pathname.startsWith('/bhagavad-gita') || location.pathname.startsWith('/chapters') || location.pathname.startsWith('/verses') ? 'page' : undefined}
+          aria-current={isGitaRoute ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25A2.25 2.25 0 016.75 3H12v16.5H6.75a2.25 2.25 0 00-2.25 1.125V5.25zM19.5 5.25A2.25 2.25 0 0017.25 3H12v16.5h5.25a2.25 2.25 0 012.25 1.125V5.25z" />
@@ -308,6 +297,30 @@ export default function App() {
           Gita
         </Link>
 
+        <Link
+          to="/ramayana"
+          className={`gs-bottom-nav__item${isRamayanaRoute ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Read the Ramayana"
+          aria-current={isRamayanaRoute ? 'page' : undefined}
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 4.5h12A1.5 1.5 0 0119.5 6v13.5H7.25A2.75 2.75 0 014.5 16.75V6A1.5 1.5 0 016 4.5z" />
+            <path strokeLinecap="round" d="M7.25 16.5H19.5M8.5 8h7M8.5 11h5" />
+          </svg>
+          Ramayana
+        </Link>
+        <Link
+          to="/search"
+          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label="Search"
+          aria-current={location.pathname === '/search' ? 'page' : undefined}
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+          </svg>
+          Search
+        </Link>
         <button
           type="button"
           className={`gs-bottom-nav__item gs-bottom-nav__item--sarathi${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
@@ -329,33 +342,7 @@ export default function App() {
           </svg>
           Sarathi
         </button>
-        <Link
-          to="/search"
-          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Search"
-          aria-current={location.pathname === '/search' ? 'page' : undefined}
-        >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
-          </svg>
-          Search
-        </Link>
-        <Link
-          to="/faq"
-          className={`gs-bottom-nav__item${location.pathname === '/faq' ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="FAQ"
-          aria-current={location.pathname === '/faq' ? 'page' : undefined}
-        >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-          FAQ
-        </Link>
       </nav>
     </div>
-    </HelmetProvider>
   );
 }

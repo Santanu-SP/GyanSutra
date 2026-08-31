@@ -26,13 +26,6 @@ import './SarathiPanel.css';
 
 // Snap zone heights (dvh)
 const SNAP = { peek: 28, normal: 55, full: 90 };
-const LOADING_STAGES = [
-  'Searching the scriptures…',
-  'Retrieving relevant verses…',
-  'Consulting the Bhagavad Gita…',
-  'Reflecting on the teaching…',
-  'Composing the answer…',
-];
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -98,8 +91,6 @@ export default function SarathiPanel({
   const [isMinimizing, setIsMinimizing]  = useState(false);
   const [isDragging, setIsDragging]      = useState(false);
   const [dynamicHeight, setDynamicHeight] = useState(null);    // dvh number during drag; null = use snap
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);    // live timer during loading
-  const [stageIndex, setStageIndex]      = useState(0);       // rotating stage message index
 
   // Keep ref in sync
   const setPanelSize = (s) => { panelSizeRef.current = s; _setPanelSize(s); };
@@ -204,24 +195,6 @@ export default function SarathiPanel({
     return () => clearTimeout(t);
   }, [isOpen]);
 
-  // ── Live elapsed timer + rotating stage messages while loading ───────────
-  useEffect(() => {
-    if (!isLoading) {
-      setElapsedSeconds(0);
-      setStageIndex(0);
-      return;
-    }
-    const interval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
-      setStageIndex(prev => (prev + 1) % LOADING_STAGES.length);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isLoading]);
-
-  const ESTIMATED_TOTAL = 3; // seconds — typical native Gemini response time
-  const remaining = Math.max(0, ESTIMATED_TOTAL - elapsedSeconds);
-  const progress  = Math.min(100, (elapsedSeconds / ESTIMATED_TOTAL) * 100);
-
   // ── Escape closes ──────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape' && isOpen) handleClose(); };
@@ -256,7 +229,7 @@ export default function SarathiPanel({
         className={panelClasses}
         style={{ '--sarathi-panel-h': `${currentDvh}dvh` }}
         role="complementary"
-        aria-label="Sarathi — Your spiritual companion"
+        aria-label="Sarathi scripture assistant"
         aria-hidden={!isOpen}
         id="sarathi-panel"
       >
@@ -297,13 +270,13 @@ export default function SarathiPanel({
               </AnimatedButton>
             </div>
 
-            {/* Minimise button — triggers smooth close animation ──────────── */}
+            {/* Close button */}
             <AnimatedButton
               type="button"
               className="active-press sarathi-panel__header-btn"
               onClick={handleClose}
-              aria-label="Minimise Sarathi"
-              title="Minimise"
+              aria-label="Close Sarathi"
+              title="Close"
               id="close-sarathi-btn"
             >
               {/* Horizontal bar = minimise metaphor */}
@@ -317,7 +290,7 @@ export default function SarathiPanel({
         {/* ── Suggested paths ──────────────────────────────────────────── */}
         {showSuggestions && (
           <div className="sarathi-panel__paths">
-            <p className="sarathi-panel__paths-label">Paths to Explore</p>
+            <p className="sarathi-panel__paths-label">Suggested questions</p>
             <div className="sarathi-panel__paths-list">
               {suggestedPrompts.map((prompt) => (
                 <AnimatedButton
@@ -346,7 +319,7 @@ export default function SarathiPanel({
               className={`sarathi-msg sarathi-msg--${message.role} sarathi-msg-enter`}
             >
               <p className="sarathi-msg__label">
-                {message.role === 'user' ? 'Your Reflection' : 'Sarathi'}
+                {message.role === 'user' ? 'You' : 'Sarathi'}
               </p>
               <div className="sarathi-msg__content">
                 <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -363,47 +336,7 @@ export default function SarathiPanel({
                 <div className="shimmer-skeleton short"></div>
               </div>
               <div className="sarathi-loader">
-                <div className="sarathi-loader__flame-container">
-                  <div className="sarathi-loader__ring"></div>
-                  <div className="sarathi-loader__ring"></div>
-                  <div className="sarathi-loader__ring"></div>
-                  <SarathiFlame className="sarathi-loader__flame" />
-                </div>
-                <div className="sarathi-loader__dots">
-                  <span className="sarathi-loader__dot"></span>
-                  <span className="sarathi-loader__dot"></span>
-                  <span className="sarathi-loader__dot"></span>
-                </div>
-                <p className="sarathi-loader__text">{LOADING_STAGES[stageIndex]}</p>
-
-                {/* Progress bar + time estimate */}
-                <div style={{ width: '100%', marginTop: '0.75rem' }}>
-                  <div style={{
-                    height: '3px',
-                    borderRadius: '99px',
-                    background: 'rgba(245,158,11,0.15)',
-                    overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${progress}%`,
-                      background: 'linear-gradient(90deg, rgba(245,158,11,0.6), rgba(245,158,11,1))',
-                      borderRadius: '99px',
-                      transition: 'width 1s linear',
-                    }} />
-                  </div>
-                  <p style={{
-                    marginTop: '0.4rem',
-                    fontSize: '0.7rem',
-                    color: 'var(--text-muted)',
-                    textAlign: 'center',
-                    letterSpacing: '0.04em',
-                  }}>
-                    {remaining > 0
-                      ? `~ ${remaining}s remaining`
-                      : 'Almost there…'}
-                  </p>
-                </div>
+                <p className="sarathi-loader__text">Looking through the texts…</p>
               </div>
             </div>
           )}
@@ -425,7 +358,7 @@ export default function SarathiPanel({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={3}
-              placeholder="Ask about dharma, a verse, devotion, or any teaching…"
+              placeholder="Ask about a verse or idea"
               disabled={isLoading}
               aria-label="Your question for Sarathi"
               onKeyDown={(e) => {
@@ -445,7 +378,7 @@ export default function SarathiPanel({
                 disabled={isLoading || !question.trim()}
                 id="sarathi-submit-btn"
               >
-                {isLoading ? 'Seeking…' : 'Seek Guidance'}
+                {isLoading ? 'Working…' : 'Ask'}
               </AnimatedButton>
             </div>
           </div>

@@ -1,9 +1,9 @@
 {
-  "name": "Gyan Sutra — Thread of Knowledge",
+  "name": "Gyan Sutra",
   "short_name": "Gyan Sutra",
   "id": "./",
   "scope": "./",
-  "description": "Explore the Bhagavad Gita and Valmiki Ramayana through authentic texts, semantic search, related verses, commentaries, and Sarathi.",
+  "description": "Read the Bhagavad Gita and Valmiki Ramayana in Sanskrit and English, search verses, and ask Sarathi for help.",
   "start_url": "./",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],

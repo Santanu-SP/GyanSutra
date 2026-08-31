@@ -224,7 +224,7 @@ p {
 
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .container,
@@ -495,177 +495,365 @@ p {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Mobile Home Page — responsive refinements
-   Makes the Home page comfortable, thumb-friendly, and naturally
-   proportioned on small screens. Desktop remains unchanged.
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ── Home page ───────────────────────────────────────────────────────── */
+.gs-home-page {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 30rem),
+    var(--bg);
+}
 
-/* ── Hero heading — fluid typography ─────────────────────────────────── */
+.gs-home {
+  width: min(100% - 3rem, 1180px);
+  margin-inline: auto;
+  padding-block: clamp(2.5rem, 6vw, 5.5rem);
+}
+
+.gs-home__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 6.5rem);
+}
+
+.gs-home__intro {
+  max-width: 38rem;
+}
+
+.gs-home__eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--accent-hover);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .gs-home__heading {
-  font-size: clamp(2rem, 7.5vw, 3.052rem);
-  line-height: 1.18;
-  letter-spacing: -0.025em;
+  max-width: 14ch;
+  margin: 0;
+  font-size: clamp(2.65rem, 5.2vw, 4.85rem);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
   text-wrap: balance;
 }
 
 .gs-home__subheading {
-  font-size: clamp(0.8rem, 2.5vw, 1rem);
-  line-height: 1.6;
+  max-width: 33rem;
+  margin: 1.35rem 0 0;
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.7;
 }
 
-/* ── Mobile-specific home adjustments ────────────────────────────────── */
+.gs-home__cta-row {
+  margin-top: 1.75rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+}
+
+.gs-home__cta-primary {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-md);
+  background: var(--text-primary);
+  color: var(--bg);
+  font-weight: 500;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.gs-home__cta-primary:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+.gs-home__text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--border) 70%, transparent);
+  text-underline-offset: 0.3rem;
+}
+
+.gs-home__text-link:hover {
+  color: var(--accent-hover);
+  text-decoration-color: currentColor;
+}
+
+.gs-home__darshan {
+  min-height: 360px;
+  padding: clamp(1.4rem, 3vw, 2.25rem);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+
+.gs-home__darshan-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.gs-home__darshan-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.gs-home__darshan-mark {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text-primary));
+  font-family: var(--font-devanagari);
+  font-size: 1.75rem;
+}
+
+.gs-home__darshan-status {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.gs-home__darshan-status a {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.gs-home__darshan-content {
+  padding-top: 1.5rem;
+}
+
+.gs-home__darshan-sanskrit {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  line-height: 1.8;
+}
+
+.gs-home__darshan-translation {
+  margin: 1rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.gs-home__darshan-actions {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.gs-home__darshan-actions button {
+  min-height: 40px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.gs-home__darshan-actions button:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent-hover);
+}
+
+.gs-home__library {
+  padding-top: clamp(4.5rem, 9vw, 8rem);
+  scroll-margin-top: 6rem;
+}
+
+.gs-home__section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1.75rem;
+}
+
+.gs-home__section-heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  letter-spacing: -0.025em;
+}
+
+.gs-home__section-heading > p {
+  max-width: 30rem;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.gs-home__cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.gs-home__source-card {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.gs-home__source-card:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg-surface) 95%, var(--accent));
+}
+
+.gs-home__source-topline {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gs-home__source-topline .devanagari {
+  color: var(--accent-hover);
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.gs-home__source-card h3 {
+  margin: 2.5rem 0 0;
+  font-size: 1.55rem;
+}
+
+.gs-home__source-card p {
+  max-width: 31rem;
+  margin: 0.7rem 0 1.5rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.gs-home__source-action {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.gs-home__upcoming {
+  margin: 1.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 860px) {
+  .gs-home__hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .gs-home__intro {
+    max-width: 44rem;
+  }
+
+  .gs-home__darshan {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 767px) {
-  /* Tighter section spacing on mobile */
   .gs-home {
-    gap: 1.75rem !important;
-    padding: 1.25rem max(1rem, env(safe-area-inset-right)) 2.5rem max(1rem, env(safe-area-inset-left)) !important;
+    width: auto;
+    padding: 2rem max(1rem, env(safe-area-inset-right)) 3.25rem max(1rem, env(safe-area-inset-left));
   }
 
   .gs-home__heading {
-    font-size: clamp(2.05rem, 9.2vw, 2.8rem);
+    max-width: 13ch;
+    font-size: clamp(2.35rem, 11vw, 3.25rem);
+    line-height: 1.08;
   }
 
   .gs-home__subheading {
-    max-width: 35rem;
+    margin-top: 1rem;
     font-size: 1rem;
-    line-height: 1.55;
+    line-height: 1.6;
   }
 
-  /* Darshan card — no rotation, compact padding */
-  .gs-home__darshan {
-    transform: rotate(0) !important;
-    border-radius: 1rem !important;
-    padding: 0.875rem !important;
-    border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
-    box-shadow: var(--shadow-sm) !important;
-  }
-
-  .gs-home__darshan-label {
-    gap: 0.75rem;
-    letter-spacing: 0.14em !important;
-  }
-
-  .gs-home__darshan-actions {
-    align-items: flex-start !important;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .gs-home__darshan-actions button {
-    min-height: 40px;
-    padding-inline: 0.875rem;
-  }
-
-  /* CTAs — stretch to full width for easy thumb reach */
   .gs-home__cta-row {
-    flex-direction: column !important;
-    gap: 0.75rem !important;
+    margin-top: 1.4rem;
   }
 
   .gs-home__cta-primary {
-    width: 100% !important;
-    flex: unset !important;
-    min-height: 54px;
+    width: 100%;
   }
 
-  .gs-home__cta-row > button:last-child {
-    min-height: 44px;
+  .gs-home__text-link {
     width: 100%;
     justify-content: center;
   }
 
-  /* Trust badges — tighter gap, smaller on mobile */
-  .gs-home__badges {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem 0.75rem !important;
-    padding-top: 0.5rem !important;
+  .gs-home__darshan {
+    padding: 1.2rem;
   }
 
-  .gs-home__badges > span {
-    min-width: 0;
+  .gs-home__darshan-actions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  /* Feature cards — compact mobile layout */
-  .gs-home__feature-card {
-    padding: 1.125rem !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--shadow-sm) !important;
-  }
-
-  .gs-home__feature-card button {
+  .gs-home__darshan-actions button {
     min-height: 44px;
   }
 
-  .gs-home__features {
-    gap: 0.75rem !important;
+  .gs-home__library {
+    padding-top: 4.5rem;
   }
 
-  /* Library section — tighter spacing */
-  .gs-home__library {
-    gap: 1rem !important;
+  .gs-home__section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
   }
 
   .gs-home__cards-grid {
-    gap: 0.875rem !important;
-  }
-
-  .gs-home__cards-grid > * {
-    padding: 1.125rem !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--shadow-sm) !important;
-  }
-
-  /* Coming-soon cards — dimmed with visual indicator */
-  .gs-home__card--coming-soon {
-    opacity: 0.62;
-    cursor: default;
-    filter: saturate(0.55);
-  }
-
-  .gs-home__card--coming-soon::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, transparent 60%, rgba(0, 0, 0, 0.12) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
-}
-
-@media (max-width: 360px) {
-  .gs-home__badges {
     grid-template-columns: 1fr;
   }
 
-  .gs-home__darshan-label span:last-child {
-    display: none;
-  }
-}
-
-/* ── Tablet adjustments (768px-1023px) ───────────────────────────────── */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .gs-home__darshan {
-    transform: rotate(0) !important;
-  }
-
-  .gs-home__card--coming-soon {
-    opacity: 0.6;
-    filter: saturate(0.6);
-  }
-}
-
-/* ── Desktop — Coming Soon cards subtle treatment ────────────────────── */
-@media (min-width: 1024px) {
-  .gs-home__card--coming-soon {
-    opacity: 0.7;
-    filter: saturate(0.7);
-  }
-
-  .gs-home__card--coming-soon:hover {
-    opacity: 0.85;
-    filter: saturate(0.85);
+  .gs-home__source-card {
+    min-height: 240px;
   }
 }

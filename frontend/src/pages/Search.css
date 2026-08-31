@@ -1,4 +1,5 @@
 .search-page {
+  width: min(100% - 3rem, var(--max-width-prose));
   max-width: var(--max-width-prose);
   margin: 0 auto;
   padding-bottom: var(--space-16);
@@ -97,4 +98,25 @@
   border: 1px solid color-mix(in srgb, #c0392b 30%, transparent);
   border-radius: var(--radius-sm);
   color: #c0392b;
+}
+
+.search-page__filter-btn {
+  min-height: 40px;
+}
+
+@media (max-width: 767px) {
+  .search-page {
+    width: auto;
+    padding-inline: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .search-page__header {
+    padding-top: var(--space-6);
+  }
+
+  .search-page__filter-btn,
+  .search-page__suggestion {
+    min-height: 44px;
+  }
 }

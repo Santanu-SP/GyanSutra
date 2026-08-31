@@ -69,7 +69,7 @@ export default function AskPanel() {
             className="ask-panel__textarea"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask anything from the Bhagavad Gita…&#10;e.g. What does Krishna say about duty?"
+            placeholder="Ask about the Bhagavad Gita&#10;For example: What does Krishna say about duty?"
             rows={3}
             maxLength={500}
             disabled={state === 'loading'}
@@ -91,7 +91,7 @@ export default function AskPanel() {
               disabled={!canSubmit}
               id="ask-submit-btn"
             >
-              {state === 'loading' ? 'Seeking…' : 'Ask'}
+              {state === 'loading' ? 'Working…' : 'Ask'}
             </AnimatedButton>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function AskPanel() {
               <span className="sarathi-loader__dot"></span>
               <span className="sarathi-loader__dot"></span>
             </div>
-            <p className="sarathi-loader__text">Searching the verses…</p>
+            <p className="sarathi-loader__text">Looking through the verses…</p>
           </div>
         </div>
       )}
@@ -123,7 +123,7 @@ export default function AskPanel() {
           <div className="ask-panel__answer">
             <h2 className="ask-panel__answer-heading">
               <span className="ask-panel__answer-icon">✦</span>
-              From the Scripture
+              Answer from the text
             </h2>
             <p className="ask-panel__answer-text">{result.answer}</p>
           </div>

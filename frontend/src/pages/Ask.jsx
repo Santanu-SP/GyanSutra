@@ -12,12 +12,11 @@ export default function Ask() {
         <span className="ask-page__eyebrow">ज्ञान सूत्र · Gyan Sutra</span>
         <h1 className="ask-page__heading">Ask the Gita</h1>
         <p className="ask-page__subheading">
-          Ask any question. Every answer is grounded in a specific verse — no guesses, no opinions.
-          If the scripture doesn't have a clear answer, you'll hear that plainly.
+          Ask about a passage or idea. Answers draw from the verses in this library and show the relevant references.
         </p>
         <div className="ask-page__badge">
           <span className="ask-page__badge-dot" aria-hidden="true">✦</span>
-          Retrieval-grounded · Citations included
+          Source verses included
         </div>
       </header>
       <hr className="gold-rule" />

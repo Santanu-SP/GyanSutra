@@ -2,7 +2,7 @@ export function OrganizationSchema({
   name = "Gyan Sutra", 
   url = "https://gyansutraapp.com",
   logo = "https://gyansutraapp.pages.dev/icons/logo.svg",
-  description = "Ancient wisdom for modern seekers. Read the complete Valmiki Ramayana and Bhagwat Gita."
+  description = "Read the Bhagavad Gita and Valmiki Ramayana in Sanskrit and English."
 } = {}) {
   return {
     "@context": "https://schema.org",

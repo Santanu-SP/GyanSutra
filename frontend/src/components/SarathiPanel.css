@@ -533,7 +533,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.4rem 0.75rem 0.4rem 1rem;
-  border-top: 1px solid var(--hairline-faint);
+  border-top: var(--hairline-faint);
   gap: 0.625rem;
 }
 

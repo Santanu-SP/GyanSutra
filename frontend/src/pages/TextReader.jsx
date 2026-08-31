@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getAllChapters } from '../services/api';
-import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AnimatedButton from '../components/AnimatedButton';
 
@@ -92,7 +91,7 @@ export default function TextReader() {
         <div className="text-reader__container">
           <Link to="/" className="text-reader__back">← Library</Link>
           <header className="text-reader__header">
-            <p className="text-reader__source-badge">Sacred Scripture</p>
+            <p className="text-reader__source-badge">In preparation</p>
             <h1 className="text-reader__title">{meta.title}</h1>
             <p className="text-reader__devanagari devanagari">{meta.devanagari}</p>
             {meta.description && (
@@ -104,14 +103,13 @@ export default function TextReader() {
             <div className="text-reader__coming-soon-icon" aria-hidden="true">ॐ</div>
             <h2 className="text-reader__coming-soon-title">Coming Soon</h2>
             <p className="text-reader__coming-soon-body">
-              The <strong>{meta.title}</strong> is being carefully transcribed and curated for this library.
-              It will be available soon. Begin your journey with the Bhagavad Gita in the meantime.
+              <strong>{meta.title}</strong> is not available yet. You can read the Bhagavad Gita while this edition is prepared.
             </p>
             <Link
               to="/bhagavad-gita"
               className="text-reader__coming-soon-cta"
             >
-              Begin with Bhagavad Gita →
+              Read the Bhagavad Gita →
             </Link>
           </div>
         </div>
@@ -130,32 +128,16 @@ export default function TextReader() {
 
         {/* Source header */}
         <header className="text-reader__header">
-          <p className="text-reader__source-badge">Sacred Scripture</p>
+          <p className="text-reader__source-badge">18 chapters</p>
           <h1 className="text-reader__title">{meta.title}</h1>
           <p className="text-reader__devanagari devanagari">{meta.devanagari}</p>
           {meta.description && (
             <p className="text-reader__description">{meta.description}</p>
           )}
-          <div style={{ marginTop: '1.5rem' }}>
-            <AnimatedButton
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: `Ask a question about the ${meta.title}` } }))}
-              className="active-press inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/8 px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 hover:text-[color:var(--accent)] transition"
-              style={{ cursor: 'pointer' }}
-            >
-              <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
-                <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
-              </svg>
-              Consult Sarathi about {meta.title}
-            </AnimatedButton>
-          </div>
         </header>
 
-        {/* Search + jump navigation bar */}
+        {/* Chapter jump */}
         <div className="text-reader__nav-bar">
-          <div className="text-reader__search-wrap">
-            <SearchBar placeholder="Search by meaning, topic, or keyword…" />
-          </div>
           <form
             className="text-reader__jump"
             onSubmit={handleJump}

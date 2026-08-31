@@ -2,7 +2,6 @@
  * ChapterReader — reads all verses in a chapter.
  * Shows one verse at a time with prev/next navigation.
  * Page-turn animation between verses.
- * Triggers PWA install prompt after the last verse.
  *
  * Additions (non-breaking, UI only):
  *   - Compact chapter strip at the top — quick jump between chapters
@@ -16,7 +15,6 @@ import { getChapter, getChapterVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendationsRail from '../components/RecommendationsRail';
-import { usePWAInstall } from '../hooks/usePWAInstall';
 import AnimatedButton from '../components/AnimatedButton';
 
 import './ChapterReader.css';
@@ -32,7 +30,6 @@ export default function ChapterReader() {
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
   const [animClass, setAnimClass]       = useState('');
-  const { canInstall, triggerInstall }  = usePWAInstall();
 
   useEffect(() => {
     setLoading(true);
@@ -65,8 +62,6 @@ export default function ChapterReader() {
   const handleNext = () => {
     if (currentIndex < verses.length - 1) {
       goTo(currentIndex + 1);
-    } else if (canInstall) {
-      triggerInstall();
     }
   };
 
@@ -82,14 +77,12 @@ export default function ChapterReader() {
       } else if (e.key === 'ArrowRight') {
         if (currentIndex < verses.length - 1) {
           goTo(currentIndex + 1);
-        } else if (canInstall) {
-          triggerInstall();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, verses, canInstall, triggerInstall, goTo]);
+  }, [currentIndex, verses, goTo]);
 
   const isLastVerse   = currentIndex === verses.length - 1;
   const currentVerse  = verses[currentIndex];
@@ -219,12 +212,11 @@ export default function ChapterReader() {
           <AnimatedButton
             className={`active-press chapter-reader__nav-btn chapter-reader__nav-btn--next${isLastVerse ? ' chapter-reader__nav-btn--finish' : ''}`}
             onClick={handleNext}
+            disabled={isLastVerse}
             id="next-verse-btn"
-            aria-label={isLastVerse ? 'Finish chapter' : 'Next verse'}
+            aria-label={isLastVerse ? 'End of chapter' : 'Next verse'}
           >
-            {isLastVerse
-              ? (canInstall ? 'Finish & Install ✦' : 'Chapter Complete ✦')
-              : 'Next →'}
+            {isLastVerse ? 'End of chapter' : 'Next →'}
           </AnimatedButton>
         </nav>
       )}

@@ -24,15 +24,32 @@ export default function Search() {
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    if (!q || q.length < 3) return;
+    if (!q || q.length < 3) {
+      setResults([]);
+      setError(null);
+      setSearched(false);
+      return;
+    }
     setLoading(true);
     setError(null);
+    setResults([]);
     setSearched(true);
+    let cancelled = false;
 
     searchVerses(q)
-      .then((data) => setResults(data.results || []))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) setResults(data.results || []);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [q]);
 
   const displayedResults = results.filter(v => {
@@ -45,7 +62,7 @@ export default function Search() {
     <main className="search-page">
       <header className="search-page__header">
         <h1 className="search-page__heading">Search Scriptures</h1>
-        <SearchBar autoFocus={!q} placeholder="Search verses by meaning, concept, or keyword…" />
+        <SearchBar autoFocus={!q} placeholder="Search by topic, phrase, or keyword" />
         
         <div className="search-page__filters" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           {['all', 'gita', 'ramayana'].map(f => (
@@ -63,9 +80,9 @@ export default function Search() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 borderRadius: '20px',
-                border: `1px solid ${filter === f ? 'var(--amber-500)' : 'var(--border)'}`,
+                border: `1px solid ${filter === f ? 'var(--accent)' : 'var(--border)'}`,
                 backgroundColor: filter === f ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-                color: filter === f ? 'var(--amber-500)' : 'var(--text-muted)',
+                color: filter === f ? 'var(--accent)' : 'var(--text-muted)',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
@@ -82,13 +99,13 @@ export default function Search() {
           <LoadingSpinner size="medium" text="Searching scriptures..." />
         )}
 
-        {!loading && searched && !error && results.length === 0 && (
+        {!loading && searched && !error && displayedResults.length === 0 && (
           <div className="search-page__empty">
             <p className="search-page__empty-text">
               No verses found for "<strong>{q}</strong>"
             </p>
             <p className="search-page__empty-hint">
-              Try a broader term or phrase from the scriptures — e.g. "duty", "soul", "peace of mind".
+              Try a broader phrase, such as “duty”, “soul”, or “peace of mind”.
             </p>
             <div className="search-page__sarathi-suggest" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Or ask Sarathi directly about this concept:</p>
@@ -113,11 +130,10 @@ export default function Search() {
           </div>
         )}
 
-        {!loading && displayedResults.length > 0 && (
+        {!loading && searched && !error && displayedResults.length > 0 && (
           <>
             <p className="search-page__meta">
-              {displayedResults.length} {displayedResults.length === 1 ? 'verse' : 'verses'} matching
-              "<em>{q}</em>" — ordered by relevance
+              {displayedResults.length} {displayedResults.length === 1 ? 'verse' : 'verses'} matching “<em>{q}</em>”, ordered by relevance
             </p>
             <div className="search-page__list">
               {displayedResults.map((verse, idx) => (
@@ -131,29 +147,13 @@ export default function Search() {
                 </div>
               ))}
             </div>
-            <div className="search-page__sarathi-suggest" style={{ marginTop: '3rem', borderTop: '1px solid var(--border)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '440px' }}>
-                Still seeking more insights? Let Sarathi analyze the scriptures and give you a comprehensive answer.
-              </p>
-              <AnimatedButton
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', { detail: { prompt: q } }))}
-                className="active-press inline-flex items-center justify-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-[color:var(--text-primary)] hover:border-amber-400/60 transition"
-                style={{ cursor: 'pointer' }}
-              >
-                <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
-                  <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
-                </svg>
-                Ask Sarathi about "{q}"
-              </AnimatedButton>
-            </div>
           </>
         )}
 
         {!q && !loading && (
           <div className="search-page__idle">
             <p className="search-page__idle-text">
-              Ask anything — the scriptures likely have a teaching for it.
+              Search for an idea, a phrase, or a question from the texts.
             </p>
             <div className="search-page__suggestions">
               {['What is the nature of the soul?', 'How to find peace?', 'What is duty?', 'Liberation from sorrow'].map((s, idx) => (

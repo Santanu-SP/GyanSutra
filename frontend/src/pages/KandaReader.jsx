@@ -33,11 +33,13 @@ export default function KandaReader() {
     if (!kanda) return;
     
     setLoading(true);
+    setError(null);
     setCurrentIndex(0);
     
     getRamayanaSarga(kandaId, currentSarga)
       .then(data => {
         setVerses(data.verses || []);
+        setError(null);
         setLoading(false);
       })
       .catch(err => {
@@ -114,14 +116,15 @@ export default function KandaReader() {
         <div className="chapter-reader__title-block">
           <h1 className="chapter-reader__title devanagari">{kanda.name}</h1>
           <div className="flex items-center gap-4 mt-4">
-            <label className="text-[color:var(--text-secondary)] text-sm uppercase tracking-widest">Sarga:</label>
+            <label htmlFor="sarga-select" className="text-[color:var(--text-secondary)] text-sm uppercase tracking-widest">Sarga</label>
             <select 
+              id="sarga-select"
               value={currentSarga}
               onChange={(e) => setCurrentSarga(parseInt(e.target.value, 10))}
-              className="bg-transparent border border-amber-500/20 text-[color:var(--text-primary)] rounded px-2 py-1 outline-none"
+              className="min-h-11 bg-transparent border border-amber-500/20 text-[color:var(--text-primary)] rounded px-3 py-2 outline-none"
             >
               {Array.from({ length: kanda.sargas }, (_, i) => i + 1).map(num => (
-                <option key={num} value={num} className="bg-[color:var(--bg-main)]">
+                <option key={num} value={num} className="bg-[color:var(--bg-surface)]">
                   {num}
                 </option>
               ))}
@@ -188,33 +191,6 @@ export default function KandaReader() {
         </nav>
       )}
 
-      {/* Floating Side Navigation */}
-      {!loading && verses.length > 0 && (
-        <>
-          <AnimatedButton
-            className="floating-nav-btn floating-nav-btn--prev"
-            onClick={handlePrev}
-            disabled={currentIndex === 0 && currentSarga === 1}
-            aria-label="Previous verse"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-          </AnimatedButton>
-          <AnimatedButton
-            className="floating-nav-btn floating-nav-btn--next"
-            onClick={handleNext}
-            disabled={currentIndex === verses.length - 1 && currentSarga === kanda.sargas}
-            aria-label="Next verse"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </AnimatedButton>
-        </>
-      )}
     </main>
   );
 }

@@ -62,18 +62,14 @@
   margin: 0;
 }
 
-/* ── Nav bar: search + jump ────────────────────────────────────────── */
+/* ── Chapter jump ──────────────────────────────────────────────────── */
 .text-reader__nav-bar {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
-}
-
-.text-reader__search-wrap {
-  flex: 1;
-  min-width: 200px;
 }
 
 .text-reader__jump {
@@ -91,6 +87,7 @@
   background: var(--bg-surface);
   color: var(--text-primary);
   width: 140px;
+  min-height: 42px;
   transition: border-color var(--transition-fast);
   outline: none;
 }
@@ -103,6 +100,7 @@
   font-size: var(--text-sm);
   font-weight: 500;
   padding: 0.5rem 1rem;
+  min-height: 42px;
   background: var(--accent);
   color: white;
   border: none;
@@ -262,10 +260,6 @@
     align-items: stretch;
   }
 
-  .text-reader__search-wrap {
-    width: 100%;
-  }
-
   .text-reader__jump {
     width: 100%;
   }
@@ -273,6 +267,11 @@
   .text-reader__jump-input {
     flex: 1;
     width: auto;
+    min-height: 44px;
+  }
+
+  .text-reader__jump-btn {
+    min-height: 44px;
   }
 }
 
