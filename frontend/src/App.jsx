@@ -10,15 +10,14 @@
  * Sarathi state lives here - SarathiPanel is presentation only.
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { askQuestion } from './services/api';
 import Home from './pages/Home';
 import TextReader from './pages/TextReader';
 import ThemeToggle from './components/ThemeToggle';
 import SarathiPanel from './components/SarathiPanel';
-import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import SEOHead from './components/SEO/SEOHead';
 import AnimatedButton from './components/AnimatedButton';
@@ -39,14 +38,24 @@ function lazyWithRetry(componentImport) {
   });
 }
 
-// Lazy-load heavier pages to keep initial bundle small
-const ChapterReader = lazyWithRetry(() => import('./pages/ChapterReader'));
-const Search        = lazyWithRetry(() => import('./pages/Search'));
-const VerseDetail   = lazyWithRetry(() => import('./pages/VerseDetail'));
-const Ramayana      = lazyWithRetry(() => import('./pages/Ramayana'));
-const KandaReader   = lazyWithRetry(() => import('./pages/KandaReader'));
-const FAQ           = lazyWithRetry(() => import('./pages/FAQ'));
-const Ask           = lazyWithRetry(() => import('./pages/Ask'));
+// Lazy-load heavier pages, then warm their small chunks while the browser is idle.
+const routeImports = {
+  chapterReader: () => import('./pages/ChapterReader'),
+  search: () => import('./pages/Search'),
+  verseDetail: () => import('./pages/VerseDetail'),
+  ramayana: () => import('./pages/Ramayana'),
+  kandaReader: () => import('./pages/KandaReader'),
+  faq: () => import('./pages/FAQ'),
+  ask: () => import('./pages/Ask'),
+};
+
+const ChapterReader = lazyWithRetry(routeImports.chapterReader);
+const Search        = lazyWithRetry(routeImports.search);
+const VerseDetail   = lazyWithRetry(routeImports.verseDetail);
+const Ramayana      = lazyWithRetry(routeImports.ramayana);
+const KandaReader   = lazyWithRetry(routeImports.kandaReader);
+const FAQ           = lazyWithRetry(routeImports.faq);
+const Ask           = lazyWithRetry(routeImports.ask);
 
 // Suggested conversation starters - shown when panel is first opened
 const SARATHI_PROMPTS = [
@@ -55,21 +64,23 @@ const SARATHI_PROMPTS = [
   'Which verses can help with a difficult decision?',
 ];
 
-// Premium page loading state
+// Quiet route loading state for the rare case where an idle preload has not finished.
 function PageLoader() {
   return (
-    <LoadingSpinner fullPage={true} text="Loading..." />
+    <div className="gs-route-loader" role="status" aria-live="polite">
+      <span className="gs-route-loader__mark" aria-hidden="true" />
+      <span>Opening page</span>
+    </div>
   );
 }
 
-// Wrapper for soft route transitions
+// A quick opacity change avoids leaving decorative rules from the old page on screen.
 function PageTransition({ children }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.15, ease: "easeOut" }}
+      initial={{ opacity: 0.82 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       className="page-transition-wrapper"
     >
       {children}
@@ -131,6 +142,46 @@ export default function App() {
   useEffect(() => {
     setIsSarathiOpen(false);
   }, [location.pathname]);
+
+  useLayoutEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  // Reset the viewport before the new route paints. This prevents a frame of
+  // the previous reading position from appearing above the next page.
+  useLayoutEffect(() => {
+    if (location.hash) return;
+
+    const scrollRoot = document.scrollingElement;
+    if (scrollRoot) {
+      scrollRoot.scrollTop = 0;
+      scrollRoot.scrollLeft = 0;
+    }
+    document.body.scrollTop = 0;
+  }, [location.pathname, location.search, location.hash]);
+
+  useEffect(() => {
+    const warmRouteChunks = () => {
+      Object.values(routeImports).forEach((loadRoute) => {
+        loadRoute().catch(() => {
+          // Navigation still has lazyWithRetry as a recovery path.
+        });
+      });
+    };
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(warmRouteChunks, { timeout: 1800 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timerId = window.setTimeout(warmRouteChunks, 500);
+    return () => window.clearTimeout(timerId);
+  }, []);
 
   async function handleAsk(event) {
     event.preventDefault();
@@ -238,22 +289,20 @@ export default function App() {
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
-            <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}>
-              <Routes location={location} key={location.pathname}>
-                <Route
-                  path="/"
-                  element={<PageTransition><Home /></PageTransition>}
-                />
-                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-                <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
-                <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
-                <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
-                <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
-                <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
-                <Route path="/ask" element={<PageTransition><Ask /></PageTransition>} />
-                <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
-              </Routes>
-            </AnimatePresence>
+            <Routes location={location} key={`${location.pathname}${location.search}`}>
+              <Route
+                path="/"
+                element={<PageTransition><Home /></PageTransition>}
+              />
+              <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+              <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
+              <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
+              <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
+              <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
+              <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
+              <Route path="/ask" element={<PageTransition><Ask /></PageTransition>} />
+              <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
+            </Routes>
           </Suspense>
         </ErrorBoundary>
         <Footer />

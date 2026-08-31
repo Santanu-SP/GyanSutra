@@ -260,31 +260,39 @@
   }
 }
 
-/* ── Page loader (Suspense fallback) ─────────────────────────────────── */
-.gs-page-loader {
+/* ── Route loader (Suspense fallback) ────────────────────────────────── */
+.gs-route-loader {
+  min-height: min(52dvh, 30rem);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 50dvh;
-  color: var(--marigold);
+  gap: 0.65rem;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
 }
 
-.gs-page-loader__dot {
-  width: 8px;
-  height: 8px;
+.gs-route-loader__mark {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
-  animation: loaderPulse 1.2s ease-in-out infinite;
+  background: var(--accent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 10%, transparent);
+  animation: routeLoaderPulse 720ms ease-in-out infinite alternate;
 }
 
-@keyframes loaderPulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.9); }
-  50%       { opacity: 1;   transform: scale(1.1); }
+@keyframes routeLoaderPulse {
+  from { opacity: 0.45; transform: scale(0.82); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.page-transition-wrapper {
+  min-height: 1px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gs-body { transition: none; }
-  .gs-page-loader__dot { animation: none; opacity: 1; }
+  .gs-route-loader__mark { animation: none; opacity: 1; }
 }
 
 /* ── Mobile bottom navigation bar ────────────────────────────────────── */

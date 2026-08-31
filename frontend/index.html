@@ -68,8 +68,8 @@
       .gs-boot-splash__content {
         display: grid;
         justify-items: center;
-        gap: 0.8rem;
-        animation: gs-boot-arrive 420ms cubic-bezier(.2,.8,.2,1) both;
+        gap: 0.7rem;
+        animation: gs-boot-arrive 180ms cubic-bezier(.2,.8,.2,1) both;
       }
       .gs-boot-splash__logo {
         width: 62px;
@@ -84,33 +84,12 @@
         text-transform: uppercase;
       }
       [data-theme="dark"] .gs-boot-splash__name { color: #efe8f5; }
-      .gs-boot-splash__thread {
-        width: 42px;
-        height: 2px;
-        overflow: hidden;
-        border-radius: 999px;
-        background: rgba(201, 154, 78, .22);
-      }
-      .gs-boot-splash__thread::after {
-        content: '';
-        display: block;
-        width: 55%;
-        height: 100%;
-        border-radius: inherit;
-        background: #e8a33d;
-        animation: gs-boot-thread 620ms ease-in-out infinite alternate;
-      }
       @keyframes gs-boot-arrive {
         from { opacity: 0; transform: translateY(5px) scale(.96); }
         to { opacity: 1; transform: translateY(0) scale(1); }
       }
-      @keyframes gs-boot-thread {
-        from { transform: translateX(-70%); }
-        to { transform: translateX(150%); }
-      }
       @media (prefers-reduced-motion: reduce) {
-        .gs-boot-splash__content,
-        .gs-boot-splash__thread::after { animation: none; }
+        .gs-boot-splash__content { animation: none; }
         #gs-boot-splash { transition-duration: 80ms; }
       }
     </style>
@@ -139,7 +118,6 @@
       <div class="gs-boot-splash__content">
         <img class="gs-boot-splash__logo" src="%BASE_URL%icons/logo.svg" alt="" width="62" height="62" />
         <p class="gs-boot-splash__name">Gyan Sutra</p>
-        <span class="gs-boot-splash__thread"></span>
       </div>
     </div>
     <div id="root"></div>

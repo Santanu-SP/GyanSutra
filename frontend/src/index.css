@@ -532,14 +532,6 @@ p {
   text-transform: uppercase;
 }
 
-.gs-home__eyebrow::before {
-  content: '';
-  width: 1.75rem;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.75;
-}
-
 .gs-home__heading {
   max-width: 13.5ch;
   margin: 0;
@@ -634,16 +626,6 @@ p {
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
   box-shadow: 0 18px 55px color-mix(in srgb, var(--ink) 9%, transparent);
-}
-
-.gs-home__darshan::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 8%, transparent));
 }
 
 .gs-home__darshan-header {
@@ -888,10 +870,6 @@ p {
   .gs-home__eyebrow {
     margin-bottom: 0.7rem;
     font-size: 0.69rem;
-  }
-
-  .gs-home__eyebrow::before {
-    width: 1.25rem;
   }
 
   .gs-home__heading {

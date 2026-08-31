@@ -5,17 +5,17 @@ export default function SplashScreen({ children }) {
     const splash = document.getElementById('gs-boot-splash');
     if (!splash) return undefined;
 
-    // The app is already rendered behind the lightweight boot layer. Keep the
-    // brand moment brief, then remove it from the DOM completely.
-    const revealTimer = window.setTimeout(() => {
+    // The splash only covers bundle startup. Once React is ready, reveal the
+    // app on the next frame and remove the layer completely.
+    const revealFrame = window.requestAnimationFrame(() => {
       splash.classList.add('is-leaving');
-    }, 520);
+    });
     const removeTimer = window.setTimeout(() => {
       splash.remove();
-    }, 760);
+    }, 220);
 
     return () => {
-      window.clearTimeout(revealTimer);
+      window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(removeTimer);
     };
   }, []);
