@@ -1,7 +1,7 @@
 {
   "name": "gyansutra-backend",
   "version": "1.0.0",
-  "description": "Gyan Sutra API — RAG backend for Indian scripture knowledge platform",
+  "description": "Gyan Sutra API - RAG backend for Indian scripture knowledge platform",
   "main": "src/app.js",
   "engines": {
     "node": ">=18.0.0"

@@ -1,5 +1,5 @@
 /**
- * RAG Service — Retrieve-Augment-Generate pipeline for Gyan Sutra.
+ * RAG Service - Retrieve-Augment-Generate pipeline for Gyan Sutra.
  * Fast, authentic, deeply grounded in Bhagavad Gita & Valmiki Ramayana.
  */
 
@@ -13,8 +13,8 @@ const { findNearestVerses, collections, getDoc } = require('./firestore');
 // Set lower than 0.72 so more queries get verse-grounded answers.
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.55');
 const TOP_K                = parseInt(process.env.RAG_TOP_K || '6', 10);
-const TOP_CONTEXT          = 2;    // max verses sent to LLM — 2 is enough for grounding
-const MAX_COMMENTARY_CHARS = 200;  // truncate per-guru commentary — keeps token budget tight
+const TOP_CONTEXT          = 2;    // max verses sent to LLM - 2 is enough for grounding
+const MAX_COMMENTARY_CHARS = 200;  // truncate per-guru commentary - keeps token budget tight
 
 // Primary + fallback model chain (ordered by reliability → quality)
 const OPENROUTER_MODELS = [
@@ -24,12 +24,12 @@ const OPENROUTER_MODELS = [
   'openrouter/free'                            // Last-resort wildcard
 ];
 
-// Non-thinking model FIRST — gemini-3.5-flash doesn't waste tokens on reasoning.
+// Non-thinking model FIRST - gemini-3.5-flash doesn't waste tokens on reasoning.
 // gemini-3.6-flash is a thinking model whose internal reasoning consumes the
 // max_tokens budget, causing finish_reason='length' on complex prompts.
 const GEMINI_MODELS = [
-  'gemini-3.5-flash',         // Fast, reliable, no thinking overhead — PRIMARY
-  'gemini-3.6-flash',         // Thinking model — higher quality but needs more tokens
+  'gemini-3.5-flash',         // Fast, reliable, no thinking overhead - PRIMARY
+  'gemini-3.6-flash',         // Thinking model - higher quality but needs more tokens
 ];
 
 // Per-model token budget. Thinking models need much more headroom because their
@@ -43,7 +43,7 @@ const DEFAULT_MAX_TOKENS = 2048;
 // Per-model timeout (ms). Fail fast so fallbacks get a chance.
 const MODEL_TIMEOUT_MS = 15000;
 
-// Groq free-tier models — used automatically when all Gemini models fail
+// Groq free-tier models - used automatically when all Gemini models fail
 // Get a free key at: https://console.groq.com/keys
 const GROQ_MODELS = [
   'openai/gpt-oss-120b',  // Best quality on Groq (120B params)
@@ -79,7 +79,7 @@ let groqClient;
 function getGroqClient() {
   if (!groqClient) {
     const groqKey = process.env.GROQ_API_KEY || '';
-    if (!groqKey) return null; // Groq not configured — skip silently
+    if (!groqKey) return null; // Groq not configured - skip silently
     groqClient = new OpenAI({
       baseURL: 'https://api.groq.com/openai/v1',
       apiKey: groqKey,
@@ -90,9 +90,9 @@ function getGroqClient() {
   return groqClient;
 }
 
-const SYSTEM_PROMPT = `You are Sarathi (सारथि) — Gyan Sutra's spiritual guide, master of the Bhagavad Gita and Valmiki Ramayana.
+const SYSTEM_PROMPT = `You are Sarathi (सारथि) - Gyan Sutra's spiritual guide, master of the Bhagavad Gita and Valmiki Ramayana.
 
-RESPOND USING EXACTLY THESE FOUR SECTIONS — NO EXCEPTIONS:
+RESPOND USING EXACTLY THESE FOUR SECTIONS - NO EXCEPTIONS:
 
 ### 📖 The Teaching
 [Core answer, 2-3 sentences. Start directly. No preamble.]
@@ -111,7 +111,7 @@ RULES:
 - NEVER fabricate verse numbers. NEVER mix Mahabharata/Ramayana characters.
 - English for English questions. Pure Devanagari Hindi for Hindi/Hinglish.
 - Decline only if completely outside scripture: "This falls outside the Gita and Ramayana."
-- Output ONLY the four sections above — no internal thoughts, no preamble, no markdown tables.
+- Output ONLY the four sections above - no internal thoughts, no preamble, no markdown tables.
 - Evaluate the Retrieved Context: if it doesn’t match the question, IGNORE it and use your own knowledge.`;
 
 /**
@@ -151,7 +151,7 @@ function cleanResponse(raw) {
     text = text.replace(/\[List maximum 2 gurus.*?\]/g, '');
   } else {
     // Fallback stripping if the exact heading isn't used
-    const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–—]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
+    const thinkingPreamblePattern = /^(here(?:'s| is) (?:a |my |the )?thinking(?: process)?[:\-–-]?|let me think|analysis:|chain[- ]of[- ]thought:)/im;
     if (thinkingPreamblePattern.test(text)) {
       const realContentMatch = text.match(/(\n#{1,3} |\n\*{2}📖|\n📖|^\s*#{1,3} |\n---\n)/im);
       if (realContentMatch && realContentMatch.index > 0) {
@@ -199,7 +199,7 @@ async function tryModel(client, model, chatMessages, maxTokens) {
 
     if (finishReason === 'length') {
       console.warn(`[RAG] Model ${model} hit token limit (finish_reason=length, content=${rawAnswer.length} chars).`);
-      // DON'T discard — use the partial response if it has meaningful content
+      // DON'T discard - use the partial response if it has meaningful content
       if (rawAnswer.length > 80) {
         return { answer: rawAnswer, error: null, truncated: true };
       }
@@ -261,17 +261,17 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
     if (result.answer) {
       const cleaned = cleanResponse(result.answer);
       if (!result.truncated) {
-        // Clean, complete response — return immediately
+        // Clean, complete response - return immediately
         return cleaned.length > 10 ? cleaned : result.answer;
       }
-      // Truncated but has content — save as fallback, try next model for a complete one
+      // Truncated but has content - save as fallback, try next model for a complete one
       if (!bestPartialAnswer || cleaned.length > bestPartialAnswer.length) {
         bestPartialAnswer = cleaned.length > 10 ? cleaned : result.answer;
       }
     }
   }
 
-  // ── Phase 2: Gemini exhausted — fall back to Groq seamlessly ───────────────
+  // ── Phase 2: Gemini exhausted - fall back to Groq seamlessly ───────────────
   const groq = getGroqClient();
   if (groq) {
     console.info('[RAG] Switching to Groq fallback provider...');
@@ -302,7 +302,7 @@ async function callLlmWithFallback(chatMessages, isCompareMode = false) {
 }
 
 /**
- * Main RAG function — Retrieve, Augment, Generate.
+ * Main RAG function - Retrieve, Augment, Generate.
  *
  * Speed optimisation: explicit-match doc lookups run in parallel with embedText(),
  * saving ~300-400ms on every request that contains a verse reference.
@@ -331,7 +331,7 @@ async function askRag(question, history = []) {
     if (mapped) { ramK = mapped; ramS = parseInt(ramNamed[2], 10); ramShl = parseInt(ramNamed[3], 10); }
   }
 
-  // ── Step 2: Parallel — embed question + fetch exact-match docs ────────────
+  // ── Step 2: Parallel - embed question + fetch exact-match docs ────────────
   // embedText and the two getDoc calls have no dependencies on each other;
   // running them together saves one or two sequential Firestore round-trips.
   const [queryVector, exactGitaDoc, exactRamDoc] = await Promise.all([
@@ -347,7 +347,7 @@ async function askRag(question, history = []) {
       : Promise.resolve(null),
   ]);
 
-  // ── Step 3: KNN similarity search (sequential — needs the vector) ─────────
+  // ── Step 3: KNN similarity search (sequential - needs the vector) ─────────
   let retrieved = [];
   if (queryVector && queryVector.length > 0) {
     try {
@@ -392,7 +392,7 @@ async function askRag(question, history = []) {
     tags: d.tags || [],
   }));
 
-  // ── Step 5: Context construction — always provide best available verses ───
+  // ── Step 5: Context construction - always provide best available verses ───
   //
   // Design principle: Sarathi ALWAYS answers. We never send a hard refusal
   // instruction to the LLM. Instead:
@@ -401,7 +401,7 @@ async function askRag(question, history = []) {
   //   • Zero retrieved                    → LLM uses its own scriptural knowledge
   //
   // Only TOP_CONTEXT (3) verses are sent to keep the prompt compact and fast.
-  // Guru commentaries are truncated at MAX_COMMENTARY_CHARS (600) — the LLM
+  // Guru commentaries are truncated at MAX_COMMENTARY_CHARS (600) - the LLM
   // naturally expands from its training on these Gurus; the truncated snippet
   // is enough to ground and verify the response.
 
@@ -415,11 +415,11 @@ async function askRag(question, history = []) {
 
   let contextLines;
   if (contextVerses.length === 0) {
-    // No embedding results at all — ask LLM to draw on its own training
+    // No embedding results at all - ask LLM to draw on its own training
     contextLines = '[No verse retrieved. Answer from your deep knowledge of the Bhagavad Gita and Valmiki Ramayana. Be transparent: note when sharing general scriptural wisdom rather than a pinpointed verse.]';
   } else {
     const prefix = isDirectlyInContext
-      ? '' // High-confidence — no extra instruction needed
+      ? '' // High-confidence - no extra instruction needed
       : '[Note: The verses below are the closest available matches but may not directly address the question. Use them as reference and draw on your broader Gita/Ramayana knowledge to give a complete, accurate answer.]\n\n';
 
     contextLines = prefix + contextVerses.map((v, i) => {
@@ -427,7 +427,7 @@ async function askRag(question, history = []) {
         ? v.wordMeanings.map(w => `${w.word} = ${w.meaning}`).join(', ')
         : '';
 
-      // Truncate long commentaries — avg 3000 chars; 600 keeps the key insight
+      // Truncate long commentaries - avg 3000 chars; 600 keeps the key insight
       // and keeps the prompt well within the LLM's context window.
       const explanations = Array.isArray(v.detailedExplanations) && v.detailedExplanations.length > 0
         ? v.detailedExplanations.map(exp => {
@@ -488,7 +488,7 @@ async function askRag(question, history = []) {
   // Guard: if LLM returned empty content log it clearly
   if (!answer || answer.trim().length < 5) {
     console.error('[RAG] LLM returned empty or near-empty answer. Model may have refused or timed out.');
-    answer = '⚠️ Sarathi received an empty response from the AI. Please try asking again — the service may be temporarily overloaded.';
+    answer = '⚠️ Sarathi received an empty response from the AI. Please try asking again - the service may be temporarily overloaded.';
   }
 
   // ── Step 7: Build citations from above-threshold verses ──────────────────

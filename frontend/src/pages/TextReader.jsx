@@ -1,5 +1,5 @@
 /**
- * TextReader — Chapter Navigator for Bhagavad Gita.
+ * TextReader - Chapter Navigator for Bhagavad Gita.
  * Shows a "Coming Soon" screen for sources not yet available.
  */
 
@@ -11,7 +11,7 @@ import AnimatedButton from '../components/AnimatedButton';
 
 import './TextReader.css';
 
-// Static source metadata — avoids an extra backend round-trip
+// Static source metadata - avoids an extra backend round-trip
 const SOURCE_META = {
   'bhagavad-gita': {
     title: 'Bhagavad Gita',
@@ -33,7 +33,7 @@ const SOURCE_META = {
   },
 };
 
-// Roman numerals for chapter numbers — more manuscript-like than Arabic
+// Roman numerals for chapter numbers - more manuscript-like than Arabic
 const ROMAN = [
   'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
   'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII',
@@ -174,7 +174,7 @@ export default function TextReader() {
           <p className="text-reader__error">Could not load chapters: {error}</p>
         )}
 
-        {/* ── Chapter list — table-of-contents style ─────────────── */}
+        {/* ── Chapter list - table-of-contents style ─────────────── */}
         {!loading && !error && chapters.length > 0 && (
           <ol
             className="text-reader__chapter-list"

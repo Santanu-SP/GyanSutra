@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/search?q=<query>&limit=<n>
  *
  * Semantic search: embeds the query and runs KNN against all verse embeddings.
- * This is the same vector retrieval used by /ask, but without the LLM step —
+ * This is the same vector retrieval used by /ask, but without the LLM step -
  * results are returned directly as ranked verse cards.
  *
  * Falls back gracefully if the query is too short to embed meaningfully.

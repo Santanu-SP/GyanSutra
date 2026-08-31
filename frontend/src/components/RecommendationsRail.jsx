@@ -1,5 +1,5 @@
 /**
- * RecommendationsRail — "Related teachings" section.
+ * RecommendationsRail - "Related teachings" section.
  * Horizontal scroll on mobile, sidebar-style on desktop.
  * Reuses IlluminatedVerseCard (compact variant).
  */
@@ -42,7 +42,7 @@ export default function RecommendationsRail({ contentId, type = 'verse' }) {
     );
   }
 
-  if (error || recs.length === 0) return null; // Fail silently — don't break the page
+  if (error || recs.length === 0) return null; // Fail silently - don't break the page
 
   return (
     <aside className="reco-rail" aria-label="Related teachings">

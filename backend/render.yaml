@@ -11,7 +11,7 @@ services:
       - key: PORT
         value: 3001
       - key: GEMINI_API_KEY
-        sync: false   # Set manually in Render dashboard — never committed
+        sync: false   # Set manually in Render dashboard - never committed
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_JSON

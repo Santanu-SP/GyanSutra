@@ -1,7 +1,7 @@
 /**
  * Firestore Admin SDK wrapper.
  * Initializes once and exports typed collection helpers.
- * The Admin SDK is called only from the Express server — never from the browser.
+ * The Admin SDK is called only from the Express server - never from the browser.
  */
 
 const admin = require('firebase-admin');
@@ -76,7 +76,7 @@ async function setDoc(collectionName, docId, data) {
 }
 
 /**
- * Batch write — splits automatically at Firestore's 500-op limit.
+ * Batch write - splits automatically at Firestore's 500-op limit.
  * items: Array of { id, data }
  */
 async function batchWrite(collectionName, items) {
@@ -98,7 +98,7 @@ async function batchWrite(collectionName, items) {
  * Firestore native KNN vector search.
  * Returns up to `topK` verse documents ordered by cosine distance.
  *
- * Requires a vector index on `verses.embedding` — create it in Firebase Console or via CLI:
+ * Requires a vector index on `verses.embedding` - create it in Firebase Console or via CLI:
  *   firebase firestore:indexes
  *
  * @param {number[]} queryVector - 768-dimensional embedding

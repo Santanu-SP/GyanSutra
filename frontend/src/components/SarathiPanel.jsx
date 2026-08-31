@@ -1,7 +1,7 @@
 /**
- * SarathiPanel — Gyan Sutra's spiritual companion.
+ * SarathiPanel - Gyan Sutra's spiritual companion.
  *
- * Named Sarathi (सारथि) — as Krishna was Arjuna's charioteer and guide.
+ * Named Sarathi (सारथि) - as Krishna was Arjuna's charioteer and guide.
  * This is not a chatbot. It is a companion for scripture reflection.
  *
  * Layout behavior:
@@ -13,9 +13,9 @@
  *     - Size-snap buttons in header for quick height switching
  *
  * Props:
- *   isOpen, onClose, onOpen — panel open/close state
- *   messages, question, setQuestion, onAsk, isLoading — chat state
- *   suggestedPrompts — initial path buttons
+ *   isOpen, onClose, onOpen - panel open/close state
+ *   messages, question, setQuestion, onAsk, isLoading - chat state
+ *   suggestedPrompts - initial path buttons
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -93,7 +93,7 @@ export default function SarathiPanel({
   // Keep ref in sync
   const setPanelSize = (s) => { panelSizeRef.current = s; _setPanelSize(s); };
 
-  // Current height in dvh — dynamic during drag, snap zone otherwise
+  // Current height in dvh - dynamic during drag, snap zone otherwise
   const currentDvh = isDragging && dynamicHeight !== null ? dynamicHeight : SNAP[panelSize];
 
   // ── Set a comfortable initial height on mobile ───────────────────────
@@ -213,7 +213,7 @@ export default function SarathiPanel({
   return (
     <>
 
-      {/* ── Mobile backdrop — only for normal/full sizes (peek lets user see screen) ── */}
+      {/* ── Mobile backdrop - only for normal/full sizes (peek lets user see screen) ── */}
       {isOpen && panelSize !== 'peek' && (
         <div
           className="sarathi-backdrop"
@@ -231,7 +231,7 @@ export default function SarathiPanel({
         aria-hidden={!isOpen}
         id="sarathi-panel"
       >
-        {/* ── Mobile drag handle — grab & pull to resize ──────────────── */}
+        {/* ── Mobile drag handle - grab & pull to resize ──────────────── */}
         <div
           className="sarathi-panel__handle"
           aria-label="Drag to resize panel"

@@ -1,5 +1,5 @@
 /**
- * VerseDetail — full single-verse page with recommendations.
+ * VerseDetail - full single-verse page with recommendations.
  */
 
 import { useState, useEffect } from 'react';

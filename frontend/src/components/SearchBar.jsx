@@ -1,5 +1,5 @@
 /**
- * SearchBar — persistent global search.
+ * SearchBar - persistent global search.
  * Debounced, with keyboard shortcut (Cmd/Ctrl+K) to focus.
  */
 

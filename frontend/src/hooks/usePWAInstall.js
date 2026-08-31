@@ -1,13 +1,13 @@
 /**
- * usePWAInstall — handles the PWA beforeinstallprompt event.
+ * usePWAInstall - handles the PWA beforeinstallprompt event.
  *
  * The install prompt is intentionally deferred until the user has read a full
- * chapter (see ChapterReader.jsx for the trigger) — not shown on page load.
+ * chapter (see ChapterReader.jsx for the trigger) - not shown on page load.
  *
  * Returns:
- *   canInstall  {boolean} — true if the browser has an installable prompt ready
- *   triggerInstall {() => Promise<void>} — show the native install prompt
- *   dismissed   {boolean} — user dismissed once, don't show again this session
+ *   canInstall  {boolean} - true if the browser has an installable prompt ready
+ *   triggerInstall {() => Promise<void>} - show the native install prompt
+ *   dismissed   {boolean} - user dismissed once, don't show again this session
  */
 
 import { useState, useEffect, useCallback } from 'react';

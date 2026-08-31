@@ -73,7 +73,7 @@ const askLimiter = rateLimit({
   max: parseInt(process.env.ASK_RATE_LIMIT_MAX || '20', 10),
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many questions — please wait a moment before asking again.' },
+  message: { error: 'Too many questions - please wait a moment before asking again.' },
 });
 
 app.use('/api', generalLimiter);

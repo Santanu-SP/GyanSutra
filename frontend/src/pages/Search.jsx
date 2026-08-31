@@ -1,5 +1,5 @@
 /**
- * Search — full semantic search results page.
+ * Search - full semantic search results page.
  */
 
 import { useState, useEffect } from 'react';

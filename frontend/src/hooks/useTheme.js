@@ -1,5 +1,5 @@
 /**
- * useTheme — manages light/dark mode.
+ * useTheme - manages light/dark mode.
  *
  * Priority order:
  *   1. User's manual override (persisted in localStorage)

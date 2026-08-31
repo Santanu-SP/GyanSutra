@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * AnimatedButton — A drop-in replacement for <button>
+ * AnimatedButton - A drop-in replacement for <button>
  * Provides premium Apple/Linear style micro-interactions:
  * - Spring scale on hover/active
  * - Crossfade loading state

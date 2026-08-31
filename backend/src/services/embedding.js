@@ -1,5 +1,5 @@
 /**
- * Embedding Service — Runs a state-of-the-art transformer model locally.
+ * Embedding Service - Runs a state-of-the-art transformer model locally.
  * 100% Free, Unlimited, 0ms Network Latency, and requires NO API Keys.
  * Outputs native 384-dimensional vectors matching your Firestore setup.
  */

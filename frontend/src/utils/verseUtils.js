@@ -1,9 +1,9 @@
 /**
- * verseUtils — utility functions for verse data manipulation.
+ * verseUtils - utility functions for verse data manipulation.
  */
 
 /**
- * filterVerses — filter a verse list.
+ * filterVerses - filter a verse list.
  * Currently a pass-through; can be extended for tag/chapter filtering.
  *
  * @param {Array} verses - Array of verse objects

@@ -7,7 +7,7 @@ const router = express.Router();
  * POST /api/ask
  * Body: { question: string, history?: Array<{ role: 'user'|'sarathi', content: string }> }
  *
- * The RAG endpoint — the core of Gyan Sutra's AI layer.
+ * The RAG endpoint - the core of Gyan Sutra's AI layer.
  *
  * Pipeline (enforced in rag.js):
  *   1. Embed the question
@@ -35,7 +35,7 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'Question is too long (max 500 characters).' });
     }
 
-    // history is optional — validate shape if provided
+    // history is optional - validate shape if provided
     // Only keep last 2 exchanges (4 messages) to save input tokens while preserving follow-up context
     const safeHistory = Array.isArray(history)
       ? history
@@ -46,7 +46,7 @@ router.post('/', async (req, res, next) => {
     const trimmed = question.trim();
     const result = await askRag(trimmed, safeHistory);
 
-    // Fire-and-forget QA log — non-blocking
+    // Fire-and-forget QA log - non-blocking
     logQaCall({
       question: trimmed,
       retrievedVerseIds: result.citations.map(c => c.id),

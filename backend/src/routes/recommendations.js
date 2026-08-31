@@ -12,7 +12,7 @@ const RECO_THRESHOLD = 0.60; // Minimum similarity for a recommendation
  * GET /api/recommendations/:contentId
  *
  * Returns 4–6 "Related teachings" for a given verse or story.
- * Uses cosine similarity against the same embedding store — no separate ML system.
+ * Uses cosine similarity against the same embedding store - no separate ML system.
  *
  * :contentId is a Firestore document ID:
  *   - Verses: "1_47" (chapter_verse)
@@ -43,7 +43,7 @@ router.get('/:contentId', async (req, res, next) => {
     const sourceEmbedding = sourceData.embedding;
 
     if (!sourceEmbedding || !Array.isArray(sourceEmbedding.arrayValue?.values ?? sourceEmbedding)) {
-      // Embedding might not be stored yet (e.g. old doc) — fall back gracefully
+      // Embedding might not be stored yet (e.g. old doc) - fall back gracefully
       return res.json({ contentId, recommendations: [] });
     }
 

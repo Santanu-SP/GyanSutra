@@ -51,7 +51,7 @@ router.get('/:id/verses', async (req, res, next) => {
 
     const verses = snap.docs.map(doc => {
       const data = doc.data();
-      delete data.embedding; // Strip vector — client never needs it
+      delete data.embedding; // Strip vector - client never needs it
       return { id: doc.id, ...data };
     });
 

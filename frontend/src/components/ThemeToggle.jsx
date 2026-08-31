@@ -1,6 +1,6 @@
 /**
- * ThemeToggle — light/dark mode switch.
- * Uses a sun/moon icon pair. No text label needed — icon is self-explanatory.
+ * ThemeToggle - light/dark mode switch.
+ * Uses a sun/moon icon pair. No text label needed - icon is self-explanatory.
  */
 
 import { useTheme } from '../hooks/useTheme';

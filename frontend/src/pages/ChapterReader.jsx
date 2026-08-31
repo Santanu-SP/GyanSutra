@@ -1,11 +1,11 @@
 /**
- * ChapterReader — reads all verses in a chapter.
+ * ChapterReader - reads all verses in a chapter.
  * Shows one verse at a time with prev/next navigation.
  * Page-turn animation between verses.
  *
  * Additions (non-breaking, UI only):
- *   - Compact chapter strip at the top — quick jump between chapters
- *   - Verse jump dropdown in the nav bar — jump to any verse directly
+ *   - Compact chapter strip at the top - quick jump between chapters
+ *   - Verse jump dropdown in the nav bar - jump to any verse directly
  *   - Back link navigates to the source (bhagavad-gita) not just /
  */
 
@@ -124,7 +124,7 @@ export default function ChapterReader() {
         </header>
       )}
 
-      {/* ── Compact chapter strip — quick jump to any chapter ─────── */}
+      {/* ── Compact chapter strip - quick jump to any chapter ─────── */}
       {!loading && (
         <nav
           className="chapter-strip"
@@ -221,7 +221,7 @@ export default function ChapterReader() {
         </nav>
       )}
 
-      {/* ── Recommendations — shown at chapter end ─────────────────── */}
+      {/* ── Recommendations - shown at chapter end ─────────────────── */}
       {!loading && isLastVerse && currentVerse && (
         <div className="chapter-reader__recos">
           <RecommendationsRail contentId={currentVerse.id} type="verse" />

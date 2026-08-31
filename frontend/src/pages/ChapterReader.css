@@ -173,7 +173,7 @@
   margin-inline: auto;
 }
 
-/* ── Chapter strip — compact chapter number bar ──────────────────── */
+/* ── Chapter strip - compact chapter number bar ──────────────────── */
 .chapter-strip {
   display: flex;
   flex-wrap: wrap;

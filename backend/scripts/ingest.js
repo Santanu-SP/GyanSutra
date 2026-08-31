@@ -1,5 +1,5 @@
 /**
- * Gyan Sutra — High-Fidelity API-Driven Ingestor
+ * Gyan Sutra - High-Fidelity API-Driven Ingestor
  * ────────────────────────────────────────────────────────────────────────────
  * Fetches verse records via the stable open static API layer, maps bilingual 
  * translation nodes, processes local ONNX 384-dim embeddings, and updates Firestore.
@@ -41,7 +41,7 @@ const GITA_CHAPTERS = [
 
 async function main() {
   console.log('╔══════════════════════════════════════════════╗');
-  console.log('║   Gyan Sutra — API Ingestion Engine Live     ║');
+  console.log('║   Gyan Sutra - API Ingestion Engine Live     ║');
   console.log('╚══════════════════════════════════════════════╝');
 
   console.log('\n[Step 1/2] Synchronizing chapter blueprints…');

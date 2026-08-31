@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Gyan Sutra — Design System Tokens
+   Gyan Sutra - Design System Tokens
    This file is the single source of truth for all visual constants.
-   Every CSS rule in the app must use these tokens — never raw hex values.
+   Every CSS rule in the app must use these tokens - never raw hex values.
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Color scheme tracks data-theme ──────────────────────────────────── */
@@ -10,14 +10,14 @@
 
 /* ── Color Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Brand palette — the core five */
-  --parchment:    #F6EFDD;  /* Light-mode background — oxidized paper        */
+  /* Brand palette - the core five */
+  --parchment:    #F6EFDD;  /* Light-mode background - oxidized paper        */
   --ink:          #241A2E;  /* Primary text on light backgrounds              */
-  --marigold:     #E8A33D;  /* Primary accent — CTAs, active state, links     */
-  --copper:       #BE6A2E;  /* Secondary accent — hover / pressed states      */
-  --indigo:       #3B2245;  /* Brand deep — headers, chips, dark-mode cards   */
+  --marigold:     #E8A33D;  /* Primary accent - CTAs, active state, links     */
+  --copper:       #BE6A2E;  /* Secondary accent - hover / pressed states      */
+  --indigo:       #3B2245;  /* Brand deep - headers, chips, dark-mode cards   */
 
-  /* Thread motif — the recurring hairline */
+  /* Thread motif - the recurring hairline */
   --gold-thread:  #C99A4E;  /* Hairline rules, dividers, card borders         */
 
   /* Dark mode surfaces */
@@ -25,7 +25,7 @@
   --night-surface:#2A1E30;  /* Dark-mode card / surface                       */
   --night-border: #3D2A48;  /* Dark-mode border                               */
 
-  /* Semantic aliases — used in component code */
+  /* Semantic aliases - used in component code */
   --bg:           var(--parchment);
   --bg-surface:   #FDFAF3;   /* slightly lighter than parchment for cards     */
   --text-primary: var(--ink);
@@ -43,15 +43,15 @@
   --font-body:    'Hind', system-ui, sans-serif;     /* UI text, translations, nav       */
   --font-devanagari: 'Tiro Devanagari Hindi', serif; /* Sanskrit and Hindi verse text    */
 
-  /* Type scale — major third (1.25) */
-  --text-xs:   0.64rem;   /* 10.24px — tags, labels        */
-  --text-sm:   0.8rem;    /* 12.8px  — captions, metadata  */
-  --text-base: 1rem;      /* 16px    — body text           */
-  --text-md:   1.25rem;   /* 20px    — sub-headings        */
-  --text-lg:   1.563rem;  /* 25px    — section headings    */
-  --text-xl:   1.953rem;  /* 31px    — page titles         */
-  --text-2xl:  2.441rem;  /* 39px    — display / hero      */
-  --text-3xl:  3.052rem;  /* 49px    — large Sanskrit      */
+  /* Type scale - major third (1.25) */
+  --text-xs:   0.64rem;   /* 10.24px - tags, labels        */
+  --text-sm:   0.8rem;    /* 12.8px  - captions, metadata  */
+  --text-base: 1rem;      /* 16px    - body text           */
+  --text-md:   1.25rem;   /* 20px    - sub-headings        */
+  --text-lg:   1.563rem;  /* 25px    - section headings    */
+  --text-xl:   1.953rem;  /* 31px    - page titles         */
+  --text-2xl:  2.441rem;  /* 39px    - display / hero      */
+  --text-3xl:  3.052rem;  /* 49px    - large Sanskrit      */
 
   /* Devanagari is slightly larger to visually lead */
   --text-sanskrit-body: 1.4rem;
@@ -91,14 +91,14 @@
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  /* The hairline — the "thread" motif */
+  /* The hairline - the "thread" motif */
   --hairline: 1px solid var(--gold-thread);
   --hairline-faint: 1px solid color-mix(in srgb, var(--gold-thread) 30%, transparent);
 }
 
 /* ── Elevation / Shadows ──────────────────────────────────────────────── */
 :root {
-  /* No heavy drop shadows — this is a manuscript, not a dashboard */
+  /* No heavy drop shadows - this is a manuscript, not a dashboard */
   --shadow-sm: 0 1px 3px rgba(36, 26, 46, 0.08);
   --shadow-md: 0 4px 12px rgba(36, 26, 46, 0.10);
   --shadow-glow: 0 0 20px rgba(232, 163, 61, 0.15);   /* marigold glow for focus states */
@@ -110,11 +110,11 @@
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
 
-  /* Page-turn animation — used between verses */
+  /* Page-turn animation - used between verses */
   --page-turn-duration: 350ms;
   --page-turn-easing: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Diya flicker — the loading state animation */
+  /* Diya flicker - the loading state animation */
   --diya-flicker-duration: 2.4s;
 }
 

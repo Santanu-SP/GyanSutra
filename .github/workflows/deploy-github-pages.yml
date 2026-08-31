@@ -54,7 +54,7 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || 'https://gyansutra.onrender.com' }}
         run: npm run build
 
-      # ── 5. SPA fallback — copy index.html → 404.html ──────────────────────
+      # ── 5. SPA fallback - copy index.html → 404.html ──────────────────────
       #   public/404.html (the purpose-built redirect shim) is already copied
       #   into dist/ by Vite. This step is a belt-and-suspenders safety copy
       #   in case the shim is not present for any reason.

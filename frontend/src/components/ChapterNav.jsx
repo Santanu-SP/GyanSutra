@@ -1,9 +1,9 @@
 /**
- * ChapterNav — book-edge tab strip.
+ * ChapterNav - book-edge tab strip.
  *
  * Renders 18 chapter tabs along the left edge on desktop,
  * or as a horizontal scrollable strip on mobile.
- * Deliberately NOT a grid — it reads like tabbed page-edges on a physical book.
+ * Deliberately NOT a grid - it reads like tabbed page-edges on a physical book.
  */
 
 import { NavLink } from 'react-router-dom';

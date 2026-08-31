@@ -1,5 +1,5 @@
 /**
- * Ask — the AI Q&A page.
+ * Ask - the AI Q&A page.
  */
 
 import AskPanel from '../components/AskPanel';

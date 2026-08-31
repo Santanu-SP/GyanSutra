@@ -1,8 +1,8 @@
 /**
- * AskPanel — the AI Q&A interface.
+ * AskPanel - the AI Q&A interface.
  *
  * Loading state: diya flicker (opacity pulse, disabled if prefers-reduced-motion).
- * Refusal state: calm, intentional — looks deliberate, not like an error.
+ * Refusal state: calm, intentional - looks deliberate, not like an error.
  * Answer state: response text + IlluminatedVerseCard citations, tappable.
  */
 
@@ -97,7 +97,7 @@ export default function AskPanel() {
         </div>
       </form>
 
-      {/* Loading state — premium loader */}
+      {/* Loading state - premium loader */}
       {state === 'loading' && (
         <div className="ask-panel__loading" role="status" aria-live="polite">
           <div className="sarathi-loader">
@@ -154,7 +154,7 @@ export default function AskPanel() {
         </div>
       )}
 
-      {/* Refusal state — intentional, calm, not an error */}
+      {/* Refusal state - intentional, calm, not an error */}
       {state === 'refused' && result && (
         <div className="ask-panel__refusal page-turn-enter" role="status">
           <div className="ask-panel__refusal-icon" aria-hidden="true">

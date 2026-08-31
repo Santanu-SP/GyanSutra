@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   IlluminatedVerseCard — the visual signature of Gyan Sutra
+   IlluminatedVerseCard - the visual signature of Gyan Sutra
    ═══════════════════════════════════════════════════════════════════════ */
 
 .verse-card {
@@ -19,7 +19,7 @@
     var(--shadow-sm);
 }
 
-/* The gold hairline — the "thread" motif */
+/* The gold hairline - the "thread" motif */
 .verse-card::before {
   content: '';
   position: absolute;
@@ -103,7 +103,7 @@
   font-weight: 500;
 }
 
-/* ── Sanskrit — the visual leader ────────────────────────────────────── */
+/* ── Sanskrit - the visual leader ────────────────────────────────────── */
 .verse-card__sanskrit {
   color: var(--text-primary);
   margin-bottom: var(--space-4);

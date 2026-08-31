@@ -1,5 +1,5 @@
 /**
- * API service — all fetch calls to the Gyan Sutra Express backend.
+ * API service - all fetch calls to the Gyan Sutra Express backend.
  * The base URL is set via VITE_API_BASE_URL in .env.
  * Falls back to localhost:3001 for local development.
  */

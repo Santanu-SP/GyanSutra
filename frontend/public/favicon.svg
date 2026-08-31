@@ -5,7 +5,7 @@
       <stop offset="0%" stop-color="#1A0A0A"/>
       <stop offset="100%" stop-color="#0D0505"/>
     </radialGradient>
-    <!-- Flame gradient — rich saffron to deep amber -->
+    <!-- Flame gradient - rich saffron to deep amber -->
     <linearGradient id="flame" x1="256" y1="100" x2="256" y2="310" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#FFE082"/>
       <stop offset="45%" stop-color="#F59B2B"/>
@@ -24,14 +24,14 @@
     </linearGradient>
   </defs>
 
-  <!-- Deep background circle — ensures visibility on any tab/browser -->
+  <!-- Deep background circle - ensures visibility on any tab/browser -->
   <circle cx="256" cy="256" r="248" fill="url(#bg)"/>
 
-  <!-- Outer seal ring — bold enough to read at favicon size -->
+  <!-- Outer seal ring - bold enough to read at favicon size -->
   <circle cx="256" cy="256" r="232" fill="none" stroke="url(#ring)" stroke-width="9"/>
   <circle cx="256" cy="256" r="216" fill="none" stroke="#C99A4E" stroke-width="2" opacity="0.45"/>
 
-  <!-- Open book — ivory pages, clearly readable on dark background -->
+  <!-- Open book - ivory pages, clearly readable on dark background -->
   <path d="M 128 350
            C 128 315 186 295 256 295
            C 326 295 384 315 384 350
@@ -44,7 +44,7 @@
   <!-- Book center spine line -->
   <line x1="256" y1="298" x2="256" y2="316" stroke="#C99A4E" stroke-width="3" opacity="0.9"/>
 
-  <!-- Flame — bold, clear teardrop shape rising from book -->
+  <!-- Flame - bold, clear teardrop shape rising from book -->
   <path d="M 230 310
            C 185 260 196 188 238 148
            C 245 140 251 128 256 118
@@ -55,10 +55,10 @@
            Z"
         fill="url(#flame)"/>
 
-  <!-- Inner flame glow — bright core -->
+  <!-- Inner flame glow - bright core -->
   <ellipse cx="256" cy="210" rx="18" ry="38" fill="#FFF3B8" opacity="0.45"/>
 
-  <!-- Sutra thread — the tying wave -->
+  <!-- Sutra thread - the tying wave -->
   <path d="M 144 372
            C 182 410 222 338 256 370
            C 290 402 330 410 368 372"

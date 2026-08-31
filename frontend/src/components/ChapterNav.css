@@ -1,4 +1,4 @@
-/* ChapterNav — book-edge tab strip */
+/* ChapterNav - book-edge tab strip */
 
 .chapter-nav {
   display: flex;
@@ -64,7 +64,7 @@
   color: var(--accent);
 }
 
-/* Active marker — the "thread" pulling the current chapter forward */
+/* Active marker - the "thread" pulling the current chapter forward */
 .chapter-nav__tab--active::before {
   content: '';
   position: absolute;

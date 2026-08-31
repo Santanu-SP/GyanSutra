@@ -1,5 +1,5 @@
 /**
- * App.jsx — Gyan Sutra application root.
+ * App.jsx - Gyan Sutra application root.
  *
  * Layout:
  *   - Sticky header with brand, search, ThemeToggle, Sarathi trigger
@@ -7,7 +7,7 @@
  *   - SarathiPanel: desktop side panel / mobile bottom sheet (non-blocking)
  *   - Routes: all pages including previously unconnected ones
  *
- * Sarathi state lives here — SarathiPanel is presentation only.
+ * Sarathi state lives here - SarathiPanel is presentation only.
  */
 
 import { useState, useEffect, lazy, Suspense } from 'react';
@@ -48,7 +48,7 @@ const KandaReader   = lazyWithRetry(() => import('./pages/KandaReader'));
 const FAQ           = lazyWithRetry(() => import('./pages/FAQ'));
 const Ask           = lazyWithRetry(() => import('./pages/Ask'));
 
-// Suggested conversation starters — shown when panel is first opened
+// Suggested conversation starters - shown when panel is first opened
 const SARATHI_PROMPTS = [
   'What does the Gita teach about duty?',
   'Explain detachment in simple words.',
@@ -144,7 +144,7 @@ export default function App() {
 
     try {
       // Build history from existing messages (exclude the welcome message and the one we just added).
-      // Only send the last 6 messages (3 exchanges) — enough for follow-ups without confusion.
+      // Only send the last 6 messages (3 exchanges) - enough for follow-ups without confusion.
       const history = [...messages, userMessage]
         .filter(m => m.id !== 'welcome')
         .slice(-6)
@@ -234,7 +234,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── App body — shifts right on desktop when Sarathi is open ── */}
+      {/* ── App body - shifts right on desktop when Sarathi is open ── */}
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
@@ -259,7 +259,7 @@ export default function App() {
         <Footer />
       </div>
 
-      {/* ── Sarathi companion — side panel on desktop, sheet on mobile ── */}
+      {/* ── Sarathi companion - side panel on desktop, sheet on mobile ── */}
       <SarathiPanel
         isOpen={isSarathiOpen}
         onClose={() => setIsSarathiOpen(false)}

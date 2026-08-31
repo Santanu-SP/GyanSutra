@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   TextReader — Chapter Navigator
-   Book-style table of contents. Not a card grid — reads like a manuscript.
+   TextReader - Chapter Navigator
+   Book-style table of contents. Not a card grid - reads like a manuscript.
    ═══════════════════════════════════════════════════════════════════════ */
 
 .text-reader {
@@ -152,7 +152,7 @@
   border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
 }
 
-/* ── Chapter row — the main list item ─────────────────────────────── */
+/* ── Chapter row - the main list item ─────────────────────────────── */
 .text-reader__chapter-row {
   display: grid;
   grid-template-columns: 3rem 1fr auto;

@@ -1,5 +1,5 @@
 /**
- * IlluminatedVerseCard — the visual signature of Gyan Sutra.
+ * IlluminatedVerseCard - the visual signature of Gyan Sutra.
  *
  * Every verse is shown inside this panel, consistently, across:
  *   - Chapter reader
@@ -10,7 +10,7 @@
  *
  * Structure:
  *   ┌─────── thin gold hairline border ───────────┐
- *   │  [corner flourish — flame motif, low opacity]│
+ *   │  [corner flourish - flame motif, low opacity]│
  *   │                                              │
  *   │  Sanskrit (large, Tiro Devanagari)           │
  *   │  Transliteration (italic, smaller)           │
@@ -22,11 +22,11 @@
  *   └──────────────────────────────────────────────┘
  *
  * Props:
- *   verse       {object}  — verse document from Firestore/API
- *   variant     {'full' | 'compact' | 'citation'}  — layout variant
- *   onClick     {function} — optional click handler (for search/citations)
- *   similarity  {number}  — optional similarity score (for citation display)
- *   className   {string}  — additional class names
+ *   verse       {object}  - verse document from Firestore/API
+ *   variant     {'full' | 'compact' | 'citation'}  - layout variant
+ *   onClick     {function} - optional click handler (for search/citations)
+ *   similarity  {number}  - optional similarity score (for citation display)
+ *   className   {string}  - additional class names
  */
 
 import { useState } from 'react';
@@ -129,7 +129,7 @@ const FormattedCommentary = ({ text, language, className = '', style = {} }) => 
   }
 };
 
-// SVG corner flourish — flame and thread motif at low opacity
+// SVG corner flourish - flame and thread motif at low opacity
 const CornerFlourish = ({ position = 'top-right', size = 48 }) => (
   <svg
     className={`verse-card__flourish verse-card__flourish--${position}`}
@@ -212,7 +212,7 @@ export default function IlluminatedVerseCard({
       aria-label={`Chapter ${chapterNumber}, Verse ${verseNumber}`}
       id={`verse-${id || `${chapterNumber}-${verseNumber}`}`}
     >
-      {/* Corner flourishes — the recurring motif */}
+      {/* Corner flourishes - the recurring motif */}
       <CornerFlourish position="top-right" size={variant === 'compact' ? 32 : 48} />
       <CornerFlourish position="bottom-left" size={variant === 'compact' ? 32 : 48} />
 
@@ -230,7 +230,7 @@ export default function IlluminatedVerseCard({
         )}
       </div>
 
-      {/* Sanskrit — always the visual leader */}
+      {/* Sanskrit - always the visual leader */}
       {sanskrit && (
         <div className="verse-card__sanskrit devanagari-hero">
           {sanskrit}
