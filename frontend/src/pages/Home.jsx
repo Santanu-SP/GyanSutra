@@ -95,7 +95,13 @@ export default function Home() {
                   {dailyVerse.translationEnglish}
                 </p>
                 <div className="gs-home__darshan-actions">
-                  <span>Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}</span>
+                  <Link
+                    to={`/chapters/chapter_${dailyVerse.chapterNumber}?verse=${dailyVerse.verseNumber}`}
+                    className="gs-home__darshan-reference"
+                    aria-label={`Read Bhagavad Gita ${dailyVerse.chapterNumber}.${dailyVerse.verseNumber}`}
+                  >
+                    Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}
+                  </Link>
                   <button
                     type="button"
                     onClick={() => window.dispatchEvent(new CustomEvent('open-sarathi', {

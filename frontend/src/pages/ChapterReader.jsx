@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getChapter, getChapterVerses } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -24,6 +24,8 @@ const CHAPTERS = Array.from({ length: 18 }, (_, i) => i + 1);
 
 export default function ChapterReader() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const requestedVerse = Number(searchParams.get('verse'));
   const [chapter, setChapter]           = useState(null);
   const [verses, setVerses]             = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,6 +42,10 @@ export default function ChapterReader() {
         setChapter(ch || null);
         const vs = Array.isArray(versesRes?.verses) ? versesRes.verses : [];
         setVerses(vs);
+        const requestedIndex = Number.isFinite(requestedVerse) && requestedVerse > 0
+          ? vs.findIndex((verse) => Number(verse.verseNumber) === requestedVerse)
+          : -1;
+        setCurrentIndex(requestedIndex >= 0 ? requestedIndex : 0);
         setLoading(false);
       })
       .catch((err) => {
@@ -47,7 +53,7 @@ export default function ChapterReader() {
         setError(err?.message || 'Could not load chapter.');
         setLoading(false);
       });
-  }, [id]);
+  }, [id, requestedVerse]);
 
   const goTo = useCallback((newIndex) => {
     setAnimClass('page-turn-exit');

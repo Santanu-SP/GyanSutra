@@ -25,7 +25,7 @@ import AnimatedButton from './AnimatedButton';
 import './SarathiPanel.css';
 
 // Snap zone heights (dvh)
-const SNAP = { peek: 32, normal: 72, full: 94 };
+const SNAP = { peek: 36, normal: 82, full: 100 };
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -126,7 +126,7 @@ export default function SarathiPanel({
     if (!dragStartRef.current) return;
     const delta    = dragStartRef.current.y - clientY; // positive = dragged up = taller
     const dvhDelta = (delta / window.innerHeight) * 100;
-    const newH     = Math.max(14, Math.min(93, dragStartRef.current.startH + dvhDelta));
+    const newH     = Math.max(14, Math.min(100, dragStartRef.current.startH + dvhDelta));
     dynamicHRef.current = newH;
     setDynamicHeight(newH);
   }, []);
@@ -186,9 +186,10 @@ export default function SarathiPanel({
     else if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  // ── Focus textarea when panel opens ───────────────────────────────────
+  // Focus the composer on desktop. On mobile this would open the keyboard
+  // immediately and hide the useful part of the conversation.
   useEffect(() => {
-    if (!isOpen || !textareaRef.current) return;
+    if (!isOpen || isMobileViewport() || !textareaRef.current) return;
     const t = setTimeout(() => textareaRef.current?.focus(), 250);
     return () => clearTimeout(t);
   }, [isOpen]);
@@ -205,6 +206,7 @@ export default function SarathiPanel({
   // Panel CSS classes
   const panelClasses = [
     'sarathi-panel',
+    `sarathi-panel--${panelSize}`,
     isOpen        ? 'sarathi-panel--open'       : '',
     isMinimizing  ? 'sarathi-panel--minimizing'  : '',
     isDragging    ? 'sarathi-panel--dragging'    : '',
@@ -290,64 +292,66 @@ export default function SarathiPanel({
           </div>
         </header>
 
-        {/* ── Suggested paths ──────────────────────────────────────────── */}
-        {showSuggestions && (
-          <div className="sarathi-panel__paths">
-            <p className="sarathi-panel__paths-label">Suggested questions</p>
-            <div className="sarathi-panel__paths-list">
-              {suggestedPrompts.map((prompt) => (
-                <AnimatedButton
-                  key={prompt}
-                  type="button"
-                  className="active-press sarathi-panel__path-btn"
-                  onClick={() => setQuestion(prompt)}
-                >
-                  <span>{prompt}</span>
-                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                    <path d="M6 10h8M11 7l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </AnimatedButton>
-              ))}
-            </div>
+        <div className="sarathi-panel__body">
+          {/* ── Message thread ─────────────────────────────────────────── */}
+          <div
+            className="sarathi-panel__messages"
+            role="log"
+            aria-live="polite"
+            aria-label="Conversation with Sarathi"
+          >
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`sarathi-msg sarathi-msg--${message.role}${message.id === 'welcome' ? ' sarathi-msg--welcome' : ''} sarathi-msg-enter`}
+              >
+                <p className="sarathi-msg__label">
+                  {message.role === 'user' ? 'You' : 'Sarathi'}
+                </p>
+                <div className="sarathi-msg__content">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="sarathi-msg sarathi-msg--sarathi sarathi-msg-enter">
+                <p className="sarathi-msg__label">Sarathi</p>
+                <div className="sarathi-msg__content" style={{ border: 'none', background: 'transparent', padding: '0.5rem 0' }}>
+                  <div className="shimmer-skeleton"></div>
+                  <div className="shimmer-skeleton"></div>
+                  <div className="shimmer-skeleton short"></div>
+                </div>
+                <div className="sarathi-loader">
+                  <p className="sarathi-loader__text">Looking through the texts…</p>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} aria-hidden="true" />
           </div>
-        )}
 
-        {/* ── Message thread ───────────────────────────────────────────── */}
-        <div
-          className="sarathi-panel__messages"
-          role="log"
-          aria-live="polite"
-          aria-label="Conversation with Sarathi"
-        >
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`sarathi-msg sarathi-msg--${message.role}${message.id === 'welcome' ? ' sarathi-msg--welcome' : ''} sarathi-msg-enter`}
-            >
-              <p className="sarathi-msg__label">
-                {message.role === 'user' ? 'You' : 'Sarathi'}
-              </p>
-              <div className="sarathi-msg__content">
-                <ReactMarkdown>{message.content}</ReactMarkdown>
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="sarathi-msg sarathi-msg--sarathi sarathi-msg-enter">
-              <p className="sarathi-msg__label">Sarathi</p>
-              <div className="sarathi-msg__content" style={{ border: 'none', background: 'transparent', padding: '0.5rem 0' }}>
-                <div className="shimmer-skeleton"></div>
-                <div className="shimmer-skeleton"></div>
-                <div className="shimmer-skeleton short"></div>
-              </div>
-              <div className="sarathi-loader">
-                <p className="sarathi-loader__text">Looking through the texts…</p>
+          {/* ── Suggested paths ────────────────────────────────────────── */}
+          {showSuggestions && (
+            <div className="sarathi-panel__paths">
+              <p className="sarathi-panel__paths-label">Try asking</p>
+              <div className="sarathi-panel__paths-list">
+                {suggestedPrompts.map((prompt) => (
+                  <AnimatedButton
+                    key={prompt}
+                    type="button"
+                    className="active-press sarathi-panel__path-btn"
+                    onClick={() => setQuestion(prompt)}
+                  >
+                    <span>{prompt}</span>
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M6 10h8M11 7l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </AnimatedButton>
+                ))}
               </div>
             </div>
           )}
-
-          <div ref={messagesEndRef} aria-hidden="true" />
         </div>
 
         {/* ── Input form ──────────────────────────────────────────────── */}

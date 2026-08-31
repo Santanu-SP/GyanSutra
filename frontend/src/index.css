@@ -852,19 +852,19 @@ p {
 
   .gs-home {
     width: auto;
-    padding: 1rem max(1.125rem, env(safe-area-inset-right)) 3.25rem max(1.125rem, env(safe-area-inset-left));
+    padding: 1.25rem max(1.125rem, env(safe-area-inset-right)) 3.25rem max(1.125rem, env(safe-area-inset-left));
   }
 
   .gs-home__hero {
-    gap: 2rem;
+    gap: 1.35rem;
   }
 
   .gs-home__intro {
-    order: 2;
+    order: 1;
   }
 
   .gs-home__darshan {
-    order: 1;
+    order: 2;
   }
 
   .gs-home__eyebrow {
@@ -873,66 +873,95 @@ p {
   }
 
   .gs-home__heading {
-    max-width: 15ch;
-    font-size: clamp(2.2rem, 10.6vw, 3.15rem);
-    line-height: 1.1;
+    max-width: 14ch;
+    font-size: clamp(2.1rem, 10vw, 2.85rem);
+    line-height: 1.06;
     letter-spacing: -0.038em;
   }
 
   .gs-home__subheading {
-    margin-top: 1rem;
-    font-size: 1rem;
-    line-height: 1.6;
+    max-width: 31rem;
+    margin-top: 0.85rem;
+    font-size: 0.94rem;
+    line-height: 1.5;
   }
 
   .gs-home__cta-row {
-    margin-top: 1.35rem;
+    margin-top: 1.1rem;
     gap: 0.7rem;
   }
 
   .gs-home__cta-primary {
     width: 100%;
-    min-height: 52px;
+    min-height: 48px;
     justify-content: space-between;
     padding-inline: 1.15rem;
   }
 
   .gs-home__text-link {
-    min-height: 40px;
-    margin-inline: auto;
+    display: none;
   }
 
   .gs-home__darshan {
-    padding: 1.1rem;
-    border-radius: 14px;
+    padding: 1rem;
+    border-radius: 16px;
     box-shadow: 0 14px 36px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .gs-home__darshan-header {
-    padding-bottom: 1rem;
+    align-items: center;
+    padding-bottom: 0.8rem;
   }
 
   .gs-home__darshan-header h2 {
-    font-size: 1.3rem;
+    font-size: 1.22rem;
+  }
+
+  .gs-home__darshan-mark {
+    font-size: 1.65rem;
   }
 
   .gs-home__darshan-content {
-    padding-top: 1rem;
+    padding-top: 0.85rem;
   }
 
   .gs-home__darshan-sanskrit {
-    font-size: 1.38rem;
-    line-height: 1.75;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 1.22rem;
+    line-height: 1.62;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .gs-home__darshan-translation {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-top: 0.7rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .gs-home__darshan-actions {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
     align-items: center;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .gs-home__darshan-actions button {
-    min-height: 44px;
+    min-height: 40px;
+    white-space: nowrap;
+  }
+
+  .gs-home__darshan-reference {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 0.2rem;
   }
 
   .gs-home__library {
@@ -956,19 +985,18 @@ p {
 
 @media (max-width: 420px) {
   .gs-home__darshan-sanskrit {
-    font-size: 1.26rem;
-    line-height: 1.68;
+    font-size: 1.16rem;
+    line-height: 1.58;
   }
 
   .gs-home__darshan-translation {
-    margin-top: 0.8rem;
-    font-size: 0.9rem;
-    line-height: 1.55;
+    font-size: 0.84rem;
+    line-height: 1.45;
   }
 
   .gs-home__darshan-actions {
-    margin-top: 1rem;
-    padding-top: 0.8rem;
+    margin-top: 0.75rem;
+    padding-top: 0.7rem;
     font-size: 0.74rem;
   }
 
