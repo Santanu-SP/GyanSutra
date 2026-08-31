@@ -80,14 +80,17 @@ export default function Home() {
           >
             <div className="gs-home__darshan-header">
               <div>
-                <p className="gs-home__eyebrow">Verse of the day</p>
-                <h2 id="daily-verse-title">Today’s reading</h2>
+                <p className="gs-home__eyebrow">Daily Darshan</p>
+                <h2 id="daily-verse-title">Today’s verse</h2>
               </div>
               <span className="gs-home__darshan-mark" aria-hidden="true">ॐ</span>
             </div>
 
             {dailyVerseState === 'loading' && (
-              <div className="gs-home__darshan-status" role="status">Loading today’s verse…</div>
+              <div className="gs-home__darshan-status gs-home__darshan-status--loading" role="status">
+                <span className="gs-home__darshan-loader" aria-hidden="true" />
+                <span>Preparing today’s verse</span>
+              </div>
             )}
 
             {dailyVerseState === 'unavailable' && (

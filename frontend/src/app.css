@@ -110,7 +110,7 @@
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-/* Hide nav links on mobile — bottom nav handles mobile navigation */
+/* Reading destinations move to the bottom bar on mobile. */
 @media (max-width: 767px) {
   .gs-header__nav-links { display: none; }
 }
@@ -360,10 +360,6 @@
     flex-shrink: 0;
   }
 
-  .gs-bottom-nav__item--sarathi .gs-bottom-nav__icon {
-    width: 23px;
-    height: 23px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -387,9 +383,34 @@
     gap: 0.375rem;
   }
 
+  .gs-header__search-action,
   .gs-header .sarathi-trigger,
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
   .gs-header__search-action {
+    display: inline-flex;
+  }
+
+  .gs-header .sarathi-trigger {
+    display: inline-flex;
+    justify-content: center;
+    padding: 0;
+    border-color: color-mix(in srgb, var(--border) 58%, transparent);
+    background: color-mix(in srgb, var(--bg-surface) 74%, transparent);
+    color: var(--accent-hover);
+  }
+
+  .gs-header .sarathi-trigger__label {
     display: none;
+  }
+
+  .gs-header .sarathi-trigger__icon {
+    width: 19px;
+    height: 19px;
   }
 }
 
@@ -406,6 +427,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .gs-header__search-action,
+  .gs-header .sarathi-trigger,
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
   }
 }
 

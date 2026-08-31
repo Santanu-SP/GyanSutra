@@ -199,14 +199,14 @@ export default function App() {
 
           {/* Right Side Elements */}
           <div className="gs-header__right">
-            {/* Desktop nav links */}
+            {/* Reading links stay in the desktop header. */}
             <nav className="gs-header__nav-links" aria-label="Primary navigation">
               <span className="gs-header__nav-label">Read</span>
               <Link to="/bhagavad-gita" aria-current={isGitaRoute ? 'page' : undefined} className={`gs-header__nav-link${isGitaRoute ? ' gs-header__nav-link--active' : ''}`}>Bhagavad Gita</Link>
               <Link to="/ramayana" aria-current={isRamayanaRoute ? 'page' : undefined} className={`gs-header__nav-link${isRamayanaRoute ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
             </nav>
 
-            {/* Right actions */}
+            {/* Utility actions stay in the header on every screen. */}
             <div className="gs-header__actions">
               <Link
                 to="/search"
@@ -271,7 +271,7 @@ export default function App() {
         suggestedPrompts={SARATHI_PROMPTS}
       />
 
-      {/* ── Mobile bottom navigation bar ───────────────────────────── */}
+      {/* ── Mobile bottom navigation: destinations only ───────────── */}
       <nav className="gs-bottom-nav" aria-label="Mobile navigation">
         <Link
           to="/"
@@ -309,39 +309,6 @@ export default function App() {
           </svg>
           Ramayana
         </Link>
-        <Link
-          to="/search"
-          className={`gs-bottom-nav__item${location.pathname === '/search' ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Search"
-          aria-current={location.pathname === '/search' ? 'page' : undefined}
-        >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path strokeLinecap="round" d="M15.5 15.5L21 21" />
-          </svg>
-          Search
-        </Link>
-        <button
-          type="button"
-          className={`gs-bottom-nav__item gs-bottom-nav__item--sarathi${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
-          onClick={() => setIsSarathiOpen((open) => !open)}
-          aria-label={isSarathiOpen ? 'Close Sarathi' : 'Open Sarathi'}
-          aria-expanded={isSarathiOpen}
-        >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 3C12 3 6 8.5 6 14C6 17.314 8.686 20 12 20C15.314 20 18 17.314 18 14C18 8.5 12 3 12 3Z"
-              fill="currentColor"
-              opacity="0.85"
-            />
-            <path
-              d="M12 8C12 8 9.5 11 9.5 14C9.5 15.381 10.619 16.5 12 16.5C13.381 16.5 14.5 15.381 14.5 14C14.5 11 12 8 12 8Z"
-              fill="var(--bg)"
-              opacity="0.5"
-            />
-          </svg>
-          Sarathi
-        </button>
       </nav>
     </div>
   );
