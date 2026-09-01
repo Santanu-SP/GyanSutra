@@ -21,6 +21,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SEOHead from './components/SEO/SEOHead';
 import AnimatedButton from './components/AnimatedButton';
 import Footer from './components/Footer';
+import { recoverFromChunkError } from './utils/chunkRecovery';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import useLanguage from './i18n/useLanguage';
 
@@ -32,9 +33,9 @@ function lazyWithRetry(componentImport) {
     try {
       return await componentImport();
     } catch (error) {
-      console.warn('Dynamic import chunk load failed. Reloading page to fetch latest version...', error);
-      window.location.reload();
-      return new Promise(() => {});
+      const isReloading = await recoverFromChunkError(error);
+      if (isReloading) return new Promise(() => {});
+      throw error;
     }
   });
 }

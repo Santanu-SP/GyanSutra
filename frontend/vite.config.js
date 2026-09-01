@@ -13,7 +13,8 @@ export default defineConfig({
     tailwindcss(),
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Activate a new shell between sessions so its HTML and chunks stay in sync.
+      registerType: 'prompt',
       manifest: false, // We provide our own public/manifest.json
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
@@ -47,7 +48,7 @@ export default defineConfig({
     port: 5173,
   },
   build: {
-    target: 'esnext',
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks: (id) => {

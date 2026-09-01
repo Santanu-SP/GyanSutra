@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import AnimatedButton from './AnimatedButton';
+import { recoverFromChunkError } from '../utils/chunkRecovery';
 
 
 export default class ErrorBoundary extends Component {
@@ -14,22 +15,12 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('Unhandled UI Error:', error, errorInfo);
-    
-    // Auto-reload on chunk load failure (stale JS build after deployment)
-    const isChunkError = 
-      error?.name === 'ChunkLoadError' ||
-      /Loading chunk|Failed to fetch dynamically imported module/i.test(error?.message || '');
+    void recoverFromChunkError(error);
 
-    if (isChunkError) {
-      const storageKey = 'last_chunk_reload';
-      const lastReload = sessionStorage.getItem(storageKey);
-      const now = Date.now();
-      
-      // Reload once if chunk load failed to fetch updated index.html & JS assets
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        sessionStorage.setItem(storageKey, now.toString());
-        window.location.reload();
-      }
+    const splash = document.getElementById('gs-boot-splash');
+    if (splash) {
+      splash.classList.add('is-leaving');
+      window.setTimeout(() => splash.remove(), 180);
     }
   }
 

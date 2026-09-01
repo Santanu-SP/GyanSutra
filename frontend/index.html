@@ -46,7 +46,8 @@
     <script>
       (function() {
         window.__gyanSutraBootStartedAt = performance.now();
-        var stored = localStorage.getItem('gyansutra-theme');
+        var stored = null;
+        try { stored = localStorage.getItem('gyansutra-theme'); } catch (e) { /* use system theme */ }
         var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
       })();
@@ -104,6 +105,37 @@
         text-transform: uppercase;
       }
       [data-theme="dark"] .gs-boot-splash__name { color: #efe8f5; }
+      .gs-boot-splash__pending {
+        margin: -.15rem 0 0;
+        color: #756a7d;
+        font: 500 .72rem/1.4 system-ui, sans-serif;
+        letter-spacing: .06em;
+      }
+      [data-theme="dark"] .gs-boot-splash__pending { color: #a59bb0; }
+      .gs-boot-splash__recovery {
+        display: none;
+        max-width: 20rem;
+        text-align: center;
+        color: #756a7d;
+        font: 500 .82rem/1.5 system-ui, sans-serif;
+      }
+      .gs-boot-splash__recovery p { margin: 0 0 .8rem; }
+      .gs-boot-splash__recovery button {
+        min-height: 2.5rem;
+        padding: .55rem 1rem;
+        border: 1px solid rgba(190, 106, 46, .48);
+        border-radius: .65rem;
+        background: rgba(190, 106, 46, .1);
+        color: #5d321f;
+        font: 600 .8rem/1 system-ui, sans-serif;
+        cursor: pointer;
+      }
+      .gs-boot-splash__recovery button:disabled { cursor: wait; opacity: .65; }
+      [data-theme="dark"] .gs-boot-splash__recovery { color: #b9afc2; }
+      [data-theme="dark"] .gs-boot-splash__recovery button { color: #efc17d; }
+      #gs-boot-splash.is-stalled .gs-boot-splash__mark::before { animation: none; }
+      #gs-boot-splash.is-stalled .gs-boot-splash__pending { display: none; }
+      #gs-boot-splash.is-stalled .gs-boot-splash__recovery { display: block; }
       @keyframes gs-boot-arrive {
         from { opacity: 0; transform: translateY(4px) scale(.97); }
         to { opacity: 1; transform: translateY(0) scale(1); }
@@ -122,16 +154,16 @@
     -->
     <script>
       (function() {
-        var redirect = sessionStorage.getItem('spa-redirect');
-        if (redirect) {
-          sessionStorage.removeItem('spa-redirect');
-          try {
+        try {
+          var redirect = sessionStorage.getItem('spa-redirect');
+          if (redirect) {
+            sessionStorage.removeItem('spa-redirect');
             var parsed = JSON.parse(redirect);
             if (parsed.pathname && parsed.pathname !== window.location.pathname) {
               window.history.replaceState(null, null, parsed.pathname + (parsed.search || '') + (parsed.hash || ''));
             }
-          } catch (e) { /* ignore */ }
-        }
+          }
+        } catch (e) { /* ignore unavailable or invalid session data */ }
       })();
     </script>
   </head>
@@ -142,9 +174,65 @@
           <img class="gs-boot-splash__logo" src="%BASE_URL%icons/logo.svg" alt="" width="56" height="56" />
         </div>
         <p class="gs-boot-splash__name">Gyan Sutra</p>
+        <p class="gs-boot-splash__pending">Opening the library</p>
+        <div class="gs-boot-splash__recovery" role="status">
+          <p>The library is taking longer to open.</p>
+          <button id="gs-boot-retry" type="button">Refresh app</button>
+        </div>
       </div>
     </div>
     <div id="root"></div>
+    <script>
+      (function() {
+        var splash = document.getElementById('gs-boot-splash');
+        var retry = document.getElementById('gs-boot-retry');
+        var finished = false;
+
+        window.__gyanSutraRevealApp = function() {
+          if (finished || !splash) return;
+          finished = true;
+          window.clearTimeout(window.__gyanSutraBootWatchdog);
+          splash.setAttribute('aria-hidden', 'true');
+          splash.classList.add('is-leaving');
+          window.setTimeout(function() { splash.remove(); }, 180);
+        };
+
+        async function refreshApp() {
+          if (retry) {
+            retry.disabled = true;
+            retry.textContent = 'Refreshing';
+          }
+          try {
+            if ('serviceWorker' in navigator) {
+              var scope = new URL('%BASE_URL%', window.location.origin).href;
+              var registration = await navigator.serviceWorker.getRegistration(scope);
+              if (registration) await registration.unregister();
+            }
+            if ('caches' in window) {
+              var names = await window.caches.keys();
+              await Promise.all(names.filter(function(name) {
+                return /precache|workbox/i.test(name);
+              }).map(function(name) { return window.caches.delete(name); }));
+            }
+          } catch (error) {
+            console.warn('App cache refresh was incomplete.', error);
+          }
+          window.location.reload();
+        }
+
+        if (retry) retry.addEventListener('click', refreshApp);
+
+        window.__gyanSutraBootWatchdog = window.setTimeout(function() {
+          var root = document.getElementById('root');
+          if (root && root.childElementCount > 0) {
+            window.__gyanSutraRevealApp();
+            return;
+          }
+          splash.removeAttribute('aria-hidden');
+          splash.classList.add('is-stalled');
+        }, 3500);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

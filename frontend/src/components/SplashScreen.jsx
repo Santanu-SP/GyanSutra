@@ -18,8 +18,12 @@ export default function SplashScreen({ children }) {
     // Finish the short brand motion before revealing fully rendered content.
     const exitTimer = window.setTimeout(() => {
       revealFrame = window.requestAnimationFrame(() => {
-        splash.classList.add('is-leaving');
-        removeTimer = window.setTimeout(() => splash.remove(), exitDuration);
+        if (typeof window.__gyanSutraRevealApp === 'function') {
+          window.__gyanSutraRevealApp();
+        } else {
+          splash.classList.add('is-leaving');
+          removeTimer = window.setTimeout(() => splash.remove(), exitDuration);
+        }
       });
     }, exitDelay);
 
