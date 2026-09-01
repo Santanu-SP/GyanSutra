@@ -35,7 +35,7 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'Request body must be a JSON object.' });
     }
 
-    const { question, history, contextIds } = req.body;
+    const { question, history, contextIds, language } = req.body;
 
     if (!question || typeof question !== 'string' || question.trim().length < 5) {
       return res.status(400).json({ error: 'Please provide a question (at least 5 characters).' });
@@ -71,7 +71,10 @@ router.post('/', async (req, res, next) => {
           .slice(0, 4)
       : [];
 
-    const result = await askRag(trimmed, safeHistory, safeContextIds);
+    const safeLanguage = ['en', 'hi', 'bn', 'mr', 'te', 'ta'].includes(language) ? language : 'en';
+    const result = language === undefined
+      ? await askRag(trimmed, safeHistory, safeContextIds)
+      : await askRag(trimmed, safeHistory, safeContextIds, safeLanguage);
     const { _diagnostics: diagnostics, ...publicResult } = result;
 
     // Fire-and-forget QA log - non-blocking

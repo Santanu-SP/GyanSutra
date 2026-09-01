@@ -77,6 +77,14 @@ describe('bounded grounded RAG', () => {
     expect(mockCompletionCreate).not.toHaveBeenCalled();
   });
 
+  test('returns fallback copy in the selected language', async () => {
+    const { askRag } = loadRag();
+    const result = await askRag('Explain duty', [], [], 'bn');
+
+    expect(result.answer).toContain('ব্যাখ্যা পরিষেবা');
+    expect(result.answer).not.toContain('The explanation service');
+  });
+
   test('does not spend model credits when retrieval has no strong evidence', async () => {
     mockFindNearestVerses.mockResolvedValue([{ ...verse, similarity: 0.3 }]);
     const { askRag } = loadRag({ GEMINI_API_KEY: 'test-key' });

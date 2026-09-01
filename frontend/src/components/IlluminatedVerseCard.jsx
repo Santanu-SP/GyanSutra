@@ -29,9 +29,9 @@
  *   className   {string}  - additional class names
  */
 
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AnimatedButton from './AnimatedButton';
+import useLanguage from '../i18n/useLanguage';
 
 import './IlluminatedVerseCard.css';
 
@@ -164,7 +164,9 @@ export default function IlluminatedVerseCard({
   similarity,
   className = '',
 }) {
-  const [lang, setLang] = useState('english'); // 'english' | 'hindi'
+  const { language, t } = useLanguage();
+  const lang = language === 'hi' ? 'hindi' : 'english';
+  const canShowStoredProse = language === 'en' || language === 'hi';
   const navigate = useNavigate();
 
   if (!verse) return null;
@@ -209,7 +211,7 @@ export default function IlluminatedVerseCard({
       onKeyDown={isClickable ? handleKeyDown : undefined}
       tabIndex={isClickable ? 0 : undefined}
       role={isClickable ? 'button' : 'article'}
-      aria-label={`Chapter ${chapterNumber}, Verse ${verseNumber}`}
+      aria-label={`${t('chapter')} ${chapterNumber}, ${t('verse')} ${verseNumber}`}
       id={`verse-${id || `${chapterNumber}-${verseNumber}`}`}
     >
       {/* Corner flourishes - the recurring motif */}
@@ -220,12 +222,12 @@ export default function IlluminatedVerseCard({
       <div className="verse-card__ref">
         <span className="verse-card__ref-label">
           {verse.book === 'ramayana' || verse.kanda
-            ? `${verse.kanda || 'Kanda ' + verse.kandaNumber} · Sarga ${verse.sarga} · Shloka ${verse.shlokaNumber}`
-            : `Chapter ${chapterNumber} · Verse ${verseNumber}`}
+            ? `${verse.kanda || `${t('kanda')} ${verse.kandaNumber}`} · ${t('sarga')} ${verse.sarga} · ${t('shloka')} ${verse.shlokaNumber}`
+            : `${t('chapter')} ${chapterNumber} · ${t('verse')} ${verseNumber}`}
         </span>
         {similarity !== undefined && (
           <span className="verse-card__similarity" title="Relevance score">
-            {Math.round(similarity * 100)}% match
+            {Math.round(similarity * 100)}% {t('relevance')}
           </span>
         )}
       </div>
@@ -240,30 +242,11 @@ export default function IlluminatedVerseCard({
       <div className="verse-card__content-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '1rem 0' }}>
         
         {/* LANGUAGE TOGGLE HEADER */}
-        {(translationHindi || (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)) && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
-            <div className="verse-card__lang-toggle" role="group" aria-label="Translation language" style={{ margin: 0 }}>
-              <AnimatedButton
-                className={`verse-card__lang-btn ${lang === 'english' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); setLang('english'); }}
-              >
-                English
-              </AnimatedButton>
-              <AnimatedButton
-                className={`verse-card__lang-btn ${lang === 'hindi' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); setLang('hindi'); }}
-              >
-                हिन्दी
-              </AnimatedButton>
-            </div>
-          </div>
-        )}
-
         {/* 1. KEY VOCABULARY (Word Meanings) */}
-        {variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) && (
+        {canShowStoredProse && variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) && (
           <section className="verse-section">
             <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, marginBottom: '1rem' }}>
-              {lang === 'hindi' ? 'मुख्य शब्दार्थ' : 'Key Vocabulary'}
+              {t('keyVocabulary')}
             </h3>
             {verse.book === 'ramayana' ? (
               <p style={{ lineHeight: 1.7, color: 'var(--text-secondary)', fontSize: '1rem' }}>
@@ -286,25 +269,27 @@ export default function IlluminatedVerseCard({
         {/* 2. SIMPLE MEANING */}
         <section className="verse-section" style={{ borderTop: variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) ? 'var(--hairline)' : 'none', paddingTop: variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) ? '1.5rem' : '0' }}>
           <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, marginBottom: '1rem' }}>
-            {lang === 'hindi' ? 'सरल अर्थ' : 'Simple Meaning'}
+            {t('simpleMeaning')}
           </h3>
           <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1.7, fontWeight: 500 }}>
-            {lang === 'hindi' 
+            {!canShowStoredProse
+              ? t('translationUnavailable')
+              : lang === 'hindi'
               ? (translationHindi || "हिन्दी अनुवाद उपलब्ध नहीं है।") 
               : (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)}
           </p>
         </section>
 
         {/* 3. AUTHENTIC COMMENTARY & GURU EXPLANATIONS */}
-        {variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || comments || (verse.book !== 'ramayana' && (explanationEnglish || explanationHindi))) && (
+        {canShowStoredProse && variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || comments || (verse.book !== 'ramayana' && (explanationEnglish || explanationHindi))) && (
           <section className="verse-section" style={{ borderTop: 'var(--hairline)', paddingTop: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, margin: 0 }}>
-                {lang === 'hindi' ? 'व्याख्या' : 'Commentary'}
+                {t('commentary')}
               </h3>
               {detailedExplanations.length > 1 && (
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-                  {detailedExplanations.length} sources
+                  {detailedExplanations.length} {t('sourceCount')}
                 </span>
               )}
             </div>
@@ -417,9 +402,7 @@ export default function IlluminatedVerseCard({
         {variant === 'full' && (
           <section className="verse-section" style={{ borderTop: 'var(--hairline)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.25rem', maxWidth: '400px' }}>
-              {lang === 'hindi' 
-                ? 'इस श्लोक को अपने आधुनिक जीवन में कैसे उतारें? सारथि से गहन मनन और जीवन-सूत्र प्राप्त करें।'
-                : 'Ask Sarathi to explain this verse in plain language.'}
+              {t('askVerseHelp')}
             </p>
             <AnimatedButton
               onClick={(e) => {
@@ -438,14 +421,14 @@ export default function IlluminatedVerseCard({
               <svg viewBox="0 0 20 20" fill="none" width="16" height="16" opacity="0.8">
                 <path d="M10 2C10 2 5 7 5 12C5 14.761 7.239 17 10 17C12.761 17 15 14.761 15 12C15 7 10 2 10 2Z" fill="currentColor" opacity="0.85"/>
               </svg>
-              {lang === 'hindi' ? 'सारथि से पूछें' : 'Ask about this verse'}
+              {t('askAboutVerse')}
             </AnimatedButton>
           </section>
         )}
       </div>
 
       {/* Tags */}
-      {tags.length > 0 && variant === 'full' && (
+      {canShowStoredProse && tags.length > 0 && variant === 'full' && (
         <div className="verse-card__tags">
           {tags.slice(0, variant === 'compact' ? 2 : 5).map(tag => (
             <span key={tag} className="tag">{tag}</span>

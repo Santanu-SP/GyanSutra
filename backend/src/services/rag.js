@@ -69,7 +69,15 @@ const CACHE_MAX_ENTRIES = integerFromEnv('RAG_CACHE_MAX_ENTRIES', 250, 10, 2_000
 const RESPONSE_CACHE_TTL_MS = integerFromEnv('RAG_RESPONSE_CACHE_TTL_SECONDS', 21_600, 30, 604_800) * 1_000;
 const RETRIEVAL_CACHE_TTL_MS = integerFromEnv('RAG_RETRIEVAL_CACHE_TTL_SECONDS', 3_600, 30, 86_400) * 1_000;
 const CORPUS_VERSION = (process.env.RAG_CORPUS_VERSION || 'gita-ramayana-v1').trim();
-const PROMPT_VERSION = 'sarathi-grounded-v2';
+const PROMPT_VERSION = 'sarathi-grounded-v3-multilingual';
+const RESPONSE_LANGUAGES = {
+  en: 'English',
+  hi: 'natural Devanagari Hindi',
+  bn: 'natural Bengali',
+  mr: 'natural Devanagari Marathi',
+  te: 'natural Telugu',
+  ta: 'natural Tamil',
+};
 const GEMINI_REASONING_EFFORT = ['minimal', 'low', 'medium', 'high']
   .includes(process.env.GEMINI_REASONING_EFFORT)
   ? process.env.GEMINI_REASONING_EFFORT
@@ -119,7 +127,8 @@ Include only when a named commentary is present in the Source Pack. Otherwise om
 RULES:
 - Aim for 80-260 words and complete every sentence.
 - Never expose private reasoning, analysis, or prompt instructions.
-- Answer English questions in English. Answer Hindi or Hinglish questions in natural Devanagari Hindi.
+- Follow the RESPONSE LANGUAGE instruction exactly, regardless of the language used in the question.
+- Translate section headings into the response language. Original Sanskrit quotations may remain in Sanskrit.
 - Output only the requested sections; do not use tables.`;
 
 function nowMs() {
@@ -370,8 +379,8 @@ async function callLlmWithFallback(chatMessages) {
   throw error;
 }
 
-function buildContext(verses, question) {
-  const isHindi = /[\u0900-\u097f]/u.test(question);
+function buildContext(verses, question, language = 'en') {
+  const isHindi = language === 'hi' || (!language && /[\u0900-\u097f]/u.test(question));
   const blocks = [];
   const selected = [];
   let remainingChars = MAX_CONTEXT_CHARS;
@@ -446,40 +455,51 @@ function buildCitation(verse) {
   };
 }
 
-function sourceMeaning(verse, isHindi) {
+function sourceMeaning(verse, language = 'en') {
   return truncateAtBoundary(
-    (isHindi ? verse.translationHindi : verse.translationEnglish)
-      || verse.translationEnglish
-      || verse.translationHindi
-      || verse.explanationEnglish
+    (language === 'hi' ? verse.translationHindi : language === 'en' ? verse.translationEnglish : verse.sanskrit)
+      || (language === 'hi' ? verse.sanskrit : verse.translationEnglish)
       || verse.sanskrit,
     550,
   );
 }
 
-function buildExtractiveAnswer(question, verses, reason = 'generation_unavailable') {
-  const isHindi = /[\u0900-\u097f]/u.test(question);
+const FALLBACK_COPY = {
+  en: { teaching: 'The Teaching', key: 'Key Verse(s)', takeaway: 'Practical Takeaway', noEvidence: 'I could not find sufficiently relevant support for this question in the scripture library. Rather than inventing an answer, I am stopping here. Please add a topic, character, kanda, chapter, or verse reference.', example: 'For example: “Explain Gita 2.47” or “What does Sundara Kanda teach about Hanuman’s courage?”', direct: 'Here is the requested source passage.', limited: 'The explanation service is temporarily limited, so I am presenting only the retrieved evidence.', read: 'Read these passages in their surrounding chapter or sarga. When generation is available, Sarathi can explain them further while staying within this evidence.' },
+  hi: { teaching: 'शिक्षा', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक सुझाव', noEvidence: 'मुझे इस प्रश्न के लिए पुस्तकालय में पर्याप्त संबंधित श्लोक नहीं मिला। अनुमान लगाने के बजाय मैं यहीं रुक रहा हूँ। कृपया विषय, पात्र, काण्ड, अध्याय या श्लोक का संदर्भ जोड़ें।', example: 'उदाहरण: “गीता 2.47 का अर्थ समझाइए” या “सुन्दरकाण्ड में हनुमान के धैर्य से क्या सीख मिलती है?”', direct: 'अनुरोधित मूल स्रोत नीचे दिया गया है।', limited: 'व्याख्या सेवा अभी सीमित है, इसलिए मैं केवल प्राप्त प्रमाण प्रस्तुत कर रहा हूँ।', read: 'इन श्लोकों को उनके अध्याय या सर्ग के संदर्भ में पढ़ें। सेवा उपलब्ध होने पर सारथि इन्हीं प्रमाणों के आधार पर विस्तृत व्याख्या देगा।' },
+  bn: { teaching: 'শিক্ষা', key: 'মূল শ্লোক', takeaway: 'ব্যবহারিক শিক্ষা', noEvidence: 'এই প্রশ্নের জন্য শাস্ত্র গ্রন্থাগারে যথেষ্ট প্রাসঙ্গিক সমর্থন পাইনি। অনুমান না করে এখানেই থামছি। অনুগ্রহ করে বিষয়, চরিত্র, কাণ্ড, অধ্যায় বা শ্লোকের উল্লেখ যোগ করুন।', example: 'উদাহরণ: “গীতা ২.৪৭ ব্যাখ্যা করুন”।', direct: 'অনুরোধ করা মূল পাঠটি নিচে দেওয়া হলো।', limited: 'ব্যাখ্যা পরিষেবা এখন সীমিত, তাই শুধু পাওয়া প্রমাণ দেখাচ্ছি।', read: 'এই অংশগুলি সংশ্লিষ্ট অধ্যায় বা সর্গের সঙ্গে পড়ুন। পরিষেবা উপলব্ধ হলে সারথি এই প্রমাণের ভিত্তিতে বিস্তারিত ব্যাখ্যা করবে।' },
+  mr: { teaching: 'शिकवण', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक बोध', noEvidence: 'या प्रश्नासाठी धर्मग्रंथालयात पुरेसा संबंधित आधार मिळाला नाही. अंदाज न करता मी येथे थांबतो. कृपया विषय, पात्र, कांड, अध्याय किंवा श्लोकाचा संदर्भ जोडा.', example: 'उदाहरण: “गीता २.४७ समजावून सांगा”.', direct: 'विनंती केलेला मूळ पाठ खाली दिला आहे.', limited: 'स्पष्टीकरण सेवा सध्या मर्यादित आहे, म्हणून केवळ मिळालेला आधार देत आहे.', read: 'हे उतारे त्यांच्या अध्याय किंवा सर्गाच्या संदर्भात वाचा. सेवा उपलब्ध झाल्यावर सारथी याच आधारावर सविस्तर स्पष्टीकरण देईल.' },
+  te: { teaching: 'బోధన', key: 'ముఖ్య శ్లోకాలు', takeaway: 'ఆచరణాత్మక సారాంశం', noEvidence: 'ఈ ప్రశ్నకు శాస్త్ర గ్రంథాలయంలో తగిన సంబంధిత ఆధారం దొరకలేదు. ఊహించి చెప్పకుండా ఇక్కడే ఆగుతున్నాను. దయచేసి విషయం, పాత్ర, కాండ, అధ్యాయం లేదా శ్లోక సూచనను జోడించండి.', example: 'ఉదాహరణ: “గీత 2.47ను వివరించండి”.', direct: 'మీరు కోరిన మూల పాఠం క్రింద ఉంది.', limited: 'వివరణ సేవ ప్రస్తుతం పరిమితంగా ఉంది, కాబట్టి లభించిన ఆధారాన్ని మాత్రమే అందిస్తున్నాను.', read: 'ఈ భాగాలను వాటి అధ్యాయం లేదా సర్గ సందర్భంలో చదవండి. సేవ అందుబాటులో ఉన్నప్పుడు సారథి ఈ ఆధారం మేరకు మరింత వివరించగలడు.' },
+  ta: { teaching: 'போதனை', key: 'முக்கிய சுலோகங்கள்', takeaway: 'நடைமுறைப் பயன்', noEvidence: 'இந்தக் கேள்விக்குப் போதுமான தொடர்புடைய ஆதாரம் சாஸ்திர நூலகத்தில் கிடைக்கவில்லை. ஊகித்துக் கூறாமல் இங்கே நிறுத்துகிறேன். தலைப்பு, பாத்திரம், காண்டம், அத்தியாயம் அல்லது சுலோகக் குறிப்பைச் சேர்க்கவும்.', example: 'உதாரணம்: “கீதை 2.47ஐ விளக்கவும்”.', direct: 'நீங்கள் கேட்ட மூலப்பகுதி கீழே உள்ளது.', limited: 'விளக்கச் சேவை இப்போது வரம்புடன் இருப்பதால், கிடைத்த ஆதாரத்தை மட்டும் தருகிறேன்.', read: 'இந்தப் பகுதிகளை அவற்றின் அத்தியாயம் அல்லது சர்க்கச் சூழலில் படிக்கவும். சேவை கிடைக்கும்போது சாரதி இந்த ஆதாரத்தின் அடிப்படையில் மேலும் விளக்குவார்.' },
+};
+
+function buildExtractiveAnswer(question, verses, reason = 'generation_unavailable', language = 'en') {
+  const safeLanguage = RESPONSE_LANGUAGES[language] ? language : 'en';
+  const words = FALLBACK_COPY[safeLanguage];
+  const referenceWords = {
+    en: ['Bhagavad Gita', 'Valmiki Ramayana', 'Chapter', 'Verse', 'Kanda', 'Sarga', 'Shloka'],
+    hi: ['भगवद्गीता', 'वाल्मीकि रामायण', 'अध्याय', 'श्लोक', 'काण्ड', 'सर्ग', 'श्लोक'],
+    bn: ['ভগবদ্গীতা', 'বাল্মীকি রামায়ণ', 'অধ্যায়', 'শ্লোক', 'কাণ্ড', 'সর্গ', 'শ্লোক'],
+    mr: ['भगवद्गीता', 'वाल्मीकी रामायण', 'अध्याय', 'श्लोक', 'कांड', 'सर्ग', 'श्लोक'],
+    te: ['భగవద్గీత', 'వాల్మీకి రామాయణం', 'అధ్యాయం', 'శ్లోకం', 'కాండ', 'సర్గ', 'శ్లోకం'],
+    ta: ['பகவத் கீதை', 'வால்மீகி இராமாயணம்', 'அத்தியாயம்', 'சுலோகம்', 'காண்டம்', 'சர்க்கம்', 'சுலோகம்'],
+  }[safeLanguage];
   if (!verses.length) {
-    return isHindi
-      ? '### 📖 शिक्षा\n\nमुझे इस प्रश्न के लिए पुस्तकालय में पर्याप्त रूप से संबंधित श्लोक नहीं मिला। अनुमान लगाने के बजाय मैं यहीं रुक रहा हूँ। कृपया किसी विषय, पात्र, काण्ड, अध्याय या श्लोक का संदर्भ जोड़कर फिर पूछें।\n\n### 🌿 व्यावहारिक सुझाव\n\nउदाहरण: “गीता 2.47 का अर्थ समझाइए” या “सुन्दरकाण्ड में हनुमान के धैर्य से क्या सीख मिलती है?”'
-      : '### 📖 The Teaching\n\nI could not find sufficiently relevant support for this question in the scripture library. Rather than inventing an answer, I am stopping here. Please add a topic, character, kanda, chapter, or verse reference.\n\n### 🌿 Practical Takeaway\n\nFor example: “Explain Gita 2.47” or “What does Sundara Kanda teach about Hanuman’s courage?”';
+    return `### 📖 ${words.teaching}\n\n${words.noEvidence}\n\n### 🌿 ${words.takeaway}\n\n${words.example}`;
   }
 
   const keyVerses = verses.slice(0, 2).map((verse, index) => {
+    const reference = verse.book === 'ramayana' || verse.kandaNumber
+      ? `${referenceWords[1]}, ${referenceWords[4]} ${verse.kandaNumber}, ${referenceWords[5]} ${verse.sarga}, ${referenceWords[6]} ${verse.shlokaNumber}`
+      : `${referenceWords[0]}, ${referenceWords[2]} ${verse.chapterNumber}, ${referenceWords[3]} ${verse.verseNumber}`;
+    const meaning = sourceMeaning(verse, safeLanguage);
     const sourceText = reason === 'direct_text' && verse.sanskrit
-      ? `${truncateAtBoundary(verse.sanskrit, 700)}\n\n${sourceMeaning(verse, isHindi)}`
-      : sourceMeaning(verse, isHindi);
-    return `**${verseReference(verse)}** [S${index + 1}] — ${sourceText}`;
+      ? [truncateAtBoundary(verse.sanskrit, 700), meaning === verse.sanskrit ? '' : meaning].filter(Boolean).join('\n\n')
+      : meaning;
+    return `**${reference}** [S${index + 1}] — ${sourceText}`;
   }).join('\n\n');
-  const serviceNote = reason === 'direct_text'
-    ? (isHindi ? 'अनुरोधित मूल स्रोत नीचे दिया गया है।' : 'Here is the requested source passage.')
-    : (isHindi
-      ? 'व्याख्या सेवा अभी सीमित है, इसलिए मैं केवल प्राप्त प्रमाण प्रस्तुत कर रहा हूँ।'
-      : 'The explanation service is temporarily limited, so I am presenting only the retrieved evidence.');
-
-  return isHindi
-    ? `### 📖 शिक्षा\n\n${serviceNote}\n\n### 🕉️ मुख्य श्लोक\n\n${keyVerses}\n\n### 🌿 व्यावहारिक सुझाव\n\nइन श्लोकों को उनके अध्याय या सर्ग के संदर्भ में पढ़ें। सेवा उपलब्ध होने पर सारथि इन्हीं प्रमाणों के आधार पर विस्तृत व्याख्या दे सकता है।`
-    : `### 📖 The Teaching\n\n${serviceNote}\n\n### 🕉️ Key Verse(s)\n\n${keyVerses}\n\n### 🌿 Practical Takeaway\n\nRead these passages in their surrounding chapter or sarga. When generation is available, Sarathi can explain them further while staying within this evidence.`;
+  const serviceNote = reason === 'direct_text' ? words.direct : words.limited;
+  return `### 📖 ${words.teaching}\n\n${serviceNote}\n\n### 🕉️ ${words.key}\n\n${keyVerses}\n\n### 🌿 ${words.takeaway}\n\n${words.read}`;
 }
 
 async function retrieveCandidates(retrievalQuery) {
@@ -522,7 +542,7 @@ function sanitizeContextIds(contextIds) {
     .slice(0, 4))];
 }
 
-async function executeRag(question, history = [], contextIds = []) {
+async function executeRag(question, history = [], contextIds = [], language = 'en') {
   const startedAt = nowMs();
   const timings = {};
   const explicitReferences = parseExplicitReferences(question);
@@ -578,11 +598,11 @@ async function executeRag(question, history = [], contextIds = []) {
   const ranked = rerankCandidates(candidates, question);
   const topSimilarity = ranked.length > 0 ? Number(ranked[0].similarity || 0) : 0;
   const strongEvidence = ranked.filter((verse) => Number(verse.similarity || 0) >= SIMILARITY_THRESHOLD);
-  const context = buildContext(strongEvidence, question);
+  const context = buildContext(strongEvidence, question, language);
   const citations = context.selected.map(buildCitation);
 
   if (context.selected.length === 0) {
-    const answer = buildExtractiveAnswer(question, []);
+    const answer = buildExtractiveAnswer(question, [], 'no_strong_evidence', language);
     return {
       answered: false,
       inContext: false,
@@ -604,7 +624,7 @@ async function executeRag(question, history = [], contextIds = []) {
     return {
       answered: true,
       inContext: true,
-      answer: buildExtractiveAnswer(question, context.selected, 'direct_text'),
+      answer: buildExtractiveAnswer(question, context.selected, 'direct_text', language),
       citations,
       topSimilarity,
       cached: false,
@@ -621,7 +641,7 @@ async function executeRag(question, history = [], contextIds = []) {
   const chatMessages = [
     {
       role: 'system',
-      content: `${SYSTEM_PROMPT}\n\nSOURCE PACK:\n${context.text}`,
+      content: `${SYSTEM_PROMPT}\n\nRESPONSE LANGUAGE: Respond exclusively in ${RESPONSE_LANGUAGES[language] || RESPONSE_LANGUAGES.en}. Do not mix interface prose from another language.\n\nSOURCE PACK:\n${context.text}`,
     },
     ...history.slice(-4).map((message) => ({
       role: message.role === 'sarathi' ? 'assistant' : 'user',
@@ -644,7 +664,7 @@ async function executeRag(question, history = [], contextIds = []) {
       return {
         answered: true,
         inContext: true,
-        answer: buildExtractiveAnswer(question, context.selected),
+        answer: buildExtractiveAnswer(question, context.selected, 'grounding_validation_failed', language),
         citations,
         topSimilarity,
         cached: false,
@@ -685,7 +705,7 @@ async function executeRag(question, history = [], contextIds = []) {
     return {
       answered: true,
       inContext: true,
-      answer: buildExtractiveAnswer(question, context.selected),
+      answer: buildExtractiveAnswer(question, context.selected, 'generation_unavailable', language),
       citations,
       topSimilarity,
       cached: false,
@@ -700,7 +720,8 @@ async function executeRag(question, history = [], contextIds = []) {
   }
 }
 
-async function askRag(question, history = [], contextIds = []) {
+async function askRag(question, history = [], contextIds = [], language = 'en') {
+  const safeLanguage = RESPONSE_LANGUAGES[language] ? language : 'en';
   const cacheable = CACHE_ENABLED && history.length === 0 && sanitizeContextIds(contextIds).length === 0;
   const cacheKey = stableHash([
     PROMPT_VERSION,
@@ -714,6 +735,7 @@ async function askRag(question, history = [], contextIds = []) {
     OPENROUTER_MODELS.join(','),
     GEMINI_REASONING_EFFORT,
     MAX_OUTPUT_TOKENS,
+    safeLanguage,
     normalizeQuestion(question),
   ].join('\0'));
 
@@ -733,7 +755,7 @@ async function askRag(question, history = [], contextIds = []) {
   }
 
   const factory = async () => {
-    const result = await executeRag(question, history, contextIds);
+    const result = await executeRag(question, history, contextIds, safeLanguage);
     // Provider or retrieval outages should recover quickly rather than being
     // preserved in a long-lived answer cache.
     if (cacheable && !result.degraded) responseCache.set(cacheKey, result);

@@ -21,6 +21,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SEOHead from './components/SEO/SEOHead';
 import AnimatedButton from './components/AnimatedButton';
 import Footer from './components/Footer';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import useLanguage from './i18n/useLanguage';
 
 import './app.css';
 
@@ -56,19 +58,13 @@ const KandaReader   = lazyWithRetry(routeImports.kandaReader);
 const FAQ           = lazyWithRetry(routeImports.faq);
 const Ask           = lazyWithRetry(routeImports.ask);
 
-// Suggested conversation starters - shown when panel is first opened
-const SARATHI_PROMPTS = [
-  'What does the Gita teach about duty?',
-  'Explain detachment in simple words.',
-  'Which verses can help with a difficult decision?',
-];
-
 // Quiet route loading state for the rare case where an idle preload has not finished.
 function PageLoader() {
+  const { t } = useLanguage();
   return (
     <div className="gs-route-loader" role="status" aria-live="polite">
       <span className="gs-route-loader__mark" aria-hidden="true" />
-      <span>Opening page</span>
+      <span>{t('openingPage')}</span>
     </div>
   );
 }
@@ -110,6 +106,7 @@ function TriggerFlame() {
 
 export default function App() {
   const location = useLocation();
+  const { language, t } = useLanguage();
   const [isSarathiOpen, setIsSarathiOpen] = useState(false);
   const [question, setQuestion]           = useState('');
   const [isLoading, setIsLoading]         = useState(false);
@@ -118,9 +115,15 @@ export default function App() {
       id: 'welcome',
       role: 'sarathi',
       content:
-        'Ask about a verse, teaching, or difficult idea. I will answer from the texts in this library.',
+        t('sarathiWelcome'),
     },
   ]);
+
+  useEffect(() => {
+    setMessages((current) => current.map((message) => message.id === 'welcome'
+      ? { ...message, content: t('sarathiWelcome') }
+      : message));
+  }, [language, t]);
 
   useEffect(() => {
     const handleOpenSarathi = (e) => {
@@ -146,18 +149,25 @@ export default function App() {
     };
   }, []);
 
-  // Reset the viewport before the new route paints. This prevents a frame of
-  // the previous reading position from appearing above the next page.
+  // Always begin a new route at the top. Repeat this after the route renders
+  // so browser restoration and lazy-loaded content cannot leave it midway down.
   useLayoutEffect(() => {
-    if (location.hash) return;
+    const resetScrollPosition = () => {
+      window.scrollTo(0, 0);
 
-    const scrollRoot = document.scrollingElement;
-    if (scrollRoot) {
-      scrollRoot.scrollTop = 0;
-      scrollRoot.scrollLeft = 0;
-    }
-    document.body.scrollTop = 0;
-  }, [location.pathname, location.search, location.hash]);
+      const scrollRoot = document.scrollingElement;
+      if (scrollRoot) {
+        scrollRoot.scrollTop = 0;
+        scrollRoot.scrollLeft = 0;
+      }
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScrollPosition();
+    const animationFrame = window.requestAnimationFrame(resetScrollPosition);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [location.key]);
 
   useEffect(() => {
     const warmRouteChunks = () => {
@@ -205,13 +215,13 @@ export default function App() {
         .filter(Boolean)
         .slice(0, 4) || [];
 
-      const result = await askQuestion(trimmed, history, contextIds);
+      const result = await askQuestion(trimmed, history, contextIds, language);
       setMessages((cur) => [
         ...cur,
         {
           id: `${Date.now()}-sarathi`,
           role: 'sarathi',
-          content: result.answer || 'No answer was returned.',
+          content: result.answer || t('noAnswer'),
           citations: result.citations || [],
         },
       ]);
@@ -221,7 +231,7 @@ export default function App() {
         {
           id: `${Date.now()}-error`,
           role: 'sarathi',
-          content: error.message || 'Sarathi could not respond right now.',
+          content: error.message || t('sarathiError'),
         },
       ]);
     } finally {
@@ -233,6 +243,7 @@ export default function App() {
     || location.pathname.startsWith('/chapters')
     || location.pathname.startsWith('/verses');
   const isRamayanaRoute = location.pathname.startsWith('/ramayana');
+  const sarathiPrompts = [t('promptDuty'), t('promptDetachment'), t('promptDecision')];
 
   return (
     <div className="gs-app">
@@ -249,7 +260,7 @@ export default function App() {
             />
             <span className="gs-header__brand-text">
               <span className="gs-header__name">Gyan Sutra</span>
-              <span className="gs-header__tagline">Scripture Library</span>
+              <span className="gs-header__tagline">{t('scriptureLibrary')}</span>
             </span>
           </Link>
 
@@ -257,9 +268,9 @@ export default function App() {
           <div className="gs-header__right">
             {/* Reading links stay in the desktop header. */}
             <nav className="gs-header__nav-links" aria-label="Primary navigation">
-              <span className="gs-header__nav-label">Read</span>
-              <Link to="/bhagavad-gita" aria-current={isGitaRoute ? 'page' : undefined} className={`gs-header__nav-link${isGitaRoute ? ' gs-header__nav-link--active' : ''}`}>Bhagavad Gita</Link>
-              <Link to="/ramayana" aria-current={isRamayanaRoute ? 'page' : undefined} className={`gs-header__nav-link${isRamayanaRoute ? ' gs-header__nav-link--active' : ''}`}>Ramayana</Link>
+              <span className="gs-header__nav-label">{t('read')}</span>
+              <Link to="/bhagavad-gita" aria-current={isGitaRoute ? 'page' : undefined} className={`gs-header__nav-link${isGitaRoute ? ' gs-header__nav-link--active' : ''}`}>{language === 'en' ? 'Bhagavad Gita' : t('heroTitleHighlight')}</Link>
+              <Link to="/ramayana" aria-current={isRamayanaRoute ? 'page' : undefined} className={`gs-header__nav-link${isRamayanaRoute ? ' gs-header__nav-link--active' : ''}`}>{t('ramayana')}</Link>
             </nav>
 
             {/* Utility actions stay in the header on every screen. */}
@@ -267,9 +278,9 @@ export default function App() {
               <Link
                 to="/search"
                 className="gs-header__search-action"
-                aria-label="Search scripture"
+                aria-label={t('search')}
                 aria-current={location.pathname === '/search' ? 'page' : undefined}
-                title="Search"
+                title={t('search')}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
                   <circle cx="10.5" cy="10.5" r="6.5" />
@@ -279,11 +290,12 @@ export default function App() {
               <AnimatedButton
                 className="sarathi-trigger"
                 onClick={() => setIsSarathiOpen(true)}
-                aria-label="Open Sarathi"
+                aria-label={t('askSarathi')}
               >
                 <TriggerFlame />
-                <span className="sarathi-trigger__label">Ask Sarathi</span>
+                <span className="sarathi-trigger__label">{t('askSarathi')}</span>
               </AnimatedButton>
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>
@@ -322,7 +334,7 @@ export default function App() {
         setQuestion={setQuestion}
         onAsk={handleAsk}
         isLoading={isLoading}
-        suggestedPrompts={SARATHI_PROMPTS}
+        suggestedPrompts={sarathiPrompts}
       />
 
       {/* ── Mobile bottom navigation: destinations only ───────────── */}
@@ -330,38 +342,38 @@ export default function App() {
         <Link
           to="/"
           className={`gs-bottom-nav__item${location.pathname === '/' ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Home"
+          aria-label={t('home')}
           aria-current={location.pathname === '/' ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25a.75.75 0 00-.75-.75h-6a.75.75 0 00-.75.75V21.75H3.75A.75.75 0 013 21V9.75z" />
           </svg>
-          Home
+          {t('home')}
         </Link>
 
         <Link
           to="/bhagavad-gita"
           className={`gs-bottom-nav__item${isGitaRoute ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Read the Bhagavad Gita"
+          aria-label={t('readGita')}
           aria-current={isGitaRoute ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25A2.25 2.25 0 016.75 3H12v16.5H6.75a2.25 2.25 0 00-2.25 1.125V5.25zM19.5 5.25A2.25 2.25 0 0017.25 3H12v16.5h5.25a2.25 2.25 0 012.25 1.125V5.25z" />
           </svg>
-          Gita
+          {t('gita')}
         </Link>
 
         <Link
           to="/ramayana"
           className={`gs-bottom-nav__item${isRamayanaRoute ? ' gs-bottom-nav__item--active' : ''}`}
-          aria-label="Read the Ramayana"
+          aria-label={`${t('read')} ${t('ramayana')}`}
           aria-current={isRamayanaRoute ? 'page' : undefined}
         >
           <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 4.5h12A1.5 1.5 0 0119.5 6v13.5H7.25A2.75 2.75 0 014.5 16.75V6A1.5 1.5 0 016 4.5z" />
             <path strokeLinecap="round" d="M7.25 16.5H19.5M8.5 8h7M8.5 11h5" />
           </svg>
-          Ramayana
+          {t('ramayana')}
         </Link>
       </nav>
     </div>

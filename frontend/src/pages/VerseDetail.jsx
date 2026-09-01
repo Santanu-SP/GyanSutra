@@ -8,9 +8,11 @@ import { getVerse } from '../services/api';
 import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import RecommendationsRail from '../components/RecommendationsRail';
 import LoadingSpinner from '../components/LoadingSpinner';
+import useLanguage from '../i18n/useLanguage';
 import './VerseDetail.css';
 
 export default function VerseDetail() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const [verse, setVerse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +28,8 @@ export default function VerseDetail() {
 
   if (error) return (
     <main className="verse-detail">
-      <Link to="/" className="verse-detail__back">← Home</Link>
-      <p>Verse not found: {error}</p>
+      <Link to="/" className="verse-detail__back">← {t('home')}</Link>
+      <p>{t('translationUnavailable')}</p>
     </main>
   );
 
@@ -41,23 +43,23 @@ export default function VerseDetail() {
           <>
             <span className="verse-detail__breadcrumb-sep">›</span>
             <Link to={`/chapters/${chapterId}`} id="breadcrumb-chapter">
-              Chapter {verse.chapterNumber}
+              {t('chapter')} {verse.chapterNumber}
             </Link>
             <span className="verse-detail__breadcrumb-sep">›</span>
-            <span>Verse {verse.verseNumber}</span>
+            <span>{t('verse')} {verse.verseNumber}</span>
           </>
         )}
       </nav>
 
       {loading ? (
-        <LoadingSpinner size="medium" text="Loading Shloka..." />
+        <LoadingSpinner size="medium" text={`${t('shloka')}…`} />
       ) : verse ? (
         <>
           <IlluminatedVerseCard verse={verse} variant="full" />
           <RecommendationsRail contentId={verse.id} type="verse" />
         </>
       ) : (
-        <p>Verse not available.</p>
+        <p>{t('translationUnavailable')}</p>
       )}
     </main>
   );

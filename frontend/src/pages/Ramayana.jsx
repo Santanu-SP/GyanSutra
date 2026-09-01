@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import useLanguage from '../i18n/useLanguage';
+import KANDA_NAMES from '../utils/kandaNames';
 
 import './TextReader.css'; // Reusing the same styles
 
@@ -17,16 +19,17 @@ const ROMAN = [
 ];
 
 export default function Ramayana() {
+  const { language, t } = useLanguage();
   return (
     <main className="text-reader">
       <div className="text-reader__container">
-        <Link to="/" className="text-reader__back">← Library</Link>
+        <Link to="/" className="text-reader__back">← {t('browseLibrary')}</Link>
         <header className="text-reader__header">
-          <p className="text-reader__source-badge">7 kandas</p>
-          <h1 className="text-reader__title">Valmiki Ramayana</h1>
+          <p className="text-reader__source-badge">{t('kandas7')}</p>
+          <h1 className="text-reader__title">{language === 'en' ? 'Valmiki Ramayana' : t('ramayana')}</h1>
           <p className="text-reader__devanagari devanagari">रामायण</p>
           <p className="text-reader__description">
-            An epic text centered on dharma, exile, loyalty, and return.
+            {t('ramayanaDescription')}
           </p>
         </header>
 
@@ -40,11 +43,11 @@ export default function Ramayana() {
                   {ROMAN[i]}
                 </span>
                 <div className="text-reader__chapter-info">
-                  <span className="text-reader__chapter-english">{k.name}</span>
-                  <span className="text-reader__chapter-summary">{k.description}</span>
+                  <span className="text-reader__chapter-english">{KANDA_NAMES[language]?.[i] || k.name}</span>
+                  {language === 'en' && <span className="text-reader__chapter-summary">{k.description}</span>}
                 </div>
                 <div className="text-reader__chapter-meta">
-                  <span className="text-reader__verse-count">{k.sargas} sargas</span>
+                  <span className="text-reader__verse-count">{k.sargas} {t('sarga')}</span>
                   <span className="text-reader__arrow" aria-hidden="true">
                     →
                   </span>

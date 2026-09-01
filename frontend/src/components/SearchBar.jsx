@@ -5,9 +5,11 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useLanguage from '../i18n/useLanguage';
 import './SearchBar.css';
 
 export default function SearchBar({ autoFocus = false, placeholder = 'Search verses…' }) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export default function SearchBar({ autoFocus = false, placeholder = 'Search ver
       className="search-bar"
       onSubmit={handleSubmit}
       role="search"
-      aria-label="Search verses"
+      aria-label={t('search')}
     >
       <div className="search-bar__inner">
         <svg className="search-bar__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -57,7 +59,7 @@ export default function SearchBar({ autoFocus = false, placeholder = 'Search ver
           autoFocus={autoFocus}
           autoComplete="off"
           spellCheck="false"
-          aria-label="Search scripture"
+          aria-label={t('search')}
         />
         <kbd className="search-bar__shortcut" aria-hidden="true">⌘K</kbd>
       </div>

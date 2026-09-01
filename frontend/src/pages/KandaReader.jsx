@@ -4,6 +4,8 @@ import IlluminatedVerseCard from '../components/IlluminatedVerseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getRamayanaSarga } from '../services/api';
 import AnimatedButton from '../components/AnimatedButton';
+import useLanguage from '../i18n/useLanguage';
+import KANDA_NAMES from '../utils/kandaNames';
 
 import './ChapterReader.css';
 
@@ -17,7 +19,18 @@ const KANDAS = [
   { id: 7, name: 'Uttara Kanda', sargas: 111 },
 ];
 
+const KANDA_COPY = {
+  en: { all: 'All Kandas', missing: 'Kanda not found.', loading: 'Loading shlokas…', failed: 'Could not load this sarga.', none: 'No verses found for this Sarga.', choose: 'Try selecting a different Sarga above.', unverified: 'Unverified', previous: 'Previous shloka', next: 'Next shloka', navigation: 'Verse navigation', of: 'of' },
+  hi: { all: 'सभी काण्ड', missing: 'काण्ड नहीं मिला।', loading: 'श्लोक खुल रहे हैं…', failed: 'यह सर्ग लोड नहीं हो सका।', none: 'इस सर्ग में कोई श्लोक नहीं मिला।', choose: 'ऊपर से कोई दूसरा सर्ग चुनें।', unverified: 'अप्रमाणित', previous: 'पिछला श्लोक', next: 'अगला श्लोक', navigation: 'श्लोक संचालन', of: 'में से' },
+  bn: { all: 'সব কাণ্ড', missing: 'কাণ্ড পাওয়া যায়নি।', loading: 'শ্লোক খুলছে…', failed: 'এই সর্গ লোড করা যায়নি।', none: 'এই সর্গে কোনো শ্লোক পাওয়া যায়নি।', choose: 'উপরে অন্য একটি সর্গ বেছে নিন।', unverified: 'যাচাই করা হয়নি', previous: 'আগের শ্লোক', next: 'পরের শ্লোক', navigation: 'শ্লোক পরিচালনা', of: 'এর মধ্যে' },
+  mr: { all: 'सर्व कांड', missing: 'कांड सापडले नाही.', loading: 'श्लोक उघडत आहेत…', failed: 'हा सर्ग लोड होऊ शकला नाही.', none: 'या सर्गात श्लोक सापडले नाहीत.', choose: 'वरून वेगळा सर्ग निवडा.', unverified: 'असत्यापित', previous: 'मागील श्लोक', next: 'पुढील श्लोक', navigation: 'श्लोक नेव्हिगेशन', of: 'पैकी' },
+  te: { all: 'అన్ని కాండలు', missing: 'కాండ దొరకలేదు.', loading: 'శ్లోకాలు తెరుచుకుంటున్నాయి…', failed: 'ఈ సర్గను లోడ్ చేయలేకపోయాం.', none: 'ఈ సర్గలో శ్లోకాలు దొరకలేదు.', choose: 'పైన మరో సర్గను ఎంచుకోండి.', unverified: 'ధృవీకరించబడలేదు', previous: 'మునుపటి శ్లోకం', next: 'తదుపరి శ్లోకం', navigation: 'శ్లోక నావిగేషన్', of: 'లో' },
+  ta: { all: 'அனைத்து காண்டங்கள்', missing: 'காண்டம் கிடைக்கவில்லை.', loading: 'சுலோகங்கள் திறக்கப்படுகின்றன…', failed: 'இந்தச் சர்க்கத்தை ஏற்ற முடியவில்லை.', none: 'இந்தச் சர்க்கத்தில் சுலோகங்கள் கிடைக்கவில்லை.', choose: 'மேலே வேறு சர்க்கத்தைத் தேர்ந்தெடுக்கவும்.', unverified: 'சரிபார்க்கப்படவில்லை', previous: 'முந்தைய சுலோகம்', next: 'அடுத்த சுலோகம்', navigation: 'சுலோக வழிசெலுத்தல்', of: 'இல்' },
+};
+
 export default function KandaReader() {
+  const { language, t } = useLanguage();
+  const labels = KANDA_COPY[language] || KANDA_COPY.en;
   const { kandaNum } = useParams();
   const kandaId = parseInt(kandaNum, 10);
   const kanda = KANDAS.find(k => k.id === kandaId);
@@ -102,8 +115,8 @@ export default function KandaReader() {
 
   if (!kanda) return (
     <main className="chapter-reader chapter-reader--error">
-      <Link to="/ramayana" className="chapter-reader__back">← Ramayana</Link>
-      <p>Kanda not found.</p>
+      <Link to="/ramayana" className="chapter-reader__back">← {t('ramayana')}</Link>
+      <p>{labels.missing}</p>
     </main>
   );
 
@@ -111,12 +124,12 @@ export default function KandaReader() {
     <main className="chapter-reader">
       <header className="chapter-reader__header">
         <Link to="/ramayana" className="chapter-reader__back" id="back-to-home-link">
-          ← All Kandas
+          ← {labels.all}
         </Link>
         <div className="chapter-reader__title-block">
-          <h1 className="chapter-reader__title devanagari">{kanda.name}</h1>
+          <h1 className="chapter-reader__title devanagari">{KANDA_NAMES[language]?.[kanda.id - 1] || kanda.name}</h1>
           <div className="flex items-center gap-4 mt-4">
-            <label htmlFor="sarga-select" className="text-[color:var(--text-secondary)] text-sm uppercase tracking-widest">Sarga</label>
+            <label htmlFor="sarga-select" className="text-[color:var(--text-secondary)] text-sm uppercase tracking-widest">{t('sarga')}</label>
             <select 
               id="sarga-select"
               value={currentSarga}
@@ -135,15 +148,15 @@ export default function KandaReader() {
       </header>
 
       {loading && !error && (
-        <LoadingSpinner size="medium" text="Loading Shlokas..." />
+        <LoadingSpinner size="medium" text={labels.loading} />
       )}
 
-      {error && <p className="text-center text-red-400 mt-8">Error: {error}</p>}
+      {error && <p className="text-center text-red-400 mt-8">{labels.failed}</p>}
       
       {!loading && !error && verses.length === 0 && (
         <div className="text-center mt-16 text-[color:var(--text-secondary)]">
-          <p>No verses found for this Sarga.</p>
-          <p className="text-sm mt-2">Try selecting a different Sarga from the dropdown above.</p>
+          <p>{labels.none}</p>
+          <p className="text-sm mt-2">{labels.choose}</p>
         </div>
       )}
 
@@ -151,11 +164,11 @@ export default function KandaReader() {
         <section className={`chapter-reader__content ${animClass}`}>
           <div className="chapter-reader__verse-nav mb-6 flex justify-between items-center text-[color:var(--text-secondary)]">
              <span className="text-sm">
-                Shloka {currentIndex + 1} of {verses.length}
+                {t('shloka')} {currentIndex + 1} {labels.of} {verses.length}
              </span>
              {currentVerse.verified === false && (
                 <span className="text-xs border border-red-500/30 text-red-400 px-2 py-1 rounded-full uppercase tracking-wider">
-                  Unverified
+                  {labels.unverified}
                 </span>
              )}
           </div>
@@ -166,14 +179,14 @@ export default function KandaReader() {
 
       {/* ── Floating Navigation Controls ──────────────────────── */}
       {!loading && verses.length > 0 && (
-        <nav className="chapter-reader__controls" aria-label="Verse Navigation">
+        <nav className="chapter-reader__controls" aria-label={labels.navigation}>
           <AnimatedButton
             onClick={handlePrev}
             disabled={currentIndex === 0 && currentSarga === 1}
             className="control-btn"
-            aria-label="Previous shloka"
+            aria-label={labels.previous}
           >
-            ←<span className="sr-only">Prev</span>
+            ←<span className="sr-only">{labels.previous}</span>
           </AnimatedButton>
           
           <span className="control-progress">
@@ -184,9 +197,9 @@ export default function KandaReader() {
             onClick={handleNext}
             disabled={currentIndex === verses.length - 1 && currentSarga === kanda.sargas}
             className="control-btn"
-            aria-label="Next shloka"
+            aria-label={labels.next}
           >
-            <span className="sr-only">Next</span>→
+            <span className="sr-only">{labels.next}</span>→
           </AnimatedButton>
         </nav>
       )}

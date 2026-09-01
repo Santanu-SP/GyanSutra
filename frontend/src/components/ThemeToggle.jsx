@@ -5,6 +5,7 @@
 
 import { useTheme } from '../hooks/useTheme';
 import AnimatedButton from './AnimatedButton';
+import useLanguage from '../i18n/useLanguage';
 
 import './ThemeToggle.css';
 
@@ -35,17 +36,22 @@ const MoonIcon = () => (
 );
 
 export default function ThemeToggle() {
+  const { language } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+  const labels = ({
+    en: ['Switch to light mode', 'Switch to dark mode'], hi: ['हल्का रूप चुनें', 'गहरा रूप चुनें'], bn: ['হালকা রূপ বেছে নিন', 'গাঢ় রূপ বেছে নিন'], mr: ['फिकट रूप निवडा', 'गडद रूप निवडा'], te: ['లైట్ రూపానికి మారండి', 'డార్క్ రూపానికి మారండి'], ta: ['வெளிர் தோற்றத்திற்கு மாறவும்', 'இருண்ட தோற்றத்திற்கு மாறவும்'],
+  })[language] || ['Switch to light mode', 'Switch to dark mode'];
+  const label = isDark ? labels[0] : labels[1];
 
   return (
     <AnimatedButton
       className="theme-toggle"
       onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={label}
       aria-pressed={isDark}
       id="theme-toggle-btn"
-      title={isDark ? 'Light mode' : 'Dark mode'}
+      title={label}
     >
       <span className="theme-toggle__icon">{isDark ? <SunIcon /> : <MoonIcon />}</span>
     </AnimatedButton>

@@ -187,6 +187,15 @@ describe('Gyan Sutra API', () => {
     expect(response.headers['cache-control']).toBe('no-store');
   });
 
+  test('passes a validated response language to Sarathi', async () => {
+    await request(app)
+      .post('/api/ask')
+      .send({ question: 'Explain Gita 2.47', language: 'bn' })
+      .expect(200);
+
+    expect(mockAskRag).toHaveBeenCalledWith('Explain Gita 2.47', [], [], 'bn');
+  });
+
   test('does not expose internal server errors', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockGetDoc.mockRejectedValue(new Error('private database detail'));

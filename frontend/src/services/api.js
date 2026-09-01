@@ -41,10 +41,10 @@ export const searchVerses = (q, limit = 10) =>
   request(`/search?q=${encodeURIComponent(q)}&limit=${limit}`);
 
 // ── Ask (RAG) ─────────────────────────────────────────────────────────────────
-export const askQuestion = (question, history = [], contextIds = []) =>
+export const askQuestion = (question, history = [], contextIds = [], language = 'en') =>
   request('/ask', {
     method: 'POST',
-    body: JSON.stringify({ question, history, contextIds }),
+    body: JSON.stringify({ question, history, contextIds, language }),
   });
 
 // ── Recommendations ───────────────────────────────────────────────────────────

@@ -1,25 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyVerse } from '../services/api';
-
-const SOURCES = [
-  {
-    id: 'bhagavad-gita',
-    title: 'Bhagavad Gita',
-    devanagari: 'गीता',
-    count: '18 chapters',
-    description: 'Krishna and Arjuna discuss duty, action, devotion, and self-knowledge.',
-  },
-  {
-    id: 'ramayana',
-    title: 'Valmiki Ramayana',
-    devanagari: 'राम',
-    count: '7 kandas',
-    description: 'Read the account of Rama through exile, separation, war, and return.',
-  },
-];
+import useLanguage from '../i18n/useLanguage';
 
 export default function Home() {
+  const { language, t } = useLanguage();
   const [dailyVerse, setDailyVerse] = useState(null);
   const [dailyVerseState, setDailyVerseState] = useState('loading');
 
@@ -36,25 +21,35 @@ export default function Home() {
       .catch(() => setDailyVerseState('unavailable'));
   }, []);
 
+  const sources = [
+    { id: 'bhagavad-gita', title: language === 'en' ? 'Bhagavad Gita' : t('heroTitleHighlight'), devanagari: 'गीता', count: t('chapters18'), description: t('gitaDescription') },
+    { id: 'ramayana', title: language === 'en' ? 'Valmiki Ramayana' : t('ramayana'), devanagari: 'राम', count: t('kandas7'), description: t('ramayanaDescription') },
+  ];
+  const dailyMeaning = language === 'en'
+    ? dailyVerse?.translationEnglish
+    : language === 'hi'
+      ? (dailyVerse?.translationHindi || t('translationUnavailable'))
+      : t('translationUnavailable');
+
   return (
     <main className="gs-home-page">
       <section className="gs-home">
         <header className="gs-home__hero">
           <div className="gs-home__intro">
-            <p className="gs-home__eyebrow">Gyan Sutra Library</p>
+            <p className="gs-home__eyebrow">{t('libraryName')}</p>
             <h1 className="gs-home__heading">
-              Read the <span>Bhagavad Gita</span> and Ramayana
+              {t('heroTitleBefore')}<span>{t('heroTitleHighlight')}</span>{t('heroTitleAfter')}
             </h1>
             <p className="gs-home__subheading">
-              Original Sanskrit with transliteration, English translation, and clear commentary.
+              {t('heroSubtitle')}
             </p>
             <div className="gs-home__cta-row">
               <Link to="/bhagavad-gita" className="gs-home__cta-primary">
-                Read the Bhagavad Gita
+                {t('readGita')}
                 <span aria-hidden="true">→</span>
               </Link>
               <a href="#text-library" className="gs-home__text-link">
-                Browse the library
+                {t('browseLibrary')}
                 <span aria-hidden="true">↓</span>
               </a>
             </div>
@@ -66,15 +61,15 @@ export default function Home() {
           >
             <div className="gs-home__darshan-header">
               <div>
-                <p className="gs-home__eyebrow">Daily Darshan</p>
-                <h2 id="daily-verse-title">Today’s verse</h2>
+                <p className="gs-home__eyebrow">{t('dailyDarshan')}</p>
+                <h2 id="daily-verse-title">{t('todaysVerse')}</h2>
               </div>
               <span className="gs-home__darshan-mark" aria-hidden="true">ॐ</span>
             </div>
 
             {dailyVerseState === 'loading' && (
               <div className="gs-home__darshan-status gs-home__darshan-status--loading" role="status">
-                <span className="sr-only">Preparing today’s verse</span>
+                <span className="sr-only">{t('preparingVerse')}</span>
                 <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--sanskrit" aria-hidden="true" />
                 <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--translation" aria-hidden="true" />
                 <span className="gs-home__darshan-skeleton gs-home__darshan-skeleton--action" aria-hidden="true" />
@@ -83,9 +78,9 @@ export default function Home() {
 
             {dailyVerseState === 'unavailable' && (
               <div className="gs-home__darshan-status">
-                <p className="gs-home__darshan-status-title">Today’s verse will return soon.</p>
-                <p>You can continue reading the Bhagavad Gita in the meantime.</p>
-                <Link to="/bhagavad-gita">Browse the Bhagavad Gita <span aria-hidden="true">→</span></Link>
+                <p className="gs-home__darshan-status-title">{t('dailyUnavailable')}</p>
+                <p>{t('continueGita')}</p>
+                <Link to="/bhagavad-gita">{t('browseGita')} <span aria-hidden="true">→</span></Link>
               </div>
             )}
 
@@ -95,9 +90,9 @@ export default function Home() {
                   {dailyVerse.sanskrit}
                 </p>
                 <div className="gs-home__darshan-meaning">
-                  <span>Meaning</span>
+                  <span>{t('meaning')}</span>
                   <p className="gs-home__darshan-translation">
-                    {dailyVerse.translationEnglish}
+                    {dailyMeaning}
                   </p>
                 </div>
                 <div className="gs-home__darshan-actions">
@@ -110,7 +105,7 @@ export default function Home() {
                       Bhagavad Gita {dailyVerse.chapterNumber}.{dailyVerse.verseNumber}
                     </span>
                     <span className="gs-home__darshan-read">
-                      Read full verse <span aria-hidden="true">→</span>
+                      {t('readFullVerse')} <span aria-hidden="true">→</span>
                     </span>
                   </Link>
                   <button
@@ -119,7 +114,7 @@ export default function Home() {
                       detail: { prompt: `Explain Bhagavad Gita ${dailyVerse.chapterNumber}.${dailyVerse.verseNumber} in simple terms.` },
                     }))}
                   >
-                    Ask Sarathi <span aria-hidden="true">→</span>
+                    {t('askSarathi')} <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </div>
@@ -130,14 +125,14 @@ export default function Home() {
         <section id="text-library" className="gs-home__library" aria-labelledby="library-title">
           <div className="gs-home__section-heading">
             <div>
-              <p className="gs-home__eyebrow">Available to read</p>
-              <h2 id="library-title">Choose a text</h2>
+              <p className="gs-home__eyebrow">{t('availableRead')}</p>
+              <h2 id="library-title">{t('chooseText')}</h2>
             </div>
-            <p>Open a text, choose a chapter, and continue at your own pace.</p>
+            <p>{t('chooseTextHelp')}</p>
           </div>
 
           <div className="gs-home__cards-grid">
-            {SOURCES.map((source) => (
+            {sources.map((source) => (
               <Link key={source.id} to={`/${source.id}`} className="gs-home__source-card">
                 <div className="gs-home__source-topline">
                   <span>{source.count}</span>
@@ -146,7 +141,7 @@ export default function Home() {
                 <h3>{source.title}</h3>
                 <p>{source.description}</p>
                 <span className="gs-home__source-action">
-                  Read {source.title}
+                  {t('read')} {source.title}
                   <span aria-hidden="true">→</span>
                 </span>
               </Link>
@@ -154,7 +149,7 @@ export default function Home() {
           </div>
 
           <p className="gs-home__upcoming">
-            In preparation: Upanishads, Mahabharata, and Puranas.
+            {t('inPreparation')}
           </p>
         </section>
       </section>

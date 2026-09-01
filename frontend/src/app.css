@@ -575,3 +575,23 @@
     gap: 0.2rem;
   }
 }
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  min-height: 2.4rem;
+  padding: 0 .5rem;
+  border: var(--hairline);
+  border-radius: .6rem;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.language-switcher__icon { color: var(--accent); font-weight: 700; }
+.language-switcher select { max-width: 6.4rem; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+
+@media (max-width: 720px) {
+  .language-switcher { padding: 0 .35rem; }
+  .language-switcher select { width: 2.1rem; color: transparent; }
+  .language-switcher select option { color: initial; }
+}

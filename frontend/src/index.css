@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Martel:wght@300;400;600;700;900&family=Hind:wght@300;400;500;600&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Martel:wght@300;400;600;700;900&family=Hind:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
 @import "tailwindcss";
 @import './design-system/tokens.css';
 
@@ -26,6 +26,23 @@ body {
   font-family: var(--font-body);
   line-height: 1.6;
 }
+
+html[data-language="hi"] body,
+html[data-language="mr"] body,
+.lang-hi,
+.lang-mr { font-family: 'Noto Sans Devanagari', 'Hind', sans-serif; }
+html[data-language="bn"] body,
+.lang-bn { font-family: 'Noto Sans Bengali', sans-serif; }
+html[data-language="te"] body,
+.lang-te { font-family: 'Noto Sans Telugu', sans-serif; }
+html[data-language="ta"] body,
+.lang-ta { font-family: 'Noto Sans Tamil', sans-serif; }
+
+html[data-language="hi"] h1, html[data-language="hi"] h2, html[data-language="hi"] h3,
+html[data-language="mr"] h1, html[data-language="mr"] h2, html[data-language="mr"] h3,
+html[data-language="bn"] h1, html[data-language="bn"] h2, html[data-language="bn"] h3,
+html[data-language="te"] h1, html[data-language="te"] h2, html[data-language="te"] h3,
+html[data-language="ta"] h1, html[data-language="ta"] h2, html[data-language="ta"] h3 { font-family: inherit; }
 
 #root {
   min-height: 100dvh;

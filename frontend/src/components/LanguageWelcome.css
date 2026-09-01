@@ -1,0 +1,16 @@
+.language-welcome { min-height: 100dvh; display: grid; place-items: center; padding: 1.5rem; background: radial-gradient(circle at top, color-mix(in srgb, var(--marigold) 14%, transparent), transparent 42%), var(--bg); }
+.language-welcome__card { width: min(100%, 44rem); text-align: center; padding: clamp(1.5rem, 5vw, 3.5rem); border: var(--hairline); border-radius: 1.25rem; background: var(--surface); box-shadow: var(--shadow-lg); }
+.language-welcome__logo { width: 3.5rem; margin: 0 auto .75rem; }
+.language-welcome__brand { margin: 0 0 1rem; color: var(--accent); font-weight: 600; letter-spacing: .08em; }
+.language-welcome h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.8rem); }
+.language-welcome__multilingual { margin: .75rem auto 1.75rem; line-height: 1.8; }
+.language-welcome__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.language-welcome__option { min-height: 5.25rem; display: grid; place-content: center; gap: .15rem; border: 1px solid var(--border); border-radius: .8rem; background: var(--bg); transition: border-color .2s, background .2s, transform .2s; }
+.language-welcome__option:hover { transform: translateY(-2px); border-color: var(--accent); }
+.language-welcome__option.is-selected { border: 2px solid var(--accent); background: color-mix(in srgb, var(--marigold) 10%, var(--surface)); }
+.language-welcome__option span { font-size: 1.2rem; font-weight: 600; }
+.language-welcome__option small { color: var(--text-muted); }
+.language-welcome__continue { width: 100%; min-height: 3.25rem; margin-top: 1.25rem; border: 0; border-radius: .75rem; background: var(--accent); color: var(--on-accent, #fff); font-weight: 700; font-size: 1rem; }
+.language-welcome__note { margin: .8rem 0 0; font-size: .8rem; color: var(--text-muted); }
+@media (max-width: 560px) { .language-welcome__grid { grid-template-columns: repeat(2, 1fr); } .language-welcome__card { padding: 1.25rem; } }
+

@@ -21,6 +21,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import AnimatedButton from './AnimatedButton';
+import useLanguage from '../i18n/useLanguage';
 
 import './SarathiPanel.css';
 
@@ -65,19 +66,19 @@ function isMobileViewport() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
 }
 
-function citationLabel(citation) {
+function citationLabel(citation, language, t) {
   const idParts = citation.id?.split('_') || [];
   if (citation.book === 'Bhagavad Gita' || citation.id?.startsWith('bhagavad-gita_')) {
     const chapter = citation.chapterNumber || idParts[1];
     const verse = citation.verseNumber || idParts[2];
-    return `Bhagavad Gita ${chapter}.${verse}`;
+    return `${language === 'en' ? 'Bhagavad Gita' : t('heroTitleHighlight')} ${chapter}.${verse}`;
   }
 
   if (citation.id?.startsWith('valmiki-ramayana_')) {
     const kanda = citation.kandaNumber || idParts[1];
     const sarga = citation.sarga || idParts[2];
     const shloka = citation.shlokaNumber || idParts[3];
-    return `Valmiki Ramayana ${kanda}.${sarga}.${shloka}`;
+    return `${language === 'en' ? 'Valmiki Ramayana' : t('ramayana')} ${kanda}.${sarga}.${shloka}`;
   }
 
   return citation.book || 'Scripture source';
@@ -95,6 +96,7 @@ export default function SarathiPanel({
   isLoading,
   suggestedPrompts,
 }) {
+  const { language, t } = useLanguage();
   const messagesEndRef = useRef(null);
   const textareaRef    = useRef(null);
   const dragStartRef   = useRef(null);          // { y: number, startH: number }
@@ -247,7 +249,7 @@ export default function SarathiPanel({
         className={panelClasses}
         style={{ '--sarathi-panel-h': `${currentDvh}dvh` }}
         role="complementary"
-        aria-label="Sarathi scripture assistant"
+        aria-label={`Sarathi — ${t('scriptureGuide')}`}
         aria-hidden={!isOpen}
         id="sarathi-panel"
       >
@@ -271,7 +273,7 @@ export default function SarathiPanel({
               <h2 className="sarathi-panel__title">
                 Sarathi <span lang="hi">सारथि</span>
               </h2>
-              <p className="sarathi-panel__subtitle">Scripture guide</p>
+              <p className="sarathi-panel__subtitle">{t('scriptureGuide')}</p>
             </div>
           </div>
 
@@ -324,18 +326,18 @@ export default function SarathiPanel({
                 className={`sarathi-msg sarathi-msg--${message.role}${message.id === 'welcome' ? ' sarathi-msg--welcome' : ''} sarathi-msg-enter`}
               >
                 <p className="sarathi-msg__label">
-                  {message.role === 'user' ? 'You' : 'Sarathi'}
+                  {message.role === 'user' ? t('you') : 'Sarathi'}
                 </p>
                 <div className="sarathi-msg__content">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                   {message.role === 'sarathi' && message.citations?.length > 0 && (
                     <div className="sarathi-msg__sources" aria-label="Sources used for this answer">
-                      <p className="sarathi-msg__sources-label">Sources</p>
+                      <p className="sarathi-msg__sources-label">{t('sources')}</p>
                       <div className="sarathi-msg__source-list">
                         {message.citations.map((citation, index) => (
                           <span className="sarathi-msg__source" key={citation.id || index}>
                             <span className="sarathi-msg__source-marker">[S{index + 1}]</span>
-                            {citationLabel(citation)}
+                            {citationLabel(citation, language, t)}
                           </span>
                         ))}
                       </div>
@@ -354,7 +356,7 @@ export default function SarathiPanel({
                   <div className="shimmer-skeleton short"></div>
                 </div>
                 <div className="sarathi-loader">
-                  <p className="sarathi-loader__text">Looking through the texts…</p>
+                  <p className="sarathi-loader__text">{t('looking')}</p>
                 </div>
               </div>
             )}
@@ -365,7 +367,7 @@ export default function SarathiPanel({
           {/* ── Suggested paths ────────────────────────────────────────── */}
           {showSuggestions && (
             <div className="sarathi-panel__paths">
-              <p className="sarathi-panel__paths-label">Try asking</p>
+              <p className="sarathi-panel__paths-label">{t('tryAsking')}</p>
               <div className="sarathi-panel__paths-list">
                 {suggestedPrompts.map((prompt) => (
                   <AnimatedButton
@@ -399,7 +401,7 @@ export default function SarathiPanel({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={2}
-              placeholder="Ask about a verse or idea"
+              placeholder={t('askPlaceholder')}
               disabled={isLoading}
               aria-label="Your question for Sarathi"
               onKeyDown={(e) => {
@@ -411,7 +413,7 @@ export default function SarathiPanel({
             />
             <div className="sarathi-panel__form-footer">
               <p className="sarathi-panel__grounded-note">
-                Answers include chapter and verse
+                {t('groundedNote')}
               </p>
               <AnimatedButton
                 type="submit"
@@ -419,7 +421,7 @@ export default function SarathiPanel({
                 disabled={isLoading || !question.trim()}
                 id="sarathi-submit-btn"
               >
-                {isLoading ? 'Working…' : 'Ask'}
+                {isLoading ? t('working') : t('ask')}
               </AnimatedButton>
             </div>
           </div>
