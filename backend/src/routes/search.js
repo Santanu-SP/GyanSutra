@@ -19,15 +19,31 @@ const router = express.Router();
  */
 router.get('/', async (req, res, next) => {
   try {
-    const q = (req.query.q || '').trim();
+    if (typeof req.query.q !== 'string') {
+      return res.status(400).json({ error: 'Query must be a string.' });
+    }
+
+    const q = req.query.q.trim();
     if (!q || q.length < 3) {
       return res.status(400).json({ error: 'Query must be at least 3 characters.' });
     }
+    if (q.length > 500) {
+      return res.status(400).json({ error: 'Query is too long (max 500 characters).' });
+    }
 
-    const limit = Math.min(parseInt(req.query.limit || '10', 10), 20);
+    const rawLimit = req.query.limit;
+    let limit = 10;
+    if (rawLimit !== undefined) {
+      if (typeof rawLimit !== 'string' || !/^\d+$/.test(rawLimit)) {
+        return res.status(400).json({ error: 'Limit must be an integer from 1 to 20.' });
+      }
+      limit = Number(rawLimit);
+      if (!Number.isSafeInteger(limit) || limit < 1 || limit > 20) {
+        return res.status(400).json({ error: 'Limit must be an integer from 1 to 20.' });
+      }
+    }
 
-    // Embed as RETRIEVAL_QUERY for better cross-lingual matching
-    const queryVector = await embedText(q, 'RETRIEVAL_QUERY');
+    const queryVector = await embedText(q, { inputType: 'query' });
 
     // Retrieve more than needed so we can filter by a soft threshold
     let results = await findNearestVerses(queryVector, Math.min(limit * 2, 20));
@@ -121,7 +137,16 @@ router.get('/', async (req, res, next) => {
     const SEARCH_THRESHOLD = hasDevanagari ? 0.35 : 0.55;
     const filtered = results
       .filter(v => v.similarity >= SEARCH_THRESHOLD)
-      .slice(0, limit);
+      .slice(0, limit)
+      .map((verse) => {
+        const {
+          comments: _comments,
+          detailedExplanations: _detailedExplanations,
+          wordMeanings: _wordMeanings,
+          ...summary
+        } = verse;
+        return summary;
+      });
 
     res.json({
       query: q,

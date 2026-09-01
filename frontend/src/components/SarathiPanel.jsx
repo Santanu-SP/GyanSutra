@@ -65,6 +65,24 @@ function isMobileViewport() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
 }
 
+function citationLabel(citation) {
+  const idParts = citation.id?.split('_') || [];
+  if (citation.book === 'Bhagavad Gita' || citation.id?.startsWith('bhagavad-gita_')) {
+    const chapter = citation.chapterNumber || idParts[1];
+    const verse = citation.verseNumber || idParts[2];
+    return `Bhagavad Gita ${chapter}.${verse}`;
+  }
+
+  if (citation.id?.startsWith('valmiki-ramayana_')) {
+    const kanda = citation.kandaNumber || idParts[1];
+    const sarga = citation.sarga || idParts[2];
+    const shloka = citation.shlokaNumber || idParts[3];
+    return `Valmiki Ramayana ${kanda}.${sarga}.${shloka}`;
+  }
+
+  return citation.book || 'Scripture source';
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function SarathiPanel({
@@ -310,6 +328,19 @@ export default function SarathiPanel({
                 </p>
                 <div className="sarathi-msg__content">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
+                  {message.role === 'sarathi' && message.citations?.length > 0 && (
+                    <div className="sarathi-msg__sources" aria-label="Sources used for this answer">
+                      <p className="sarathi-msg__sources-label">Sources</p>
+                      <div className="sarathi-msg__source-list">
+                        {message.citations.map((citation, index) => (
+                          <span className="sarathi-msg__source" key={citation.id || index}>
+                            <span className="sarathi-msg__source-marker">[S{index + 1}]</span>
+                            {citationLabel(citation)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

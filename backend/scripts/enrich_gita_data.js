@@ -23,6 +23,9 @@ function fetchJson(url) {
       });
     });
     req.on('error', reject);
+    req.setTimeout(15000, () => {
+      req.destroy(new Error(`Request timed out while fetching ${url}`));
+    });
   });
 }
 

@@ -10,7 +10,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { batchWrite } = require('../src/services/firestore');
 const { embedText } = require('../src/services/embedding');
 const { SOURCES } = require('../src/data/sources');
-const { FieldValue } = require('firebase-admin/firestore');
+const { FieldValue } = require('@google-cloud/firestore');
 const gitaData = require('../data/gita.json');
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -84,12 +84,9 @@ async function main() {
 
         const embeddingText = `Chapter ${ch.number}, Verse ${vNum}\n${sanskritText}\n${transEng}\n${transHindi}`;
 
-        let vector;
-        if (SKIP_EMBED) {
-          vector = new Array(384).fill(0);
-        } else {
-          vector = await embedText(embeddingText);
-        }
+        const vector = SKIP_EMBED
+          ? null
+          : await embedText(embeddingText, { inputType: 'passage' });
 
         verseItems.push({
           id: `${SOURCE_ID}_${ch.number}_${vNum}`,
@@ -105,7 +102,7 @@ async function main() {
             detailedExplanations: localVerse.detailed_explanations || [], // <--- Injecting the new rich explanations here!
             sourceText: SOURCE.title,
             tags: [],
-            embedding: FieldValue.vector(vector),
+            embedding: vector ? FieldValue.vector(vector) : null,
           },
         });
       } catch (err) {

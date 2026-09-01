@@ -1,48 +1,56 @@
 /**
- * Firestore Admin SDK wrapper.
- * Initializes once and exports typed collection helpers.
- * The Admin SDK is called only from the Express server - never from the browser.
+ * Firestore server client wrapper.
+ * Initializes once and exports collection helpers for trusted backend use.
  */
 
-const admin = require('firebase-admin');
+const path = require('path');
+const { FieldValue, Firestore } = require('@google-cloud/firestore');
+
+const configuredDimensions = Number(process.env.EMBEDDING_DIMENSIONS);
+const EMBEDDING_DIMENSIONS = Number.isSafeInteger(configuredDimensions) && configuredDimensions > 0
+  ? Math.min(configuredDimensions, 2048)
+  : 384;
 
 // ── Initialise once ───────────────────────────────────────────────────────────
 let db;
 
 function initFirestore() {
-  if (admin.apps.length > 0) {
-    db = admin.apps[0].firestore();
-    return db;
-  }
-
-  let credential;
+  const settings = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    ignoreUndefinedProperties: true,
+  };
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    credential = admin.credential.cert(serviceAccount);
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    } catch (_error) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON.');
+    }
+
+    if (!serviceAccount.client_email || !serviceAccount.private_key) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is missing required credential fields.');
+    }
+
+    settings.projectId = settings.projectId || serviceAccount.project_id;
+    settings.credentials = {
+      client_email: serviceAccount.client_email,
+      private_key: serviceAccount.private_key,
+    };
   } else if (
-    process.env.NODE_ENV !== 'production' &&
-    process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+    process.env.NODE_ENV !== 'production'
+    && process.env.FIREBASE_SERVICE_ACCOUNT_PATH
   ) {
-    const serviceAccount = require(
-      require('path').resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)
-    );
-    credential = admin.credential.cert(serviceAccount);
+    settings.keyFilename = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
   } else {
     throw new Error(
       'Firebase credentials not found. Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH.'
     );
   }
 
-  admin.initializeApp({
-    credential,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-  });
+  db = new Firestore(settings);
 
-  db = admin.firestore();
-  db.settings({ ignoreUndefinedProperties: true });
-
-  console.log('[Firestore] Initialised successfully.');
+  console.log('[Firestore] Initialized successfully.');
   return db;
 }
 
@@ -101,17 +109,47 @@ async function batchWrite(collectionName, items) {
  * Requires a vector index on `verses.embedding` - create it in Firebase Console or via CLI:
  *   firebase firestore:indexes
  *
- * @param {number[]} queryVector - 768-dimensional embedding
+ * @param {number[]} queryVector - 384-dimensional embedding
  * @param {number} topK - how many results to retrieve
  * @returns {Promise<Array<{id, similarity, chapterNumber, verseNumber, sanskrit, transliteration, translationEnglish, translationHindi, wordMeanings, tags}>>}
  */
 async function findNearestVerses(queryVector, topK = 8) {
-  const versesCol = collections.verses();
+  if (
+    !Array.isArray(queryVector)
+    || queryVector.length !== EMBEDDING_DIMENSIONS
+    || queryVector.some((value) => !Number.isFinite(value))
+    || queryVector.every((value) => value === 0)
+  ) {
+    throw new TypeError(
+      `Query vector must contain exactly ${EMBEDDING_DIMENSIONS} finite, non-zero values.`,
+    );
+  }
 
-  const vectorQuery = versesCol.findNearest({
+  const safeTopK = Number.isInteger(topK) ? Math.min(Math.max(topK, 1), 20) : 8;
+  const versesQuery = collections.verses().select(
+    'chapterNumber',
+    'verseNumber',
+    'book',
+    'kanda',
+    'kandaNumber',
+    'sarga',
+    'shlokaNumber',
+    'sanskrit',
+    'transliteration',
+    'translationEnglish',
+    'translationHindi',
+    'explanationEnglish',
+    'comments',
+    'wordMeanings',
+    'detailedExplanations',
+    'tags',
+    '_distance',
+  );
+
+  const vectorQuery = versesQuery.findNearest({
     vectorField: 'embedding',
-    queryVector: admin.firestore.FieldValue.vector(queryVector),
-    limit: topK,
+    queryVector: FieldValue.vector(queryVector),
+    limit: safeTopK,
     distanceMeasure: 'COSINE',
     distanceResultField: '_distance', // Firestore tracks cosine distance here
   });

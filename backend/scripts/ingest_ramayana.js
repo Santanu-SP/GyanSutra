@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
-const { db, setDoc, batchWrite } = require('../src/services/firestore');
+const { batchWrite } = require('../src/services/firestore');
 const { embedText } = require('../src/services/embedding');
+const { FieldValue } = require('@google-cloud/firestore');
 
 // CLI flags
 const SKIP_EMBED = process.argv.includes('--skip-embed');
@@ -11,7 +12,7 @@ const KANDA_FILTER = (() => {
   return idx !== -1 ? parseInt(process.argv[idx + 1], 10) : null;
 })();
 
-if (SKIP_EMBED) console.log('[INFO] --skip-embed: storing zero-vectors, skipping AI embedding calls.');
+if (SKIP_EMBED) console.log('[INFO] --skip-embed: omitting vectors and skipping local embedding work.');
 if (KANDA_FILTER) console.log(`[INFO] --kanda ${KANDA_FILTER}: only ingesting Kanda #${KANDA_FILTER}.`);
 
 // Map Kanda names to numbers
@@ -140,11 +141,10 @@ async function run() {
     ].filter(Boolean).join(' | ');
 
     try {
-      if (SKIP_EMBED) {
-        verseData.embedding = new Array(384).fill(0);
-      } else {
-        verseData.embedding = await embedText(embedStr);
-      }
+      const vector = SKIP_EMBED
+        ? null
+        : await embedText(embedStr, { inputType: 'passage' });
+      verseData.embedding = vector ? FieldValue.vector(vector) : null;
 
       batchData.push({ id: docId, data: verseData });
       successCount++;
@@ -175,4 +175,7 @@ async function run() {
   console.log(`Missing Hindi Translations: All (Left null for manual review)`);
 }
 
-run().catch(console.error);
+run().catch((error) => {
+  console.error('[FATAL] Ramayana ingestion failed:', error.message);
+  process.exitCode = 1;
+});

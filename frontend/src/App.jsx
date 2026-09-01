@@ -188,20 +188,31 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      // Build history from existing messages (exclude the welcome message and the one we just added).
-      // Only send the last 6 messages (3 exchanges) - enough for follow-ups without confusion.
-      const history = [...messages, userMessage]
+      // Send only prior turns. The current question is already a separate request field.
+      const history = messages
         .filter(m => m.id !== 'welcome')
-        .slice(-6)
+        .slice(-4)
         .map(m => ({ role: m.role, content: m.content }));
 
-      const result = await askQuestion(trimmed, history);
+      // Preserve the previous source IDs separately from prose. Referential
+      // follow-ups such as "explain the second one" can then reuse the exact
+      // evidence without another ambiguous vector search.
+      const contextIds = [...messages]
+        .reverse()
+        .find(m => m.role === 'sarathi' && m.citations?.length)
+        ?.citations
+        .map(citation => citation.id)
+        .filter(Boolean)
+        .slice(0, 4) || [];
+
+      const result = await askQuestion(trimmed, history, contextIds);
       setMessages((cur) => [
         ...cur,
         {
           id: `${Date.now()}-sarathi`,
           role: 'sarathi',
           content: result.answer || 'No answer was returned.',
+          citations: result.citations || [],
         },
       ]);
     } catch (error) {

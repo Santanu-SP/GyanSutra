@@ -29,7 +29,7 @@ export const getChapterVerses = (id) => request(`/chapters/${id}/verses`);
 
 // ── Sources ───────────────────────────────────────────────────────────────────
 export const getSources = () => request('/sources');
-export const getSourceVerses = (sourceId) => request(`/verses/${sourceId}`);
+export const getSourceVerses = (sourceId) => request(`/verses/source/${sourceId}`);
 export const getRamayanaSarga = (kandaNum, sargaNum) => request(`/verses/ramayana/${kandaNum}/${sargaNum}`);
 
 // ── Verses ────────────────────────────────────────────────────────────────────
@@ -41,10 +41,10 @@ export const searchVerses = (q, limit = 10) =>
   request(`/search?q=${encodeURIComponent(q)}&limit=${limit}`);
 
 // ── Ask (RAG) ─────────────────────────────────────────────────────────────────
-export const askQuestion = (question, history = []) =>
+export const askQuestion = (question, history = [], contextIds = []) =>
   request('/ask', {
     method: 'POST',
-    body: JSON.stringify({ question, history }),
+    body: JSON.stringify({ question, history, contextIds }),
   });
 
 // ── Recommendations ───────────────────────────────────────────────────────────

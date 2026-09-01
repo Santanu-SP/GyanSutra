@@ -3,6 +3,13 @@ const { collections } = require('../services/firestore');
 
 const router = express.Router();
 
+function isValidChapterId(id) {
+  const match = /^chapter_(\d{1,2})$/.exec(id || '');
+  if (!match) return false;
+  const chapterNumber = Number(match[1]);
+  return chapterNumber >= 1 && chapterNumber <= 18;
+}
+
 /**
  * GET /api/chapters
  * Returns all 18 chapters, ordered by chapter number.
@@ -23,6 +30,9 @@ router.get('/', async (_req, res, next) => {
  */
 router.get('/:id', async (req, res, next) => {
   try {
+    if (!isValidChapterId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid chapter ID.' });
+    }
     const doc = await collections.chapters().doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Chapter not found.' });
     res.json({ id: doc.id, ...doc.data() });
@@ -38,6 +48,9 @@ router.get('/:id', async (req, res, next) => {
  */
 router.get('/:id/verses', async (req, res, next) => {
   try {
+    if (!isValidChapterId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid chapter ID.' });
+    }
     // Chapter IDs are "chapter_1", "chapter_2", etc.
     // Verses store chapterNumber as an integer.
     const chapterDoc = await collections.chapters().doc(req.params.id).get();
@@ -51,8 +64,8 @@ router.get('/:id/verses', async (req, res, next) => {
 
     const verses = snap.docs.map(doc => {
       const data = doc.data();
-      delete data.embedding; // Strip vector - client never needs it
-      return { id: doc.id, ...data };
+      const { embedding: _embedding, ...safeData } = data;
+      return { id: doc.id, ...safeData };
     });
 
     res.json({ chapterNumber: number, verses });

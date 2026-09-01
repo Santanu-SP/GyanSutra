@@ -16,11 +16,26 @@ const sitemapRoute = require('./routes/sitemap');
 const robotsRoute = require('./routes/robots');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+
+function parsePositiveInteger(value, fallback, maximum = Number.MAX_SAFE_INTEGER) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0
+    ? Math.min(parsed, maximum)
+    : fallback;
+}
+
+const trustProxyHops = parsePositiveInteger(
+  process.env.TRUST_PROXY_HOPS,
+  process.env.NODE_ENV === 'production' ? 1 : 0,
+  10,
+);
+if (trustProxyHops > 0) app.set('trust proxy', trustProxyHops);
 
 // ── Security & Logging ────────────────────────────────────────────────────────
 app.use(helmet());
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+}
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const defaultOrigins = [
@@ -47,7 +62,10 @@ app.use(cors({
     if (allowedOrigins.includes('*') || allowedOrigins.includes(cleanOrigin)) {
       return callback(null, true);
     }
-    return callback(new Error(`CORS: origin ${origin} not allowed`));
+    const error = new Error('Origin is not allowed by CORS.');
+    error.status = 403;
+    error.code = 'CORS_ORIGIN_DENIED';
+    return callback(error);
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -70,7 +88,7 @@ const generalLimiter = rateLimit({
 // Stricter limiter for /ask (embedding + generation calls are expensive)
 const askLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: parseInt(process.env.ASK_RATE_LIMIT_MAX || '20', 10),
+  max: parsePositiveInteger(process.env.ASK_RATE_LIMIT_MAX, 20, 200),
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many questions - please wait a moment before asking again.' },
@@ -92,7 +110,12 @@ app.use(robotsRoute);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.set('Cache-Control', 'no-store');
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(process.uptime()),
+  });
 });
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
@@ -101,17 +124,25 @@ app.use((_req, res) => {
 });
 
 // ── Global Error Handler ──────────────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-  const status = err.status || 500;
-  if (process.env.NODE_ENV !== 'production') {
+app.use((err, _req, res, next) => {
+  if (res.headersSent) return next(err);
+
+  const rawStatus = Number(err.status || err.statusCode);
+  const status = rawStatus >= 400 && rawStatus < 600 ? rawStatus : 500;
+  const isInvalidJson = err.type === 'entity.parse.failed';
+  const responseStatus = isInvalidJson ? 400 : status;
+
+  if (responseStatus >= 500) {
     console.error('[ERROR]', err);
   }
-  res.status(status).json({ error: err.message || 'Internal server error.' });
-});
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`[Gyan Sutra API] Running on port ${PORT} (${process.env.NODE_ENV || 'development'})`);
+  const message = isInvalidJson
+    ? 'Request body contains invalid JSON.'
+    : responseStatus >= 500 && !err.expose
+      ? 'Internal server error.'
+      : (err.message || 'Request failed.');
+
+  return res.status(responseStatus).json({ error: message });
 });
 
 module.exports = app;

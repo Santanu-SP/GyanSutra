@@ -3,7 +3,7 @@ services:
     name: gyansutra-api
     runtime: node
     buildCommand: npm install
-    startCommand: node src/app.js
+    startCommand: node src/server.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -12,19 +12,49 @@ services:
         value: 3001
       - key: GEMINI_API_KEY
         sync: false   # Set manually in Render dashboard - never committed
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false   # Paste the entire service account JSON here
       - key: ALLOWED_ORIGINS
         sync: false   # Set to your Cloudflare Pages URL e.g. https://gyansutra.pages.dev
-      - key: GEMINI_EMBEDDING_MODEL
-        value: text-embedding-004
-      - key: GEMINI_GENERATION_MODEL
-        value: gemini-2.0-flash
+      - key: GEMINI_GENERATION_MODELS
+        value: gemini-3.5-flash,gemini-3.1-flash-lite
+      - key: GROQ_MODELS
+        value: openai/gpt-oss-20b
+      - key: RAG_PROVIDER_ORDER
+        value: gemini,groq,openrouter
+      - key: GEMINI_REASONING_EFFORT
+        value: minimal
       - key: RAG_SIMILARITY_THRESHOLD
-        value: "0.72"
+        value: "0.55"
       - key: RAG_TOP_K
-        value: "8"
+        value: "12"
+      - key: RAG_TOP_CONTEXT
+        value: "4"
+      - key: RAG_MAX_MODEL_ATTEMPTS
+        value: "2"
+      - key: RAG_MODEL_TIMEOUT_MS
+        value: "9000"
+      - key: RAG_GENERATION_DEADLINE_MS
+        value: "16000"
+      - key: RAG_MAX_OUTPUT_TOKENS
+        value: "1200"
+      - key: RAG_MAX_CONCURRENT_GENERATIONS
+        value: "2"
+      - key: RAG_CACHE_ENABLED
+        value: "true"
+      - key: RAG_CACHE_MAX_ENTRIES
+        value: "250"
+      - key: RAG_CORPUS_VERSION
+        value: gita-ramayana-v1
+      - key: EMBEDDING_PREWARM
+        value: "true"
       - key: ASK_RATE_LIMIT_MAX
         value: "20"
+      - key: TRUST_PROXY_HOPS
+        value: "1"
