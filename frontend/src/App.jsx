@@ -24,6 +24,7 @@ import Footer from './components/Footer';
 import NativeAppBridge from './components/NativeAppBridge';
 import { recoverFromChunkError } from './utils/chunkRecovery';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import AppControls from './components/AppControls';
 import useLanguage from './i18n/useLanguage';
 
 import './app.css';
@@ -280,8 +281,9 @@ export default function App() {
               <Link to="/ramayana" aria-current={isRamayanaRoute ? 'page' : undefined} className={`gs-header__nav-link${isRamayanaRoute ? ' gs-header__nav-link--active' : ''}`}>{t('ramayana')}</Link>
             </nav>
 
-            {/* Utility actions stay in the header on every screen. */}
-            <div className="gs-header__actions">
+            {/* Desktop utilities. Mobile keeps a calmer app bar and moves
+                reading controls into a native-style settings sheet. */}
+            <div className="gs-header__actions gs-header__actions--desktop">
               <Link
                 to="/search"
                 className="gs-header__search-action"
@@ -304,6 +306,22 @@ export default function App() {
               </AnimatedButton>
               <LanguageSwitcher />
               <ThemeToggle />
+            </div>
+
+            <div className="gs-header__actions gs-header__actions--mobile">
+              <Link
+                to="/search"
+                className="gs-header__search-action"
+                aria-label={t('search')}
+                aria-current={location.pathname === '/search' ? 'page' : undefined}
+                title={t('search')}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path strokeLinecap="round" d="M15.5 15.5L21 21" />
+                </svg>
+              </Link>
+              <AppControls />
             </div>
           </div>
         </div>
@@ -382,6 +400,20 @@ export default function App() {
           </svg>
           {t('ramayana')}
         </Link>
+
+        <button
+          type="button"
+          className={`gs-bottom-nav__item${isSarathiOpen ? ' gs-bottom-nav__item--active' : ''}`}
+          aria-label={t('askSarathi')}
+          aria-pressed={isSarathiOpen}
+          onClick={() => setIsSarathiOpen(true)}
+        >
+          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.2c0 0-5.25 5.45-5.25 10.15a5.25 5.25 0 0010.5 0C17.25 8.65 12 3.2 12 3.2z" />
+            <path strokeLinecap="round" d="M12 9.15c0 0-2.05 2.2-2.05 4.1a2.05 2.05 0 004.1 0c0-1.9-2.05-4.1-2.05-4.1z" />
+          </svg>
+          <span>Sarathi</span>
+        </button>
       </nav>
     </div>
   );

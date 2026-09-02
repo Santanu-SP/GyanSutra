@@ -7,6 +7,7 @@
   },
   "android": {
     "allowMixedContent": false,
+    "zoomEnabled": true,
     "backgroundColor": "#1C1420"
   },
   "plugins": {

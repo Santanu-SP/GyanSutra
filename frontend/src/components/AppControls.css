@@ -1,0 +1,252 @@
+.app-controls__trigger,
+.app-controls__close {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-controls__trigger:active,
+.app-controls__close:active {
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.app-controls__trigger svg,
+.app-controls__close svg {
+  width: 22px;
+  height: 22px;
+}
+
+.app-controls__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  background: rgba(10, 7, 12, 0.52);
+  animation: appControlsFade 160ms ease-out both;
+}
+
+.app-controls__sheet {
+  width: min(100%, 34rem);
+  max-height: calc(100dvh - 1.5rem - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
+  overflow-y: auto;
+  padding: 0.5rem 1.25rem calc(1.25rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-bottom: 0;
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: var(--bg-surface);
+  box-shadow: 0 -20px 60px rgba(10, 7, 12, 0.24);
+  animation: appControlsRise 220ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.app-controls__handle {
+  width: 2.25rem;
+  height: 0.25rem;
+  margin: 0.2rem auto 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 42%, transparent);
+}
+
+.app-controls__header {
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 34%, transparent);
+}
+
+.app-controls__eyebrow {
+  margin: 0 0 0.15rem;
+  color: var(--accent-hover);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.app-controls__header h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-controls__group {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.app-controls__label-row,
+.app-controls__row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.app-controls__label-row {
+  justify-content: space-between;
+}
+
+.app-controls__label-row > div,
+.app-controls__row-copy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app-controls__label {
+  color: var(--text-primary);
+  font-size: 0.94rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.app-controls__hint {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.app-controls__label-row output {
+  color: var(--accent-hover);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.app-controls__stepper {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-controls__stepper button {
+  height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  border-radius: 0.8rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: 650 0.82rem/1 var(--font-body);
+}
+
+.app-controls__stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.app-controls__scale-track {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.app-controls__scale-track span {
+  height: 0.25rem;
+  flex: 1;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+}
+
+.app-controls__scale-track span.is-filled {
+  background: var(--accent);
+}
+
+.app-controls__row {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.8rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.app-controls__row-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  color: var(--accent-hover);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.app-controls__row select {
+  max-width: 7.5rem;
+  min-height: 2.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: 600 0.86rem/1 var(--font-body);
+  text-align: right;
+}
+
+.app-controls__switch {
+  width: 2.75rem;
+  height: 1.65rem;
+  display: flex;
+  align-items: center;
+  padding: 0.18rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 28%, transparent);
+  transition: background var(--transition-fast);
+}
+
+.app-controls__switch span {
+  width: 1.28rem;
+  height: 1.28rem;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 4px rgba(10, 7, 12, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.app-controls__switch.is-on {
+  background: var(--accent);
+}
+
+.app-controls__switch.is-on span {
+  transform: translateX(1.08rem);
+}
+
+@keyframes appControlsFade {
+  from { opacity: 0; }
+}
+
+@keyframes appControlsRise {
+  from { transform: translateY(1.5rem); opacity: 0.85; }
+}
+
+@media (min-width: 768px) {
+  .app-controls__trigger,
+  .app-controls__scrim {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-controls__scrim,
+  .app-controls__sheet {
+    animation: none;
+  }
+}
