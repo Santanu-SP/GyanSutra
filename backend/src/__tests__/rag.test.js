@@ -73,7 +73,7 @@ describe('bounded grounded RAG', () => {
       reason: 'NO_AI_PROVIDER',
     });
     expect(result.citations.map((citation) => citation.id)).toEqual(['bhagavad-gita_2_47']);
-    expect(result.answer).toContain('presenting only the retrieved evidence');
+    expect(result.answer).toContain('passages most relevant to your question');
     expect(mockCompletionCreate).not.toHaveBeenCalled();
   });
 
@@ -81,8 +81,8 @@ describe('bounded grounded RAG', () => {
     const { askRag } = loadRag();
     const result = await askRag('Explain duty', [], [], 'bn');
 
-    expect(result.answer).toContain('ব্যাখ্যা পরিষেবা');
-    expect(result.answer).not.toContain('The explanation service');
+    expect(result.answer).toContain('সবচেয়ে প্রাসঙ্গিক অংশগুলি');
+    expect(result.answer).not.toContain('ব্যাখ্যা পরিষেবা');
   });
 
   test('does not spend model credits when retrieval has no strong evidence', async () => {
@@ -197,8 +197,36 @@ describe('bounded grounded RAG', () => {
       reason: 'grounding_validation_failed',
     });
     expect(result.answer).not.toContain('18 Verse 66');
-    expect(result.answer).toContain('retrieved evidence');
+    expect(result.answer).toContain('passages most relevant to your question');
     consoleSpy.mockRestore();
+  });
+
+  test('uses a backup Gemini model after a temporary first-model failure', async () => {
+    const temporaryError = Object.assign(new Error('Temporary upstream failure'), { status: 503 });
+    mockCompletionCreate
+      .mockRejectedValueOnce(temporaryError)
+      .mockResolvedValueOnce({
+        choices: [{
+          finish_reason: 'stop',
+          message: {
+            content: '### 📖 The Teaching\nAct without attachment.\n\n### 🕉️ Key Verse(s)\n**Bhagavad Gita, Chapter 2, Verse 47** [S1] supports this.\n\n### 🌿 Practical Takeaway\nFocus on sincere effort.',
+          },
+        }],
+        usage: {},
+      });
+    const { askRag } = loadRag({
+      GEMINI_API_KEY: 'test-key',
+      RAG_MAX_MODEL_ATTEMPTS: '2',
+    });
+
+    const result = await askRag('What does the Gita teach about duty?');
+
+    expect(result).toMatchObject({ degraded: false, reason: 'generated' });
+    expect(mockCompletionCreate).toHaveBeenCalledTimes(2);
+    expect(mockCompletionCreate.mock.calls.map(([request]) => request.model)).toEqual([
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
+    ]);
   });
 
   test('uses independent providers before second models from one quota pool', () => {

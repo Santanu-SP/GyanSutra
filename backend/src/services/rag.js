@@ -58,12 +58,12 @@ const MAX_CONTEXT_CHARS = integerFromEnv('RAG_MAX_CONTEXT_CHARS', 7_000, 2_000, 
 const MAX_COMMENTARIES = integerFromEnv('RAG_MAX_COMMENTARIES', 2, 0, 4);
 const MAX_COMMENTARY_CHARS = integerFromEnv('RAG_MAX_COMMENTARY_CHARS', 650, 100, 1_500);
 const MAX_OUTPUT_TOKENS = integerFromEnv('RAG_MAX_OUTPUT_TOKENS', 1_200, 256, 2_000);
-const MODEL_TIMEOUT_MS = integerFromEnv('RAG_MODEL_TIMEOUT_MS', 9_000, 1_000, 30_000);
-const GENERATION_DEADLINE_MS = integerFromEnv('RAG_GENERATION_DEADLINE_MS', 16_000, 2_000, 45_000);
+const MODEL_TIMEOUT_MS = integerFromEnv('RAG_MODEL_TIMEOUT_MS', 10_000, 1_000, 30_000);
+const GENERATION_DEADLINE_MS = integerFromEnv('RAG_GENERATION_DEADLINE_MS', 24_000, 2_000, 45_000);
 const RETRIEVAL_TIMEOUT_MS = integerFromEnv('RAG_RETRIEVAL_TIMEOUT_MS', 8_000, 1_000, 30_000);
-const MAX_MODEL_ATTEMPTS = integerFromEnv('RAG_MAX_MODEL_ATTEMPTS', 2, 1, 3);
+const MAX_MODEL_ATTEMPTS = integerFromEnv('RAG_MAX_MODEL_ATTEMPTS', 3, 1, 3);
 const MAX_CONCURRENT_GENERATIONS = integerFromEnv('RAG_MAX_CONCURRENT_GENERATIONS', 2, 1, 20);
-const MODEL_QUEUE_TIMEOUT_MS = integerFromEnv('RAG_MODEL_QUEUE_TIMEOUT_MS', 1_200, 0, 10_000);
+const MODEL_QUEUE_TIMEOUT_MS = integerFromEnv('RAG_MODEL_QUEUE_TIMEOUT_MS', 5_000, 0, 10_000);
 const CACHE_ENABLED = booleanFromEnv('RAG_CACHE_ENABLED', true);
 const CACHE_MAX_ENTRIES = integerFromEnv('RAG_CACHE_MAX_ENTRIES', 250, 10, 2_000);
 const RESPONSE_CACHE_TTL_MS = integerFromEnv('RAG_RESPONSE_CACHE_TTL_SECONDS', 21_600, 30, 604_800) * 1_000;
@@ -237,6 +237,11 @@ function markProviderFailure(provider, error) {
   providerCircuits.set(provider, { failures, blockedUntil: Date.now() + delayMs });
 }
 
+function isTerminalProviderError(error) {
+  const status = Number(error?.status || error?.statusCode);
+  return error?.code === 'MODEL_OUTPUT_LIMIT' || [400, 401, 403, 404, 422, 429].includes(status);
+}
+
 function releaseGenerationSlot() {
   activeGenerations = Math.max(0, activeGenerations - 1);
   while (generationQueue.length > 0 && activeGenerations < MAX_CONCURRENT_GENERATIONS) {
@@ -337,12 +342,24 @@ async function callLlmWithFallback(chatMessages) {
   const release = await acquireGenerationSlot();
   const startedAt = Date.now();
   const attemptLog = [];
+  const providersTriedThisRequest = new Set();
+  const terminalProviders = new Set();
   try {
     for (const attempt of attempts) {
-      if (circuitOpen(attempt.provider)) {
+      if (terminalProviders.has(attempt.provider)) {
+        attemptLog.push({ provider: attempt.provider, model: attempt.model, outcome: 'terminal_error' });
+        continue;
+      }
+
+      // A circuit opened by an earlier request should protect the service.
+      // A transient failure in this request should still allow its backup
+      // model to answer, instead of making a first-time visitor see fallback
+      // evidence after one failed network call.
+      if (!providersTriedThisRequest.has(attempt.provider) && circuitOpen(attempt.provider)) {
         attemptLog.push({ provider: attempt.provider, model: attempt.model, outcome: 'circuit_open' });
         continue;
       }
+      providersTriedThisRequest.add(attempt.provider);
 
       const remainingMs = GENERATION_DEADLINE_MS - (Date.now() - startedAt);
       if (remainingMs < 500) break;
@@ -362,12 +379,12 @@ async function callLlmWithFallback(chatMessages) {
       }
 
       markProviderFailure(attempt.provider, result.error);
+      if (isTerminalProviderError(result.error)) terminalProviders.add(attempt.provider);
       attemptLog.push({
         provider: attempt.provider,
         model: attempt.model,
         outcome: result.error?.code || Number(result.error?.status) || 'failed',
       });
-      if (result.error?.code === 'MODEL_OUTPUT_LIMIT') break;
     }
   } finally {
     release();
@@ -465,12 +482,12 @@ function sourceMeaning(verse, language = 'en') {
 }
 
 const FALLBACK_COPY = {
-  en: { teaching: 'The Teaching', key: 'Key Verse(s)', takeaway: 'Practical Takeaway', noEvidence: 'I could not find sufficiently relevant support for this question in the scripture library. Rather than inventing an answer, I am stopping here. Please add a topic, character, kanda, chapter, or verse reference.', example: 'For example: “Explain Gita 2.47” or “What does Sundara Kanda teach about Hanuman’s courage?”', direct: 'Here is the requested source passage.', limited: 'The explanation service is temporarily limited, so I am presenting only the retrieved evidence.', read: 'Read these passages in their surrounding chapter or sarga. When generation is available, Sarathi can explain them further while staying within this evidence.' },
-  hi: { teaching: 'शिक्षा', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक सुझाव', noEvidence: 'मुझे इस प्रश्न के लिए पुस्तकालय में पर्याप्त संबंधित श्लोक नहीं मिला। अनुमान लगाने के बजाय मैं यहीं रुक रहा हूँ। कृपया विषय, पात्र, काण्ड, अध्याय या श्लोक का संदर्भ जोड़ें।', example: 'उदाहरण: “गीता 2.47 का अर्थ समझाइए” या “सुन्दरकाण्ड में हनुमान के धैर्य से क्या सीख मिलती है?”', direct: 'अनुरोधित मूल स्रोत नीचे दिया गया है।', limited: 'व्याख्या सेवा अभी सीमित है, इसलिए मैं केवल प्राप्त प्रमाण प्रस्तुत कर रहा हूँ।', read: 'इन श्लोकों को उनके अध्याय या सर्ग के संदर्भ में पढ़ें। सेवा उपलब्ध होने पर सारथि इन्हीं प्रमाणों के आधार पर विस्तृत व्याख्या देगा।' },
-  bn: { teaching: 'শিক্ষা', key: 'মূল শ্লোক', takeaway: 'ব্যবহারিক শিক্ষা', noEvidence: 'এই প্রশ্নের জন্য শাস্ত্র গ্রন্থাগারে যথেষ্ট প্রাসঙ্গিক সমর্থন পাইনি। অনুমান না করে এখানেই থামছি। অনুগ্রহ করে বিষয়, চরিত্র, কাণ্ড, অধ্যায় বা শ্লোকের উল্লেখ যোগ করুন।', example: 'উদাহরণ: “গীতা ২.৪৭ ব্যাখ্যা করুন”।', direct: 'অনুরোধ করা মূল পাঠটি নিচে দেওয়া হলো।', limited: 'ব্যাখ্যা পরিষেবা এখন সীমিত, তাই শুধু পাওয়া প্রমাণ দেখাচ্ছি।', read: 'এই অংশগুলি সংশ্লিষ্ট অধ্যায় বা সর্গের সঙ্গে পড়ুন। পরিষেবা উপলব্ধ হলে সারথি এই প্রমাণের ভিত্তিতে বিস্তারিত ব্যাখ্যা করবে।' },
-  mr: { teaching: 'शिकवण', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक बोध', noEvidence: 'या प्रश्नासाठी धर्मग्रंथालयात पुरेसा संबंधित आधार मिळाला नाही. अंदाज न करता मी येथे थांबतो. कृपया विषय, पात्र, कांड, अध्याय किंवा श्लोकाचा संदर्भ जोडा.', example: 'उदाहरण: “गीता २.४७ समजावून सांगा”.', direct: 'विनंती केलेला मूळ पाठ खाली दिला आहे.', limited: 'स्पष्टीकरण सेवा सध्या मर्यादित आहे, म्हणून केवळ मिळालेला आधार देत आहे.', read: 'हे उतारे त्यांच्या अध्याय किंवा सर्गाच्या संदर्भात वाचा. सेवा उपलब्ध झाल्यावर सारथी याच आधारावर सविस्तर स्पष्टीकरण देईल.' },
-  te: { teaching: 'బోధన', key: 'ముఖ్య శ్లోకాలు', takeaway: 'ఆచరణాత్మక సారాంశం', noEvidence: 'ఈ ప్రశ్నకు శాస్త్ర గ్రంథాలయంలో తగిన సంబంధిత ఆధారం దొరకలేదు. ఊహించి చెప్పకుండా ఇక్కడే ఆగుతున్నాను. దయచేసి విషయం, పాత్ర, కాండ, అధ్యాయం లేదా శ్లోక సూచనను జోడించండి.', example: 'ఉదాహరణ: “గీత 2.47ను వివరించండి”.', direct: 'మీరు కోరిన మూల పాఠం క్రింద ఉంది.', limited: 'వివరణ సేవ ప్రస్తుతం పరిమితంగా ఉంది, కాబట్టి లభించిన ఆధారాన్ని మాత్రమే అందిస్తున్నాను.', read: 'ఈ భాగాలను వాటి అధ్యాయం లేదా సర్గ సందర్భంలో చదవండి. సేవ అందుబాటులో ఉన్నప్పుడు సారథి ఈ ఆధారం మేరకు మరింత వివరించగలడు.' },
-  ta: { teaching: 'போதனை', key: 'முக்கிய சுலோகங்கள்', takeaway: 'நடைமுறைப் பயன்', noEvidence: 'இந்தக் கேள்விக்குப் போதுமான தொடர்புடைய ஆதாரம் சாஸ்திர நூலகத்தில் கிடைக்கவில்லை. ஊகித்துக் கூறாமல் இங்கே நிறுத்துகிறேன். தலைப்பு, பாத்திரம், காண்டம், அத்தியாயம் அல்லது சுலோகக் குறிப்பைச் சேர்க்கவும்.', example: 'உதாரணம்: “கீதை 2.47ஐ விளக்கவும்”.', direct: 'நீங்கள் கேட்ட மூலப்பகுதி கீழே உள்ளது.', limited: 'விளக்கச் சேவை இப்போது வரம்புடன் இருப்பதால், கிடைத்த ஆதாரத்தை மட்டும் தருகிறேன்.', read: 'இந்தப் பகுதிகளை அவற்றின் அத்தியாயம் அல்லது சர்க்கச் சூழலில் படிக்கவும். சேவை கிடைக்கும்போது சாரதி இந்த ஆதாரத்தின் அடிப்படையில் மேலும் விளக்குவார்.' },
+  en: { teaching: 'The Teaching', key: 'Key Verse(s)', takeaway: 'Practical Takeaway', noEvidence: 'I could not find sufficiently relevant support for this question in the scripture library. Rather than inventing an answer, I am stopping here. Please add a topic, character, kanda, chapter, or verse reference.', example: 'For example: “Explain Gita 2.47” or “What does Sundara Kanda teach about Hanuman’s courage?”', direct: 'Here is the requested source passage.', limited: 'Here are the passages most relevant to your question.', read: 'These cited passages provide the source context for this answer.' },
+  hi: { teaching: 'शिक्षा', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक सुझाव', noEvidence: 'मुझे इस प्रश्न के लिए पुस्तकालय में पर्याप्त संबंधित श्लोक नहीं मिला। अनुमान लगाने के बजाय मैं यहीं रुक रहा हूँ। कृपया विषय, पात्र, काण्ड, अध्याय या श्लोक का संदर्भ जोड़ें।', example: 'उदाहरण: “गीता 2.47 का अर्थ समझाइए” या “सुन्दरकाण्ड में हनुमान के धैर्य से क्या सीख मिलती है?”', direct: 'अनुरोधित मूल स्रोत नीचे दिया गया है।', limited: 'आपके प्रश्न से सबसे अधिक संबंधित श्लोक नीचे दिए गए हैं।', read: 'ये उद्धृत श्लोक इस उत्तर का स्रोत-संदर्भ देते हैं।' },
+  bn: { teaching: 'শিক্ষা', key: 'মূল শ্লোক', takeaway: 'ব্যবহারিক শিক্ষা', noEvidence: 'এই প্রশ্নের জন্য শাস্ত্র গ্রন্থাগারে যথেষ্ট প্রাসঙ্গিক সমর্থন পাইনি। অনুমান না করে এখানেই থামছি। অনুগ্রহ করে বিষয়, চরিত্র, কাণ্ড, অধ্যায় বা শ্লোকের উল্লেখ যোগ করুন।', example: 'উদাহরণ: “গীতা ২.৪৭ ব্যাখ্যা করুন”।', direct: 'অনুরোধ করা মূল পাঠটি নিচে দেওয়া হলো।', limited: 'আপনার প্রশ্নের সঙ্গে সবচেয়ে প্রাসঙ্গিক অংশগুলি নিচে দেওয়া হলো।', read: 'উদ্ধৃত অংশগুলি এই উত্তরের মূল প্রেক্ষিত দেয়।' },
+  mr: { teaching: 'शिकवण', key: 'मुख्य श्लोक', takeaway: 'व्यावहारिक बोध', noEvidence: 'या प्रश्नासाठी धर्मग्रंथालयात पुरेसा संबंधित आधार मिळाला नाही. अंदाज न करता मी येथे थांबतो. कृपया विषय, पात्र, कांड, अध्याय किंवा श्लोकाचा संदर्भ जोडा.', example: 'उदाहरण: “गीता २.४७ समजावून सांगा”.', direct: 'विनंती केलेला मूळ पाठ खाली दिला आहे.', limited: 'तुमच्या प्रश्नाशी सर्वाधिक संबंधित उतारे खाली दिले आहेत.', read: 'हे उद्धृत उतारे या उत्तराचा मूळ संदर्भ देतात.' },
+  te: { teaching: 'బోధన', key: 'ముఖ్య శ్లోకాలు', takeaway: 'ఆచరణాత్మక సారాంశం', noEvidence: 'ఈ ప్రశ్నకు శాస్త్ర గ్రంథాలయంలో తగిన సంబంధిత ఆధారం దొరకలేదు. ఊహించి చెప్పకుండా ఇక్కడే ఆగుతున్నాను. దయచేసి విషయం, పాత్ర, కాండ, అధ్యాయం లేదా శ్లోక సూచనను జోడించండి.', example: 'ఉదాహరణ: “గీత 2.47ను వివరించండి”.', direct: 'మీరు కోరిన మూల పాఠం క్రింద ఉంది.', limited: 'మీ ప్రశ్నకు అత్యంత సంబంధించిన భాగాలు క్రింద ఉన్నాయి.', read: 'ఉదహరించిన భాగాలు ఈ సమాధానానికి మూల సందర్భాన్ని అందిస్తాయి.' },
+  ta: { teaching: 'போதனை', key: 'முக்கிய சுலோகங்கள்', takeaway: 'நடைமுறைப் பயன்', noEvidence: 'இந்தக் கேள்விக்குப் போதுமான தொடர்புடைய ஆதாரம் சாஸ்திர நூலகத்தில் கிடைக்கவில்லை. ஊகித்துக் கூறாமல் இங்கே நிறுத்துகிறேன். தலைப்பு, பாத்திரம், காண்டம், அத்தியாயம் அல்லது சுலோகக் குறிப்பைச் சேர்க்கவும்.', example: 'உதாரணம்: “கீதை 2.47ஐ விளக்கவும்”.', direct: 'நீங்கள் கேட்ட மூலப்பகுதி கீழே உள்ளது.', limited: 'உங்கள் கேள்விக்கு மிகவும் பொருத்தமான பகுதிகள் கீழே உள்ளன.', read: 'மேற்கோள் காட்டப்பட்ட பகுதிகள் இந்தப் பதிலுக்கான மூலச் சூழலை வழங்குகின்றன.' },
 };
 
 function buildExtractiveAnswer(question, verses, reason = 'generation_unavailable', language = 'en') {

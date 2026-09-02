@@ -37,15 +37,17 @@ services:
       - key: RAG_TOP_CONTEXT
         value: "4"
       - key: RAG_MAX_MODEL_ATTEMPTS
-        value: "2"
+        value: "3"
       - key: RAG_MODEL_TIMEOUT_MS
-        value: "9000"
+        value: "10000"
       - key: RAG_GENERATION_DEADLINE_MS
-        value: "16000"
+        value: "24000"
       - key: RAG_MAX_OUTPUT_TOKENS
         value: "1200"
       - key: RAG_MAX_CONCURRENT_GENERATIONS
         value: "2"
+      - key: RAG_MODEL_QUEUE_TIMEOUT_MS
+        value: "5000"
       - key: RAG_CACHE_ENABLED
         value: "true"
       - key: RAG_CACHE_MAX_ENTRIES
