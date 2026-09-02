@@ -3,16 +3,19 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const base = process.env.VITE_BASE_PATH || '/';
+const webBase = process.env.VITE_BASE_PATH || '/';
 const siteUrl = (process.env.VITE_SITE_URL || 'https://gyansutraapp.pages.dev/').replace(/\/$/, '') + '/';
 process.env.VITE_SITE_URL = siteUrl;
 
-export default defineConfig({
-  base,
-  plugins: [
-    tailwindcss(),
-    react(),
-    VitePWA({
+export default defineConfig(({ mode }) => {
+  const isAndroidBuild = mode === 'android';
+
+  return {
+    base: isAndroidBuild ? '/' : webBase,
+    plugins: [
+      tailwindcss(),
+      react(),
+      !isAndroidBuild && VitePWA({
       // Activate a new shell between sessions so its HTML and chunks stay in sync.
       registerType: 'prompt',
       manifest: false, // We provide our own public/manifest.json
@@ -42,23 +45,24 @@ export default defineConfig({
           },
         ],
       },
-    }),
-  ],
-  server: {
-    port: 5173,
-  },
-  build: {
-    target: 'es2020',
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor';
+      }),
+    ].filter(Boolean),
+    server: {
+      port: 5173,
+    },
+    build: {
+      target: 'es2020',
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                return 'vendor';
+              }
             }
-          }
+          },
         },
       },
     },
-  },
+  };
 });

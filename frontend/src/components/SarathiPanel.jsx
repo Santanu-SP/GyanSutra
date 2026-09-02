@@ -249,7 +249,7 @@ export default function SarathiPanel({
         className={panelClasses}
         style={{ '--sarathi-panel-h': `${currentDvh}dvh` }}
         role="complementary"
-        aria-label={`Sarathi — ${t('scriptureGuide')}`}
+        aria-label={`Sarathi: ${t('scriptureGuide')}`}
         aria-hidden={!isOpen}
         id="sarathi-panel"
       >

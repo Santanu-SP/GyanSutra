@@ -41,6 +41,7 @@ if (process.env.NODE_ENV !== 'test') {
 const defaultOrigins = [
   'https://gyansutraapp.pages.dev',
   'https://santanu-sp.github.io',
+  'https://localhost', // Capacitor Android's bundled web origin
   'http://localhost:5173',
   'http://localhost:3001',
 ];

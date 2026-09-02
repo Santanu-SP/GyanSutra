@@ -496,7 +496,7 @@ function buildExtractiveAnswer(question, verses, reason = 'generation_unavailabl
     const sourceText = reason === 'direct_text' && verse.sanskrit
       ? [truncateAtBoundary(verse.sanskrit, 700), meaning === verse.sanskrit ? '' : meaning].filter(Boolean).join('\n\n')
       : meaning;
-    return `**${reference}** [S${index + 1}] — ${sourceText}`;
+    return `**${reference}** [S${index + 1}]: ${sourceText}`;
   }).join('\n\n');
   const serviceNote = reason === 'direct_text' ? words.direct : words.limited;
   return `### 📖 ${words.teaching}\n\n${serviceNote}\n\n### 🕉️ ${words.key}\n\n${keyVerses}\n\n### 🌿 ${words.takeaway}\n\n${words.read}`;

@@ -107,8 +107,8 @@
 @media (max-width: 767px) {
   .search-page {
     width: auto;
-    padding-inline: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-inline: max(1rem, var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
+    padding-right: max(1rem, var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
   }
 
   .search-page__header {

@@ -77,6 +77,18 @@ cd backend && npm start
 cd frontend && npm run dev
 ```
 
+### 5. Android Application
+
+The Android app uses Capacitor and shares the React interface with the website. Its native project is isolated in `frontend/android`, so normal web builds and deployments are unchanged.
+
+```bash
+cd frontend
+npm run android:sync
+npm run android:open
+```
+
+See [`frontend/ANDROID.md`](frontend/ANDROID.md) for setup, testing, signing, versioning, and release instructions.
+
 ### Sarathi reliability and usage limits
 
 Sarathi is designed to remain useful when an external model is slow, rate-limited,

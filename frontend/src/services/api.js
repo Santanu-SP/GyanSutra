@@ -6,11 +6,59 @@
 
 const defaultBaseUrl = import.meta.env.DEV ? 'http://localhost:3001' : 'https://gyansutra-backend-0yo7.onrender.com';
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || defaultBaseUrl).replace(/\/$/, '');
+const IS_ANDROID_BUILD = import.meta.env.MODE === 'android';
+const NATIVE_API_CACHE = 'gyansutra-native-api-v1';
+const NATIVE_CACHE_LIMIT = 150;
+
+async function readNativeCache(url) {
+  if (!IS_ANDROID_BUILD || !('caches' in window)) return null;
+  const cache = await window.caches.open(NATIVE_API_CACHE);
+  return cache.match(url);
+}
+
+async function writeNativeCache(url, response) {
+  if (!IS_ANDROID_BUILD || !('caches' in window) || !response.ok) return;
+
+  const cache = await window.caches.open(NATIVE_API_CACHE);
+  await cache.put(url, response.clone());
+
+  const keys = await cache.keys();
+  const overflow = keys.length - NATIVE_CACHE_LIMIT;
+  if (overflow > 0) {
+    await Promise.all(keys.slice(0, overflow).map((key) => cache.delete(key)));
+  }
+}
+
+async function fetchWithNativeFallback(url, options) {
+  const method = (options.method || 'GET').toUpperCase();
+  if (!IS_ANDROID_BUILD || method !== 'GET') return fetch(url, options);
+
+  try {
+    const response = await fetch(url, options);
+    if (response.ok) {
+      void writeNativeCache(url, response).catch(() => {});
+      return response;
+    }
+
+    if (response.status >= 500) {
+      const cached = await readNativeCache(url);
+      if (cached) return cached;
+    }
+    return response;
+  } catch (error) {
+    const cached = await readNativeCache(url);
+    if (cached) return cached;
+    throw error;
+  }
+}
 
 async function request(path, options = {}) {
   const url = `${BASE_URL}/api${path}`;
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+  const method = (options.method || 'GET').toUpperCase();
+  const res = await fetchWithNativeFallback(url, {
+    headers: method === 'GET'
+      ? { ...options.headers }
+      : { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
 

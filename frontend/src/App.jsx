@@ -21,6 +21,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SEOHead from './components/SEO/SEOHead';
 import AnimatedButton from './components/AnimatedButton';
 import Footer from './components/Footer';
+import NativeAppBridge from './components/NativeAppBridge';
 import { recoverFromChunkError } from './utils/chunkRecovery';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import useLanguage from './i18n/useLanguage';
@@ -248,8 +249,13 @@ export default function App() {
 
   return (
     <div className="gs-app">
-        <SEOHead />
-        {/* ── Fixed Header ── */}
+      <NativeAppBridge
+        isOverlayOpen={isSarathiOpen}
+        onCloseOverlay={() => setIsSarathiOpen(false)}
+        offlineLabel={t('offlineNotice')}
+      />
+      <SEOHead />
+      {/* ── Fixed Header ── */}
       <header className={`gs-header${isSarathiOpen ? ' gs-header--sarathi-open' : ''}`}>
         <div className="gs-header__nav">
           {/* Brand */}

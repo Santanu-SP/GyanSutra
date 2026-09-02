@@ -294,7 +294,7 @@
 @media (max-width: 767px) {
   .chapter-reader {
     width: auto;
-    padding: var(--space-6) max(1rem, env(safe-area-inset-right)) var(--space-12) max(1rem, env(safe-area-inset-left));
+    padding: var(--space-6) max(1rem, var(--safe-area-inset-right, env(safe-area-inset-right, 0px))) var(--space-12) max(1rem, var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
   }
 
   .chapter-reader__title {

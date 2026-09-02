@@ -970,7 +970,7 @@ p {
 
   .gs-home {
     width: auto;
-    padding: 1.25rem max(1.125rem, env(safe-area-inset-right)) 3.25rem max(1.125rem, env(safe-area-inset-left));
+    padding: 1.25rem max(1.125rem, var(--safe-area-inset-right, env(safe-area-inset-right, 0px))) 3.25rem max(1.125rem, var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
   }
 
   .gs-home__hero {
