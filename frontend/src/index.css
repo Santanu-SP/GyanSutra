@@ -13,7 +13,7 @@
 }
 
 html {
-  font-size: calc(16px * var(--user-font-scale, 1));
+  font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   touch-action: pan-x pan-y pinch-zoom;
@@ -242,7 +242,7 @@ p {
 
 @media (max-width: 768px) {
   html {
-    font-size: calc(16px * var(--user-font-scale, 1));
+    font-size: 16px;
   }
 
   .container,

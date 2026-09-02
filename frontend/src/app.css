@@ -278,6 +278,15 @@
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
+/* Reading size is intentionally scoped to route content. App chrome remains
+   at a stable physical size, as it would in a native Android application. */
+.gs-reading-content {
+  width: calc(100% * var(--reading-scale-inverse, 1));
+  min-height: 1px;
+  zoom: var(--reading-scale, 1);
+  transform-origin: top left;
+}
+
 /* Mobile: add bottom padding so content isn't hidden behind bottom nav */
 @media (max-width: 767px) {
   .gs-body {
@@ -360,7 +369,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
     min-height: 56px;
     padding: 0.45rem 0.15rem 0.35rem;
@@ -374,8 +383,7 @@
     background: transparent;
     cursor: pointer;
     position: relative;
-    isolation: isolate;
-    transition: color var(--transition-fast), transform var(--transition-fast);
+    transition: color 180ms ease;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -384,27 +392,82 @@
     color: var(--accent);
   }
 
-  .gs-bottom-nav__item--active::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    top: 7px;
-    width: 3.5rem;
+  .gs-bottom-nav__icon-shell {
+    position: relative;
+    width: 3.7rem;
     height: 2rem;
+    display: grid;
+    place-items: center;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    transition: transform 180ms cubic-bezier(.2, 0, 0, 1);
   }
 
-  .gs-bottom-nav__item:active {
-    transform: scale(0.96);
+  .gs-bottom-nav__icon-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    opacity: 0;
+    transform: scaleX(0.58);
+    transition:
+      opacity 180ms ease,
+      transform 260ms cubic-bezier(.2, .8, .2, 1);
+  }
+
+  .gs-bottom-nav__item--active .gs-bottom-nav__icon-shell::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .gs-bottom-nav__item:active .gs-bottom-nav__icon-shell {
+    transform: scale(0.9);
   }
 
   .gs-bottom-nav__icon {
+    position: relative;
+    z-index: 1;
     width: 23px;
     height: 23px;
     flex-shrink: 0;
+    overflow: visible;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition:
+      transform 220ms cubic-bezier(.2, .8, .2, 1),
+      stroke-width 180ms ease;
   }
 
+  .gs-bottom-nav__item--active .gs-bottom-nav__icon {
+    stroke-width: 2.05;
+    animation: gsNavIconSettle 280ms cubic-bezier(.2, .8, .2, 1) both;
+  }
+
+  .gs-bottom-nav__label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+      color 180ms ease,
+      font-weight 180ms ease,
+      transform 220ms cubic-bezier(.2, .8, .2, 1);
+  }
+
+  .gs-bottom-nav__item--active .gs-bottom-nav__label {
+    color: var(--accent);
+    font-weight: 700;
+    transform: translateY(-1px);
+  }
+
+}
+
+@keyframes gsNavIconSettle {
+  0% { transform: scale(0.88); opacity: 0.72; }
+  65% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @media (max-width: 767px) {
@@ -467,6 +530,16 @@
   .app-controls__trigger {
     width: 40px;
     height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-bottom-nav__icon-shell,
+  .gs-bottom-nav__icon-shell::before,
+  .gs-bottom-nav__icon,
+  .gs-bottom-nav__label {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

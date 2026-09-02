@@ -105,6 +105,43 @@ function TriggerFlame() {
   );
 }
 
+function BottomNavIcon({ name }) {
+  const paths = {
+    home: (
+      <>
+        <path d="M3.75 10.4 12 3.75l8.25 6.65v8.35a1.5 1.5 0 0 1-1.5 1.5h-4.5v-5.5h-4.5v5.5h-4.5a1.5 1.5 0 0 1-1.5-1.5V10.4Z" />
+        <path d="m2.75 11.2 8.3-6.7a1.5 1.5 0 0 1 1.9 0l8.3 6.7" />
+      </>
+    ),
+    gita: (
+      <>
+        <path d="M4.25 4.5h4.5A3.25 3.25 0 0 1 12 7.75v12a3.25 3.25 0 0 0-3.25-3.25h-4.5v-12Z" />
+        <path d="M19.75 4.5h-4.5A3.25 3.25 0 0 0 12 7.75v12a3.25 3.25 0 0 1 3.25-3.25h4.5v-12Z" />
+      </>
+    ),
+    ramayana: (
+      <>
+        <path d="M6 3.5h11.75A2.25 2.25 0 0 1 20 5.75v14.5H6.25A2.25 2.25 0 0 1 4 18V5.5A2 2 0 0 1 6 3.5Z" />
+        <path d="M6.25 16.5H20M8 7.25h8M8 10.5h5.25" />
+      </>
+    ),
+    sarathi: (
+      <>
+        <path d="M12 3.25c0 0-5 5.15-5 9.75a5 5 0 0 0 10 0c0-4.6-5-9.75-5-9.75Z" />
+        <path d="M12 9c0 0-2 2.1-2 4a2 2 0 0 0 4 0c0-1.9-2-4-2-4Z" />
+      </>
+    ),
+  };
+
+  return (
+    <span className="gs-bottom-nav__icon-shell" aria-hidden="true">
+      <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none">
+        {paths[name]}
+      </svg>
+    </span>
+  );
+}
+
 
 
 export default function App() {
@@ -329,24 +366,26 @@ export default function App() {
 
       {/* ── App body - shifts right on desktop when Sarathi is open ── */}
       <div className={`gs-body${isSarathiOpen ? ' gs-body--sarathi-open' : ''}`}>
-        <ErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-            <Routes location={location} key={`${location.pathname}${location.search}`}>
-              <Route
-                path="/"
-                element={<PageTransition><Home /></PageTransition>}
-              />
-              <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-              <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
-              <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
-              <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
-              <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
-              <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
-              <Route path="/ask" element={<PageTransition><Ask /></PageTransition>} />
-              <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
+        <div className="gs-reading-content">
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <Routes location={location} key={`${location.pathname}${location.search}`}>
+                <Route
+                  path="/"
+                  element={<PageTransition><Home /></PageTransition>}
+                />
+                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+                <Route path="/verses/:id" element={<PageTransition><VerseDetail /></PageTransition>} />
+                <Route path="/chapters/:id" element={<PageTransition><ChapterReader /></PageTransition>} />
+                <Route path="/ramayana" element={<PageTransition><Ramayana /></PageTransition>} />
+                <Route path="/ramayana/:kandaNum" element={<PageTransition><KandaReader /></PageTransition>} />
+                <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
+                <Route path="/ask" element={<PageTransition><Ask /></PageTransition>} />
+                <Route path="/:source_id" element={<PageTransition><TextReader /></PageTransition>} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </div>
         <Footer />
       </div>
 
@@ -370,10 +409,8 @@ export default function App() {
           aria-label={t('home')}
           aria-current={location.pathname === '/' ? 'page' : undefined}
         >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25a.75.75 0 00-.75-.75h-6a.75.75 0 00-.75.75V21.75H3.75A.75.75 0 013 21V9.75z" />
-          </svg>
-          {t('home')}
+          <BottomNavIcon name="home" />
+          <span className="gs-bottom-nav__label">{t('home')}</span>
         </Link>
 
         <Link
@@ -382,10 +419,8 @@ export default function App() {
           aria-label={t('readGita')}
           aria-current={isGitaRoute ? 'page' : undefined}
         >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25A2.25 2.25 0 016.75 3H12v16.5H6.75a2.25 2.25 0 00-2.25 1.125V5.25zM19.5 5.25A2.25 2.25 0 0017.25 3H12v16.5h5.25a2.25 2.25 0 012.25 1.125V5.25z" />
-          </svg>
-          {t('gita')}
+          <BottomNavIcon name="gita" />
+          <span className="gs-bottom-nav__label">{t('gita')}</span>
         </Link>
 
         <Link
@@ -394,11 +429,8 @@ export default function App() {
           aria-label={`${t('read')} ${t('ramayana')}`}
           aria-current={isRamayanaRoute ? 'page' : undefined}
         >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 4.5h12A1.5 1.5 0 0119.5 6v13.5H7.25A2.75 2.75 0 014.5 16.75V6A1.5 1.5 0 016 4.5z" />
-            <path strokeLinecap="round" d="M7.25 16.5H19.5M8.5 8h7M8.5 11h5" />
-          </svg>
-          {t('ramayana')}
+          <BottomNavIcon name="ramayana" />
+          <span className="gs-bottom-nav__label">{t('ramayana')}</span>
         </Link>
 
         <button
@@ -408,11 +440,8 @@ export default function App() {
           aria-pressed={isSarathiOpen}
           onClick={() => setIsSarathiOpen(true)}
         >
-          <svg className="gs-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.2c0 0-5.25 5.45-5.25 10.15a5.25 5.25 0 0010.5 0C17.25 8.65 12 3.2 12 3.2z" />
-            <path strokeLinecap="round" d="M12 9.15c0 0-2.05 2.2-2.05 4.1a2.05 2.05 0 004.1 0c0-1.9-2.05-4.1-2.05-4.1z" />
-          </svg>
-          <span>Sarathi</span>
+          <BottomNavIcon name="sarathi" />
+          <span className="gs-bottom-nav__label">Sarathi</span>
         </button>
       </nav>
     </div>

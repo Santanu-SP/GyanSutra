@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import useLanguage from '../i18n/useLanguage';
@@ -25,8 +25,9 @@ export default function AppControls() {
   const [scale, setScale] = useState(readScale);
   const closeButtonRef = useRef(null);
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--user-font-scale', scale);
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty('--reading-scale', scale);
+    document.documentElement.style.setProperty('--reading-scale-inverse', 1 / scale);
     try {
       window.localStorage.setItem(SCALE_KEY, String(scale));
     } catch {
@@ -101,7 +102,7 @@ export default function AppControls() {
               <div className="app-controls__label-row">
                 <div>
                   <span className="app-controls__label">Text size</span>
-                  <span className="app-controls__hint">Pinch to zoom also remains available</span>
+                  <span className="app-controls__hint">Adjust reading content while navigation stays fixed</span>
                 </div>
                 <output>{Math.round(scale * 100)}%</output>
               </div>
