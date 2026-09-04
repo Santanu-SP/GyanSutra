@@ -1,6 +1,7 @@
 const express = require('express');
 const { collections, getDoc } = require('../services/firestore');
 const { SOURCES } = require('../data/sources');
+const { TARGET_LANGUAGES, translateVerseContent } = require('../services/verseTranslation');
 
 const router = express.Router();
 const SOURCE_IDS = new Set(SOURCES.map((source) => source.id));
@@ -149,6 +150,41 @@ router.get('/ramayana/:kandaNumber/:sarga', async (req, res, next) => {
  */
 router.get('/source/:sourceId', (req, res, next) => {
   return sendSourceVerses(req.params.sourceId, res, next);
+});
+
+/**
+ * GET /api/verses/:id/localized?language=bn|mr|te|ta
+ * Returns source-grounded, machine-assisted reading prose in the requested
+ * language. The original verse document remains unchanged.
+ */
+router.get('/:id/localized', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const language = String(req.query.language || '').trim().toLowerCase();
+    if (!id || id.length > 256) {
+      return res.status(400).json({ error: 'Invalid verse ID.' });
+    }
+    if (!TARGET_LANGUAGES[language]) {
+      return res.status(400).json({ error: 'Language must be bn, mr, te, or ta.' });
+    }
+
+    const verse = await getDoc('verses', id);
+    if (!verse) return res.status(404).json({ error: 'Verse not found.' });
+
+    try {
+      const content = await translateVerseContent(verse, language);
+      res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+      return res.json({ content });
+    } catch (error) {
+      console.warn(`[Translation] ${id}/${language}: ${error.code || error.message}`);
+      return res.status(503).json({
+        error: 'The requested translation is temporarily unavailable.',
+        fallbackLanguage: verse.translationEnglish ? 'en' : 'hi',
+      });
+    }
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /**

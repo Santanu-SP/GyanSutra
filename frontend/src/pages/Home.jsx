@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyVerse } from '../services/api';
 import useLanguage from '../i18n/useLanguage';
+import useLocalizedVerse, { GENERATED_LANGUAGES } from '../hooks/useLocalizedVerse';
 
 export default function Home() {
   const { language, t } = useLanguage();
   const [dailyVerse, setDailyVerse] = useState(null);
   const [dailyVerseState, setDailyVerseState] = useState('loading');
+  const dailyLocalization = useLocalizedVerse(dailyVerse, language);
 
   useEffect(() => {
     getDailyVerse()
@@ -25,11 +27,14 @@ export default function Home() {
     { id: 'bhagavad-gita', title: language === 'en' ? 'Bhagavad Gita' : t('heroTitleHighlight'), devanagari: 'गीता', count: t('chapters18'), description: t('gitaDescription') },
     { id: 'ramayana', title: language === 'en' ? 'Valmiki Ramayana' : t('ramayana'), devanagari: 'राम', count: t('kandas7'), description: t('ramayanaDescription') },
   ];
-  const dailyMeaning = language === 'en'
-    ? dailyVerse?.translationEnglish
+  const dailyMeaning = GENERATED_LANGUAGES.has(language)
+    ? (dailyLocalization.content?.translation
+      || dailyVerse?.translationEnglish
+      || dailyVerse?.translationHindi
+      || t('translationUnavailable'))
     : language === 'hi'
-      ? (dailyVerse?.translationHindi || t('translationUnavailable'))
-      : t('translationUnavailable');
+      ? (dailyVerse?.translationHindi || dailyVerse?.translationEnglish || t('translationUnavailable'))
+      : (dailyVerse?.translationEnglish || dailyVerse?.translationHindi || t('translationUnavailable'));
 
   return (
     <main className="gs-home-page">

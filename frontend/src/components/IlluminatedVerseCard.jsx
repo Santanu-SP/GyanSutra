@@ -31,7 +31,9 @@
 
 import { useNavigate } from 'react-router-dom';
 import AnimatedButton from './AnimatedButton';
+import ReadAloudControls from './ReadAloudControls';
 import useLanguage from '../i18n/useLanguage';
+import useLocalizedVerse, { GENERATED_LANGUAGES } from '../hooks/useLocalizedVerse';
 
 import './IlluminatedVerseCard.css';
 
@@ -43,6 +45,8 @@ const READING_COPY = {
     compareTranslations: 'Compare translations',
     wordMeaning: 'Word-by-word meaning',
     explanation: 'Explanation',
+    explanationFrom: 'Source commentary:',
+    translatedExcerpt: 'translated excerpt',
     narrativeContext: 'Narrative context',
     commentaries: 'Traditional commentaries',
     sources: 'Text and source notes',
@@ -58,6 +62,8 @@ const READING_COPY = {
     compareTranslations: 'अन्य अनुवाद देखें',
     wordMeaning: 'शब्दार्थ',
     explanation: 'सरल व्याख्या',
+    explanationFrom: 'व्याख्या स्रोत:',
+    translatedExcerpt: 'अनूदित अंश',
     narrativeContext: 'प्रसंग',
     commentaries: 'परंपरागत टीकाएँ',
     sources: 'पाठ और स्रोत',
@@ -66,6 +72,99 @@ const READING_COPY = {
     editorialPending: 'इस प्रविष्टि का स्वतंत्र संपादकीय सत्यापन अभी शेष है।',
     matchedPending: 'संस्कृत और अंग्रेज़ी पाठ का स्रोत-मिलान हुआ है; स्वतंत्र संपादकीय सत्यापन अभी शेष है।',
   },
+  bn: {
+    transliteration: 'লিপ্যন্তর',
+    translation: 'অনুবাদ',
+    translatedBy: 'অনুবাদক',
+    compareTranslations: 'অন্যান্য অনুবাদ দেখুন',
+    wordMeaning: 'শব্দে-শব্দে অর্থ',
+    explanation: 'ব্যাখ্যা',
+    explanationFrom: 'ব্যাখ্যার উৎস:',
+    translatedExcerpt: 'অনূদিত অংশ',
+    narrativeContext: 'কাহিনির প্রসঙ্গ',
+    commentaries: 'ঐতিহ্যগত ভাষ্য',
+    sources: 'পাঠ ও উৎসের তথ্য',
+    sourceSeparation: 'মূল পাঠ, অনুবাদ, ব্যাখ্যা ও ভাষ্য আলাদা করে দেখানো হয়েছে।',
+    sourceCompiled: 'নামযুক্ত অনুবাদ ও ভাষ্যের উৎস উল্লেখ করা হয়েছে; এই সংকলিত ডিজিটাল পাঠের স্বাধীন সমালোচনামূলক-সংস্করণ পর্যালোচনা এখনও হয়নি।',
+    editorialPending: 'এই নথির স্বাধীন সম্পাদকীয় যাচাই এখনও বাকি।',
+    matchedPending: 'সংস্কৃত ও ইংরেজি নথির উৎস-মিল করা হয়েছে; স্বাধীন সম্পাদকীয় যাচাই এখনও বাকি।',
+    translating: 'বাংলা অনুবাদ প্রস্তুত হচ্ছে…',
+    machineTranslatedFrom: 'যন্ত্র-সহায়তায় অনূদিত; ভিত্তি:',
+    machineReviewPending: 'এই ভাষান্তরটি উৎস পাঠ থেকে যন্ত্র-সহায়তায় তৈরি এবং এখনও মানব সম্পাদক দ্বারা যাচাই করা হয়নি।',
+    sourceFallback: 'বাংলা অনুবাদ এখন পাওয়া যাচ্ছে না; নিচে উৎসের ইংরেজি অনুবাদ দেখানো হচ্ছে।',
+  },
+  mr: {
+    transliteration: 'लिप्यंतरण',
+    translation: 'अनुवाद',
+    translatedBy: 'अनुवादक',
+    compareTranslations: 'इतर अनुवाद पाहा',
+    wordMeaning: 'शब्दशः अर्थ',
+    explanation: 'स्पष्टीकरण',
+    explanationFrom: 'स्पष्टीकरणाचा स्रोत:',
+    translatedExcerpt: 'अनुवादित उतारा',
+    narrativeContext: 'कथेचा संदर्भ',
+    commentaries: 'पारंपरिक भाष्ये',
+    sources: 'मूळ पाठ आणि स्रोत',
+    sourceSeparation: 'मूळ पाठ, अनुवाद, स्पष्टीकरण आणि भाष्य स्वतंत्रपणे दाखवले आहेत.',
+    sourceCompiled: 'नामनिर्दिष्ट अनुवाद व भाष्यांचे स्रोत जतन केले आहेत; या संकलित डिजिटल पाठाचे स्वतंत्र चिकित्सक-संस्करण परीक्षण अद्याप झालेले नाही.',
+    editorialPending: 'या नोंदीची स्वतंत्र संपादकीय पडताळणी अद्याप बाकी आहे.',
+    matchedPending: 'संस्कृत आणि इंग्रजी नोंदींचे स्रोत-जुळणी झाली आहे; स्वतंत्र संपादकीय पडताळणी अद्याप बाकी आहे.',
+    translating: 'मराठी अनुवाद तयार होत आहे…',
+    machineTranslatedFrom: 'यंत्र-सहाय्यित अनुवाद; आधार:',
+    machineReviewPending: 'हा भाषानुवाद स्रोत पाठावरून यंत्राच्या सहाय्याने तयार केला आहे आणि मानवी संपादकाने अद्याप पडताळलेला नाही.',
+    sourceFallback: 'मराठी अनुवाद सध्या उपलब्ध नाही; खाली मूळ इंग्रजी अनुवाद दाखवला आहे.',
+  },
+  te: {
+    transliteration: 'లిప్యంతరీకరణ',
+    translation: 'అనువాదం',
+    translatedBy: 'అనువాదకుడు',
+    compareTranslations: 'ఇతర అనువాదాలు చూడండి',
+    wordMeaning: 'పదానికి పదం అర్థం',
+    explanation: 'వివరణ',
+    explanationFrom: 'వివరణ మూలం:',
+    translatedExcerpt: 'అనువదించిన భాగం',
+    narrativeContext: 'కథా సందర్భం',
+    commentaries: 'సంప్రదాయ వ్యాఖ్యానాలు',
+    sources: 'మూల పాఠం మరియు ఆధారాలు',
+    sourceSeparation: 'మూల పాఠం, అనువాదం, వివరణ మరియు వ్యాఖ్యానం విడివిడిగా చూపబడుతున్నాయి.',
+    sourceCompiled: 'పేర్కొన్న అనువాదాలు, వ్యాఖ్యానాల మూలాలు అలాగే ఉంచబడ్డాయి; ఈ సంకలిత డిజిటల్ పాఠానికి స్వతంత్ర విమర్శాత్మక-సంచిక సమీక్ష ఇంకా జరగలేదు.',
+    editorialPending: 'ఈ నమోదుకు స్వతంత్ర సంపాదకీయ ధృవీకరణ ఇంకా అవసరం.',
+    matchedPending: 'సంస్కృతం మరియు ఆంగ్ల నమోదులు మూలాలతో సరిపోల్చబడ్డాయి; స్వతంత్ర సంపాదకీయ ధృవీకరణ ఇంకా అవసరం.',
+    translating: 'తెలుగు అనువాదం సిద్ధమవుతోంది…',
+    machineTranslatedFrom: 'యంత్ర సహాయంతో అనువదించబడింది; ఆధారం:',
+    machineReviewPending: 'ఈ భాషానువాదం మూల పాఠం నుంచి యంత్ర సహాయంతో రూపొందించబడింది; మానవ సంపాదకుడు ఇంకా ధృవీకరించలేదు.',
+    sourceFallback: 'తెలుగు అనువాదం ప్రస్తుతం అందుబాటులో లేదు; దిగువన మూల ఆంగ్ల అనువాదం చూపబడుతోంది.',
+  },
+  ta: {
+    transliteration: 'ஒலிபெயர்ப்பு',
+    translation: 'மொழிபெயர்ப்பு',
+    translatedBy: 'மொழிபெயர்ப்பாளர்',
+    compareTranslations: 'மற்ற மொழிபெயர்ப்புகளைப் பார்க்கவும்',
+    wordMeaning: 'சொல்லுக்குச் சொல் பொருள்',
+    explanation: 'விளக்கம்',
+    explanationFrom: 'விளக்கத்தின் ஆதாரம்:',
+    translatedExcerpt: 'மொழிபெயர்க்கப்பட்ட பகுதி',
+    narrativeContext: 'கதைச் சூழல்',
+    commentaries: 'மரபுவழி விளக்கவுரைகள்',
+    sources: 'மூலப் பாடமும் ஆதாரங்களும்',
+    sourceSeparation: 'மூலப் பாடம், மொழிபெயர்ப்பு, விளக்கம், விளக்கவுரை ஆகியவை தனித்தனியாகக் காட்டப்படுகின்றன.',
+    sourceCompiled: 'பெயரிடப்பட்ட மொழிபெயர்ப்புகள் மற்றும் விளக்கவுரைகளின் ஆதாரங்கள் பாதுகாக்கப்பட்டுள்ளன; இந்தத் தொகுக்கப்பட்ட மின்னணுப் பாடம் இன்னும் சுயாதீன விமர்சனப் பதிப்பு ஆய்வைப் பெறவில்லை.',
+    editorialPending: 'இந்தப் பதிவுக்கு சுயாதீன ஆசிரியர் சரிபார்ப்பு இன்னும் தேவை.',
+    matchedPending: 'சமஸ்கிருத மற்றும் ஆங்கிலப் பதிவுகள் ஆதாரத்துடன் பொருத்தப்பட்டுள்ளன; சுயாதீன ஆசிரியர் சரிபார்ப்பு இன்னும் தேவை.',
+    translating: 'தமிழ் மொழிபெயர்ப்பு தயாராகிறது…',
+    machineTranslatedFrom: 'இயந்திர உதவியுடன் மொழிபெயர்க்கப்பட்டது; அடிப்படை:',
+    machineReviewPending: 'இந்த மொழிபெயர்ப்பு மூலப் பாடத்திலிருந்து இயந்திர உதவியுடன் உருவாக்கப்பட்டது; மனித ஆசிரியரால் இன்னும் சரிபார்க்கப்படவில்லை.',
+    sourceFallback: 'தமிழ் மொழிபெயர்ப்பு இப்போது கிடைக்கவில்லை; கீழே மூல ஆங்கில மொழிபெயர்ப்பு காட்டப்படுகிறது.',
+  },
+};
+
+const CONTENT_LANGUAGE_NAMES = {
+  en: 'english',
+  hi: 'hindi',
+  bn: 'bengali',
+  mr: 'marathi',
+  te: 'telugu',
+  ta: 'tamil',
 };
 
 function stripReferencePrefix(text) {
@@ -109,6 +208,7 @@ const FormattedCommentary = ({ text, language, className = '', style = {} }) => 
   
   let formattedText = text.trim();
   const isEnglish = language === 'english' || (!language && /[a-z]/i.test(formattedText));
+  const usesDevanagari = ['hindi', 'marathi', 'sanskrit'].includes(language);
   
   const splitIntoParagraphs = (str, isHindi) => {
     const sentenceRegex = isHindi ? /([^।!?]+[।!?]+)/g : /([^.!?]+[.!?]+)/g;
@@ -153,7 +253,7 @@ const FormattedCommentary = ({ text, language, className = '', style = {} }) => 
     const paragraphs = splitIntoParagraphs(formattedText, true);
     
     return (
-      <div className={`formatted-commentary devanagari ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
+      <div className={`formatted-commentary ${usesDevanagari ? 'devanagari' : ''} ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
         {paragraphs.map((p, idx) => (
           <p key={idx} style={{ margin: 0 }}>{p}</p>
         ))}
@@ -198,10 +298,11 @@ export default function IlluminatedVerseCard({
   className = '',
 }) {
   const { language, t } = useLanguage();
-  const lang = language === 'hi' ? 'hindi' : 'english';
   const labels = READING_COPY[language] || READING_COPY.en;
-  const canShowStoredProse = language === 'en' || language === 'hi';
   const navigate = useNavigate();
+  const isFull = variant === 'full';
+  const needsLocalization = GENERATED_LANGUAGES.has(language);
+  const localization = useLocalizedVerse(verse, language, { enabled: isFull });
 
   if (!verse) return null;
 
@@ -228,16 +329,25 @@ export default function IlluminatedVerseCard({
   } = verse;
 
   const isClickable = !!onClick || variant === 'compact' || variant === 'citation';
-  const isFull = variant === 'full';
   const isRamayana = verse.book === 'ramayana' || Boolean(verse.kanda);
-  const vocabulary = cleanWordMeanings(wordMeanings);
-  const translationText = canShowStoredProse
-    ? stripReferencePrefix(lang === 'hindi' ? translationHindi : translationEnglish)
-    : '';
-  const explanationText = canShowStoredProse
-    ? stripReferencePrefix(lang === 'hindi' ? explanationHindi : explanationEnglish)
-    : '';
-  const preferredCommentaryLanguage = lang;
+  const localizedContent = localization.content;
+  const sourceLanguage = language === 'hi' && translationHindi
+    ? 'hindi'
+    : translationEnglish ? 'english' : 'hindi';
+  const sourceTranslation = sourceLanguage === 'hindi' ? translationHindi : translationEnglish;
+  const sourceExplanation = sourceLanguage === 'hindi' ? explanationHindi : explanationEnglish;
+  const contentLanguage = localizedContent
+    ? CONTENT_LANGUAGE_NAMES[language]
+    : sourceLanguage;
+  const usesDevanagari = ['hindi', 'marathi', 'sanskrit'].includes(contentLanguage);
+  const vocabulary = cleanWordMeanings(
+    localizedContent?.wordMeanings?.length ? localizedContent.wordMeanings : wordMeanings,
+  );
+  const translationText = stripReferencePrefix(localizedContent?.translation || sourceTranslation);
+  const explanationText = stripReferencePrefix(localizedContent?.explanation || sourceExplanation);
+  const contextText = localizedContent?.context || comments;
+  const contextLanguage = localizedContent?.context ? contentLanguage : 'english';
+  const preferredCommentaryLanguage = needsLocalization ? 'english' : sourceLanguage;
   const commentaries = detailedExplanations
     .filter((item) => isSubstantiveText(item?.explanation))
     .sort((a, b) => {
@@ -247,23 +357,40 @@ export default function IlluminatedVerseCard({
       return rank(a) - rank(b);
     });
   const alternateTranslations = additionalTranslations.filter((item) => (
-    item?.language === lang
+    !needsLocalization
+    && item?.language === sourceLanguage
     && isSubstantiveText(item?.translation)
     && stripReferencePrefix(item.translation) !== translationText
   ));
-  const primaryTranslator = translationSources?.[lang]?.author
-    || (!isRamayana && lang === 'english' ? 'Swami Sivananda' : null)
-    || (!isRamayana && lang === 'hindi' ? 'Swami Tejomayananda' : null)
-    || (isRamayana && source?.includes('rahular/itihasa') && lang === 'english'
+  const sourceTranslator = localizedContent?.basedOn?.author
+    || translationSources?.[sourceLanguage]?.author
+    || (!isRamayana && sourceLanguage === 'english' ? 'Swami Sivananda' : null)
+    || (!isRamayana && sourceLanguage === 'hindi' ? 'Swami Tejomayananda' : null)
+    || (isRamayana && source?.includes('rahular/itihasa') && sourceLanguage === 'english'
       ? 'M. N. Dutt'
       : null);
+  const translationAttribution = needsLocalization
+    ? localizedContent
+      ? `${labels.machineTranslatedFrom}${sourceTranslator ? ` ${sourceTranslator}` : ` ${sourceLanguage}`}`
+      : sourceTranslator ? `${labels.translatedBy} ${sourceTranslator}` : null
+      : sourceTranslator ? `${labels.translatedBy} ${sourceTranslator}` : null;
+  const localizationMessage = !needsLocalization
+    ? null
+    : localization.status === 'loading'
+      ? labels.translating
+      : localizedContent
+        ? labels.machineReviewPending
+        : labels.sourceFallback;
   const hasExplanation = explanationText && explanationText !== translationText;
   const hasCommentary = commentaries.length > 0 || isSubstantiveText(sourceCommentary);
   const displayedCommentaries = commentaries.length > 0
     ? commentaries
     : hasCommentary
-      ? [{ author: labels.commentaries, language: lang, explanation: sourceCommentary }]
+      ? [{ author: labels.commentaries, language: sourceLanguage, explanation: sourceCommentary }]
       : [];
+  const readAloudExplanation = explanationText
+    || displayedCommentaries[0]?.explanation
+    || '';
   const sourceDescription = isRamayana
     ? (source?.includes('rahular/itihasa')
       ? 'Sanskrit: Valmiki Ramayana Dataset · English translation: M. N. Dutt via the Itihāsa corpus'
@@ -313,6 +440,19 @@ export default function IlluminatedVerseCard({
         )}
       </div>
 
+      {isFull && (
+        <ReadAloudControls
+          verseKey={id || `${chapterNumber}-${verseNumber}`}
+          sanskrit={sanskrit}
+          translation={translationText}
+          explanation={readAloudExplanation}
+          context={contextText}
+          language={language}
+          contentLanguage={contentLanguage}
+          disabled={needsLocalization && localization.status === 'loading'}
+        />
+      )}
+
       {/* Sanskrit - always the visual leader */}
       {sanskrit && (
         <div className="verse-card__sanskrit devanagari-hero">
@@ -332,15 +472,25 @@ export default function IlluminatedVerseCard({
         <section className="verse-card__section verse-card__translation-area">
           <div className="verse-card__section-heading">
             <h3 className="verse-card__section-title">{labels.translation}</h3>
-            {canShowStoredProse && primaryTranslator && (
+            {translationAttribution && (
               <span className="verse-card__attribution">
-                {labels.translatedBy} {primaryTranslator}
+                {translationAttribution}
               </span>
             )}
           </div>
-          <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`}>
+          <p className={`verse-card__translation ${usesDevanagari ? 'devanagari' : ''}`}>
             {translationText || t('translationUnavailable')}
           </p>
+
+          {isFull && localizationMessage && (
+            <p
+              className={`verse-card__localization-note verse-card__localization-note--${localization.status}`}
+              role="status"
+              aria-live="polite"
+            >
+              {localizationMessage}
+            </p>
+          )}
 
           {isFull && alternateTranslations.length > 0 && (
             <details className="verse-card__disclosure verse-card__alternate-translations">
@@ -349,7 +499,7 @@ export default function IlluminatedVerseCard({
                 {alternateTranslations.map((item, index) => (
                   <article className="verse-card__alternate" key={`${item.author}-${index}`}>
                     <h4>{item.author || labels.translation}</h4>
-                    <p className={lang === 'hindi' ? 'devanagari' : ''}>
+                    <p className={usesDevanagari ? 'devanagari' : ''}>
                       {stripReferencePrefix(item.translation)}
                     </p>
                   </article>
@@ -360,7 +510,7 @@ export default function IlluminatedVerseCard({
         </section>
 
         {/* Understand: supporting lexical and explanatory material. */}
-        {isFull && canShowStoredProse && vocabulary.length > 0 && (
+        {isFull && vocabulary.length > 0 && (
           <details className="verse-card__disclosure verse-card__word-meanings" open>
             <summary>{labels.wordMeaning}</summary>
             <dl className="verse-card__word-list">
@@ -376,22 +526,30 @@ export default function IlluminatedVerseCard({
 
         {isFull && hasExplanation && (
           <section className="verse-card__section">
-            <h3 className="verse-card__section-title">{labels.explanation}</h3>
-            <p className={`verse-card__explanation ${lang === 'hindi' ? 'devanagari' : ''}`}>
+            <div className="verse-card__section-heading">
+              <h3 className="verse-card__section-title">{labels.explanation}</h3>
+              {localizedContent?.explanationSource && (
+                <span className="verse-card__attribution">
+                  {labels.explanationFrom} {localizedContent.explanationSource}
+                  {localizedContent.explanationIsExcerpt ? ` · ${labels.translatedExcerpt}` : ''}
+                </span>
+              )}
+            </div>
+            <p className={`verse-card__explanation ${usesDevanagari ? 'devanagari' : ''}`}>
               {explanationText}
             </p>
           </section>
         )}
 
-        {isFull && canShowStoredProse && isSubstantiveText(comments) && (
+        {isFull && isSubstantiveText(contextText) && (
           <section className="verse-card__section verse-card__context">
             <h3 className="verse-card__section-title">{labels.narrativeContext}</h3>
-            <FormattedCommentary text={comments} language="english" />
+            <FormattedCommentary text={contextText} language={contextLanguage} />
           </section>
         )}
 
         {/* Study deeply: source-attributed interpretations stay optional. */}
-        {isFull && canShowStoredProse && displayedCommentaries.length > 0 && (
+        {isFull && displayedCommentaries.length > 0 && (
           <details className="verse-card__disclosure verse-card__commentaries">
             <summary>
               {labels.commentaries}
@@ -469,7 +627,7 @@ export default function IlluminatedVerseCard({
       </div>
 
       {/* Tags */}
-      {canShowStoredProse && tags.length > 0 && variant === 'full' && (
+      {tags.length > 0 && variant === 'full' && (
         <div className="verse-card__tags">
           {tags.slice(0, variant === 'compact' ? 2 : 5).map(tag => (
             <span key={tag} className="tag">{tag}</span>

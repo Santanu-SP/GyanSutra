@@ -191,6 +191,23 @@
   font-size: var(--text-sanskrit-body);
 }
 
+.verse-card__localization-note {
+  margin: var(--space-3) 0 0;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  padding-left: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.verse-card__localization-note--loading {
+  color: var(--accent);
+}
+
+.verse-card__localization-note--fallback {
+  color: var(--text-secondary);
+}
+
 .verse-card__explanation {
   margin: 0;
   color: var(--text-secondary);

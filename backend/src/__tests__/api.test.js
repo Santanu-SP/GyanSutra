@@ -12,6 +12,7 @@ const mockCollections = {
 const mockEmbedText = jest.fn();
 const mockAskRag = jest.fn();
 const mockLogQaCall = jest.fn();
+const mockTranslateVerseContent = jest.fn();
 
 jest.mock('../services/firestore', () => ({
   collections: mockCollections,
@@ -26,6 +27,11 @@ jest.mock('../services/embedding', () => ({
 jest.mock('../services/rag', () => ({
   askRag: mockAskRag,
   logQaCall: mockLogQaCall,
+}));
+
+jest.mock('../services/verseTranslation', () => ({
+  TARGET_LANGUAGES: { bn: {}, mr: {}, te: {}, ta: {} },
+  translateVerseContent: mockTranslateVerseContent,
 }));
 
 const request = require('supertest');
@@ -48,6 +54,15 @@ describe('Gyan Sutra API', () => {
       _diagnostics: { timings: { totalMs: 12 } },
     });
     mockLogQaCall.mockResolvedValue(undefined);
+    mockTranslateVerseContent.mockResolvedValue({
+      requestedLanguage: 'bn',
+      language: 'bn',
+      translation: 'বাংলা অনুবাদ',
+      explanation: 'বাংলা ব্যাখ্যা',
+      context: '',
+      wordMeanings: [],
+      status: 'machine-assisted-unreviewed',
+    });
   });
 
   test('reports health without caching the response', async () => {
@@ -110,6 +125,33 @@ describe('Gyan Sutra API', () => {
 
     expect(response.body.id).toBe('bhagavad-gita_9_30');
     expect(response.body.embedding).toBeUndefined();
+  });
+
+  test('returns localized verse content for a supported reading language', async () => {
+    const verse = {
+      id: 'bhagavad-gita_2_47',
+      chapterNumber: 2,
+      verseNumber: 47,
+      translationEnglish: 'You have a right to action.',
+    };
+    mockGetDoc.mockResolvedValue(verse);
+
+    const response = await request(app)
+      .get('/api/verses/bhagavad-gita_2_47/localized?language=bn')
+      .expect(200);
+
+    expect(mockTranslateVerseContent).toHaveBeenCalledWith(verse, 'bn');
+    expect(response.body.content.translation).toBe('বাংলা অনুবাদ');
+    expect(response.headers['cache-control']).toMatch(/max-age=86400/);
+  });
+
+  test('rejects unsupported verse translation languages', async () => {
+    await request(app)
+      .get('/api/verses/bhagavad-gita_2_47/localized?language=fr')
+      .expect(400);
+
+    expect(mockGetDoc).not.toHaveBeenCalled();
+    expect(mockTranslateVerseContent).not.toHaveBeenCalled();
   });
 
   test('rejects invalid Ramayana coordinates without querying Firestore', async () => {

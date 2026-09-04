@@ -277,7 +277,7 @@ function acquireGenerationSlot() {
   });
 }
 
-async function tryModel(attempt, chatMessages, timeoutMs) {
+async function tryModel(attempt, chatMessages, timeoutMs, maxOutputTokens = MAX_OUTPUT_TOKENS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   timer.unref?.();
@@ -286,7 +286,7 @@ async function tryModel(attempt, chatMessages, timeoutMs) {
     const request = {
       model: attempt.model,
       messages: chatMessages,
-      max_tokens: MAX_OUTPUT_TOKENS,
+      max_tokens: maxOutputTokens,
     };
     if (attempt.provider === 'gemini') {
       request.reasoning_effort = GEMINI_REASONING_EFFORT;
@@ -331,7 +331,10 @@ async function tryModel(attempt, chatMessages, timeoutMs) {
   }
 }
 
-async function callLlmWithFallback(chatMessages) {
+async function callLlmWithFallback(chatMessages, { maxOutputTokens = MAX_OUTPUT_TOKENS } = {}) {
+  const boundedOutputTokens = Number.isSafeInteger(maxOutputTokens)
+    ? Math.min(Math.max(maxOutputTokens, 256), 2_500)
+    : MAX_OUTPUT_TOKENS;
   const attempts = buildProviderAttempts();
   if (attempts.length === 0) {
     const error = new Error('No AI provider is configured.');
@@ -364,7 +367,7 @@ async function callLlmWithFallback(chatMessages) {
       const remainingMs = GENERATION_DEADLINE_MS - (Date.now() - startedAt);
       if (remainingMs < 500) break;
       const timeoutMs = Math.min(MODEL_TIMEOUT_MS, remainingMs);
-      const result = await tryModel(attempt, chatMessages, timeoutMs);
+      const result = await tryModel(attempt, chatMessages, timeoutMs, boundedOutputTokens);
 
       if (result.answer) {
         markProviderSuccess(attempt.provider);
@@ -816,6 +819,7 @@ async function logQaCall({
 module.exports = {
   SIMILARITY_THRESHOLD,
   askRag,
+  callLlmWithFallback,
   cleanResponse,
   logQaCall,
   __test: {

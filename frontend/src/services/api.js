@@ -9,6 +9,7 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL || defaultBaseUrl).replace(/
 const IS_ANDROID_BUILD = import.meta.env.MODE === 'android';
 const NATIVE_API_CACHE = 'gyansutra-native-api-v1';
 const NATIVE_CACHE_LIMIT = 150;
+const localizedVerseRequests = new Map();
 
 async function readNativeCache(url) {
   if (!IS_ANDROID_BUILD || !('caches' in window)) return null;
@@ -83,6 +84,19 @@ export const getRamayanaSarga = (kandaNum, sargaNum) => request(`/verses/ramayan
 // ── Verses ────────────────────────────────────────────────────────────────────
 export const getVerse = (id) => request(`/verses/${id}`);
 export const getDailyVerse = () => request('/verses/daily');
+export const getLocalizedVerse = (id, language) => {
+  const key = `${id}:${language}`;
+  if (!localizedVerseRequests.has(key)) {
+    const pending = request(`/verses/${encodeURIComponent(id)}/localized?language=${encodeURIComponent(language)}`)
+      .then((response) => response.content)
+      .catch((error) => {
+        localizedVerseRequests.delete(key);
+        throw error;
+      });
+    localizedVerseRequests.set(key, pending);
+  }
+  return localizedVerseRequests.get(key);
+};
 
 // ── Search ────────────────────────────────────────────────────────────────────
 export const searchVerses = (q, limit = 10) =>
