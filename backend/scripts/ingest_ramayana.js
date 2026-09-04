@@ -129,7 +129,18 @@ async function run() {
       comments: item.comments || null,
       key_terms: [], // Would require NLP extraction
       source: itihasaTranslation ? 'AshuVj/Valmiki_Ramayan_Dataset + rahular/itihasa' : 'AshuVj/Valmiki_Ramayan_Dataset',
-      verified: hasEnglishExp ? true : false,
+      textSource: {
+        title: 'Valmiki Ramayana Dataset',
+        corpus: 'AshuVj/Valmiki_Ramayan_Dataset',
+      },
+      translationSources: {
+        english: itihasaTranslation
+          ? { author: 'M. N. Dutt', corpus: 'rahular/itihasa', type: 'translation' }
+          : { corpus: 'AshuVj/Valmiki_Ramayan_Dataset', type: 'supporting translation' },
+      },
+      verificationStatus: itihasaTranslation ? 'source-matched' : 'unreviewed',
+      // Presence of an explanation is not proof of editorial verification.
+      verified: false,
     };
 
     // Prepare string for embedding

@@ -35,8 +35,75 @@ import useLanguage from '../i18n/useLanguage';
 
 import './IlluminatedVerseCard.css';
 
-// Helper component to format long commentary texts into readable paragraphs
-// and separate word meanings from the actual commentary in English texts.
+const READING_COPY = {
+  en: {
+    transliteration: 'Transliteration',
+    translation: 'Translation',
+    translatedBy: 'Translated by',
+    compareTranslations: 'Compare translations',
+    wordMeaning: 'Word-by-word meaning',
+    explanation: 'Explanation',
+    narrativeContext: 'Narrative context',
+    commentaries: 'Traditional commentaries',
+    sources: 'Text and source notes',
+    sourceSeparation: 'Original text, translation, explanation, and commentary are presented separately.',
+    sourceCompiled: 'Named translations and commentaries retain their source attribution; this compiled digital record has not yet received independent critical-edition review.',
+    editorialPending: 'This record still requires independent editorial verification.',
+    matchedPending: 'The Sanskrit and English records were source-matched; independent editorial verification is still pending.',
+  },
+  hi: {
+    transliteration: 'लिप्यंतरण',
+    translation: 'अनुवाद',
+    translatedBy: 'अनुवादक',
+    compareTranslations: 'अन्य अनुवाद देखें',
+    wordMeaning: 'शब्दार्थ',
+    explanation: 'सरल व्याख्या',
+    narrativeContext: 'प्रसंग',
+    commentaries: 'परंपरागत टीकाएँ',
+    sources: 'पाठ और स्रोत',
+    sourceSeparation: 'मूल पाठ, अनुवाद, व्याख्या और टीका को अलग-अलग प्रस्तुत किया गया है।',
+    sourceCompiled: 'नामित अनुवादों और टीकाओं के स्रोत सुरक्षित रखे गए हैं; इस संकलित डिजिटल पाठ की स्वतंत्र समालोचनात्मक-संस्करण समीक्षा अभी शेष है।',
+    editorialPending: 'इस प्रविष्टि का स्वतंत्र संपादकीय सत्यापन अभी शेष है।',
+    matchedPending: 'संस्कृत और अंग्रेज़ी पाठ का स्रोत-मिलान हुआ है; स्वतंत्र संपादकीय सत्यापन अभी शेष है।',
+  },
+};
+
+function stripReferencePrefix(text) {
+  return String(text || '')
+    .replace(/^\s*[।|]{0,2}\s*\d+\.\d+\.?\s*[।|]{0,2}\s*/u, '')
+    .trim();
+}
+
+function cleanWordMeanings(items) {
+  if (!Array.isArray(items)) return [];
+
+  const seen = new Set();
+  return items.flatMap((item) => {
+    const raw = `${item?.word || ''} ${item?.meaning || ''}`
+      .replace(/^English Commentary By [^\d]+/i, '')
+      .replace(/^\s*\d+\.\d+\.?\s*/u, '')
+      .split(/\.?\s*Commentary\b/i)[0]
+      .trim();
+    const match = raw.match(/^([\u0900-\u097F]+)\s+(.+)$/u);
+    if (!match) return [];
+
+    const word = match[1].trim();
+    const meaning = match[2].trim().replace(/[.,;:]$/, '');
+    const key = `${word}:${meaning}`;
+    if (!meaning || seen.has(key)) return [];
+    seen.add(key);
+    return [{ word, meaning }];
+  });
+}
+
+function isSubstantiveText(text) {
+  const value = String(text || '').trim();
+  return value.length > 20 && !/did not comment on this (?:sloka|verse)/i.test(value);
+}
+
+// Format long source commentary into readable paragraphs. Some legacy source
+// records prepend vocabulary before a "Commentary" marker; the vocabulary is
+// deliberately removed here because it has its own, earlier reading section.
 const FormattedCommentary = ({ text, language, className = '', style = {} }) => {
   if (!text) return null;
   
@@ -71,50 +138,16 @@ const FormattedCommentary = ({ text, language, className = '', style = {} }) => 
 
   if (isEnglish) {
     const match = formattedText.match(/^(.*?)(?:\.\s*|\s+)Commentary[:\s]+(.*)$/is);
-    
-    if (match && match[1].length > 10 && match[2].length > 10) {
-      let wordMeaning = match[1].trim();
-      let commentary = match[2].trim();
-      
-      wordMeaning = wordMeaning.replace(/\?/g, ',');
-      const paragraphs = splitIntoParagraphs(commentary, false);
-      
-      return (
-        <div className={`formatted-commentary ${className}`} style={baseStyle}>
-          <div className="word-meaning-block" style={{
-            fontSize: '0.85rem',
-            color: 'var(--text-muted)',
-            marginBottom: '1.25rem',
-            padding: '0.85rem 1rem',
-            backgroundColor: 'rgba(201, 154, 78, 0.05)',
-            border: '1px solid rgba(201, 154, 78, 0.15)',
-            borderRadius: '8px',
-            borderLeft: '3px solid var(--accent)',
-            lineHeight: 1.6,
-            whiteSpace: 'normal'
-          }}>
-            <span style={{fontWeight: 600, display: 'block', marginBottom: '0.4rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.7rem'}}>
-              Word Meaning
-            </span>
-            <span style={{ fontStyle: 'italic' }}>{wordMeaning}</span>
-          </div>
-          <div className="commentary-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal' }}>
-            {paragraphs.map((p, idx) => (
-              <p key={idx} style={{ margin: 0 }}>{p}</p>
-            ))}
-          </div>
-        </div>
-      );
-    } else {
-      const paragraphs = splitIntoParagraphs(formattedText, false);
-      return (
-        <div className={`formatted-commentary ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
-          {paragraphs.map((p, idx) => (
-            <p key={idx} style={{ margin: 0 }}>{p}</p>
-          ))}
-        </div>
-      );
-    }
+    if (match && match[2].length > 10) formattedText = match[2].trim();
+
+    const paragraphs = splitIntoParagraphs(formattedText, false);
+    return (
+      <div className={`formatted-commentary ${className}`} style={{...baseStyle, display: 'flex', flexDirection: 'column', gap: '1.25rem', whiteSpace: 'normal'}}>
+        {paragraphs.map((p, idx) => (
+          <p key={idx} style={{ margin: 0 }}>{p}</p>
+        ))}
+      </div>
+    );
   } else {
     formattedText = formattedText.replace(/।([^\s\n])/g, '। $1');
     const paragraphs = splitIntoParagraphs(formattedText, true);
@@ -166,6 +199,7 @@ export default function IlluminatedVerseCard({
 }) {
   const { language, t } = useLanguage();
   const lang = language === 'hi' ? 'hindi' : 'english';
+  const labels = READING_COPY[language] || READING_COPY.en;
   const canShowStoredProse = language === 'en' || language === 'hi';
   const navigate = useNavigate();
 
@@ -176,8 +210,11 @@ export default function IlluminatedVerseCard({
     chapterNumber,
     verseNumber,
     sanskrit,
+    transliteration,
     translationEnglish,
     translationHindi,
+    translationSources,
+    additionalTranslations = [],
     explanationEnglish,
     explanationHindi,
     sourceCommentary,
@@ -185,9 +222,53 @@ export default function IlluminatedVerseCard({
     wordMeanings = [],
     tags = [],
     comments,
+    source,
+    sourceText,
+    verificationStatus,
   } = verse;
 
   const isClickable = !!onClick || variant === 'compact' || variant === 'citation';
+  const isFull = variant === 'full';
+  const isRamayana = verse.book === 'ramayana' || Boolean(verse.kanda);
+  const vocabulary = cleanWordMeanings(wordMeanings);
+  const translationText = canShowStoredProse
+    ? stripReferencePrefix(lang === 'hindi' ? translationHindi : translationEnglish)
+    : '';
+  const explanationText = canShowStoredProse
+    ? stripReferencePrefix(lang === 'hindi' ? explanationHindi : explanationEnglish)
+    : '';
+  const preferredCommentaryLanguage = lang;
+  const commentaries = detailedExplanations
+    .filter((item) => isSubstantiveText(item?.explanation))
+    .sort((a, b) => {
+      const rank = (item) => item.language === preferredCommentaryLanguage
+        ? 0
+        : item.language === 'sanskrit' ? 1 : 2;
+      return rank(a) - rank(b);
+    });
+  const alternateTranslations = additionalTranslations.filter((item) => (
+    item?.language === lang
+    && isSubstantiveText(item?.translation)
+    && stripReferencePrefix(item.translation) !== translationText
+  ));
+  const primaryTranslator = translationSources?.[lang]?.author
+    || (!isRamayana && lang === 'english' ? 'Swami Sivananda' : null)
+    || (!isRamayana && lang === 'hindi' ? 'Swami Tejomayananda' : null)
+    || (isRamayana && source?.includes('rahular/itihasa') && lang === 'english'
+      ? 'M. N. Dutt'
+      : null);
+  const hasExplanation = explanationText && explanationText !== translationText;
+  const hasCommentary = commentaries.length > 0 || isSubstantiveText(sourceCommentary);
+  const displayedCommentaries = commentaries.length > 0
+    ? commentaries
+    : hasCommentary
+      ? [{ author: labels.commentaries, language: lang, explanation: sourceCommentary }]
+      : [];
+  const sourceDescription = isRamayana
+    ? (source?.includes('rahular/itihasa')
+      ? 'Sanskrit: Valmiki Ramayana Dataset · English translation: M. N. Dutt via the Itihāsa corpus'
+      : 'Sanskrit and supporting text: Valmiki Ramayana Dataset')
+    : (sourceText || 'Bhagavad Gita');
 
   const handleClick = () => {
     if (onClick) {
@@ -239,168 +320,128 @@ export default function IlluminatedVerseCard({
         </div>
       )}
 
-      <div className="verse-card__content-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '1rem 0' }}>
-        
-        {/* LANGUAGE TOGGLE HEADER */}
-        {/* 1. KEY VOCABULARY (Word Meanings) */}
-        {canShowStoredProse && variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) && (
-          <section className="verse-section">
-            <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, marginBottom: '1rem' }}>
-              {t('keyVocabulary')}
-            </h3>
-            {verse.book === 'ramayana' ? (
-              <p style={{ lineHeight: 1.7, color: 'var(--text-secondary)', fontSize: '1rem' }}>
-                {translationEnglish}
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.5rem' }}>
-                {wordMeanings.map((wm, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                    <span className="devanagari" style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '1.05rem' }}>{wm.word}</span>
-                    <span style={{ color: 'var(--accent)', opacity: 0.7 }}>=</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{wm.meaning}</span>
-                  </div>
+      {isFull && transliteration && (
+        <section className="verse-card__section verse-card__transliteration-section">
+          <h3 className="verse-card__section-title">{labels.transliteration}</h3>
+          <p className="verse-card__transliteration">{transliteration}</p>
+        </section>
+      )}
+
+      <div className="verse-card__content-grid">
+        {/* Read: a direct translation follows the original text. */}
+        <section className="verse-card__section verse-card__translation-area">
+          <div className="verse-card__section-heading">
+            <h3 className="verse-card__section-title">{labels.translation}</h3>
+            {canShowStoredProse && primaryTranslator && (
+              <span className="verse-card__attribution">
+                {labels.translatedBy} {primaryTranslator}
+              </span>
+            )}
+          </div>
+          <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`}>
+            {translationText || t('translationUnavailable')}
+          </p>
+
+          {isFull && alternateTranslations.length > 0 && (
+            <details className="verse-card__disclosure verse-card__alternate-translations">
+              <summary>{labels.compareTranslations} ({alternateTranslations.length})</summary>
+              <div className="verse-card__alternate-list">
+                {alternateTranslations.map((item, index) => (
+                  <article className="verse-card__alternate" key={`${item.author}-${index}`}>
+                    <h4>{item.author || labels.translation}</h4>
+                    <p className={lang === 'hindi' ? 'devanagari' : ''}>
+                      {stripReferencePrefix(item.translation)}
+                    </p>
+                  </article>
                 ))}
               </div>
-            )}
-          </section>
-        )}
-        
-        {/* 2. SIMPLE MEANING */}
-        <section className="verse-section" style={{ borderTop: variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) ? 'var(--hairline)' : 'none', paddingTop: variant === 'full' && (wordMeanings.length > 0 || (verse.book === 'ramayana' && translationEnglish)) ? '1.5rem' : '0' }}>
-          <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, marginBottom: '1rem' }}>
-            {t('simpleMeaning')}
-          </h3>
-          <p className={`verse-card__translation ${lang === 'hindi' ? 'devanagari' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1.7, fontWeight: 500 }}>
-            {!canShowStoredProse
-              ? t('translationUnavailable')
-              : lang === 'hindi'
-              ? (translationHindi || "हिन्दी अनुवाद उपलब्ध नहीं है।") 
-              : (verse.book === 'ramayana' ? explanationEnglish : translationEnglish)}
-          </p>
+            </details>
+          )}
         </section>
 
-        {/* 3. AUTHENTIC COMMENTARY & GURU EXPLANATIONS */}
-        {canShowStoredProse && variant === 'full' && (detailedExplanations.length > 0 || sourceCommentary || comments || (verse.book !== 'ramayana' && (explanationEnglish || explanationHindi))) && (
-          <section className="verse-section" style={{ borderTop: 'var(--hairline)', paddingTop: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
-              <h3 className="section-title" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--accent)', opacity: 0.9, margin: 0 }}>
-                {t('commentary')}
-              </h3>
-              {detailedExplanations.length > 1 && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-                  {detailedExplanations.length} {t('sourceCount')}
-                </span>
-              )}
-            </div>
-            
-            <div className="commentary-list">
-              {detailedExplanations.length > 0 ? (
-                detailedExplanations.map((exp, idx) => (
-                  <div 
-                    key={idx} 
-                    className="commentary-item" 
-                    style={{ 
-                      marginBottom: '1.75rem',
-                      padding: '1.25rem',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(217, 119, 6, 0.03)',
-                      border: '1px solid rgba(217, 119, 6, 0.12)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <h4 className="commentary-author" style={{ 
-                        color: 'var(--accent)',
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        letterSpacing: '0.03em',
-                        margin: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent)' }}></span>
-                        {exp.author}
-                      </h4>
-                      {exp.language && (
-                        <span style={{ 
-                          fontSize: '0.7rem', 
-                          textTransform: 'uppercase', 
-                          letterSpacing: '0.1em',
-                          color: 'var(--text-muted)',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          border: 'var(--hairline)'
-                        }}>
-                          {exp.language}
-                        </span>
-                      )}
-                    </div>
-                    <FormattedCommentary 
-                      text={exp.explanation} 
-                      language={exp.language} 
-                      className="commentary-text"
-                      style={{ margin: 0 }}
-                    />
-                  </div>
-                ))
-              ) : verse.book === 'ramayana' && comments ? (
-                <div className="commentary-item" style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '8px', backgroundColor: 'rgba(217, 119, 6, 0.03)', border: '1px solid rgba(217, 119, 6, 0.12)' }}>
-                  <h4 className="commentary-author" style={{ 
-                    color: 'var(--accent)',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    marginBottom: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent)' }}></span>
-                    Valmiki Ramayana Commentary
-                  </h4>
-                  <FormattedCommentary 
-                    text={comments} 
-                    language="english" 
-                    className="commentary-text"
-                    style={{ margin: 0 }}
-                  />
+        {/* Understand: supporting lexical and explanatory material. */}
+        {isFull && canShowStoredProse && vocabulary.length > 0 && (
+          <details className="verse-card__disclosure verse-card__word-meanings" open>
+            <summary>{labels.wordMeaning}</summary>
+            <dl className="verse-card__word-list">
+              {vocabulary.map((item, index) => (
+                <div className="verse-card__word-item" key={`${item.word}-${index}`}>
+                  <dt className="devanagari">{item.word}</dt>
+                  <dd>{item.meaning}</dd>
                 </div>
-              ) : (explanationEnglish || explanationHindi) ? (
-                <div className="commentary-item" style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '8px', backgroundColor: 'rgba(217, 119, 6, 0.03)', border: '1px solid rgba(217, 119, 6, 0.12)' }}>
-                  <h4 className="commentary-author" style={{ 
-                    color: 'var(--accent)',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    marginBottom: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent)' }}></span>
-                    Translation and explanation
-                  </h4>
-                  <FormattedCommentary 
-                    text={lang === 'hindi' ? (explanationHindi || explanationEnglish) : (explanationEnglish || explanationHindi)} 
-                    language={lang} 
-                    className="commentary-text"
-                    style={{ margin: 0 }}
-                  />
-                </div>
-              ) : (
-                <FormattedCommentary 
-                  text={sourceCommentary} 
-                  language={lang} 
-                  className="commentary-text"
-                  style={{ margin: 0 }}
-                />
-              )}
-            </div>
+              ))}
+            </dl>
+          </details>
+        )}
+
+        {isFull && hasExplanation && (
+          <section className="verse-card__section">
+            <h3 className="verse-card__section-title">{labels.explanation}</h3>
+            <p className={`verse-card__explanation ${lang === 'hindi' ? 'devanagari' : ''}`}>
+              {explanationText}
+            </p>
           </section>
         )}
 
-        {/* Ask about this verse */}
-        {variant === 'full' && (
-          <section className="verse-section" style={{ borderTop: 'var(--hairline)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        {isFull && canShowStoredProse && isSubstantiveText(comments) && (
+          <section className="verse-card__section verse-card__context">
+            <h3 className="verse-card__section-title">{labels.narrativeContext}</h3>
+            <FormattedCommentary text={comments} language="english" />
+          </section>
+        )}
+
+        {/* Study deeply: source-attributed interpretations stay optional. */}
+        {isFull && canShowStoredProse && displayedCommentaries.length > 0 && (
+          <details className="verse-card__disclosure verse-card__commentaries">
+            <summary>
+              {labels.commentaries}
+              <span>{displayedCommentaries.length} {t('sourceCount')}</span>
+            </summary>
+            <div className="verse-card__commentary-list">
+              {displayedCommentaries.map((item, index) => (
+                <details
+                  className="verse-card__commentary-source"
+                  key={`${item.author}-${index}`}
+                  open={index === 0}
+                >
+                  <summary>
+                    <span>{item.author || labels.commentaries}</span>
+                    {item.language && <small>{item.language}</small>}
+                  </summary>
+                  <FormattedCommentary
+                    text={item.explanation}
+                    language={item.language}
+                    className="commentary-text"
+                  />
+                </details>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {isFull && (
+          <details className="verse-card__disclosure verse-card__source-notes">
+            <summary>{labels.sources}</summary>
+            <div className="verse-card__source-note-body">
+              <p>{sourceDescription}</p>
+              <p>{labels.sourceSeparation}</p>
+              {isRamayana && (
+                <p className="verse-card__verification-note">
+                  {verificationStatus === 'source-matched' || source?.includes('rahular/itihasa')
+                    ? labels.matchedPending
+                    : labels.editorialPending}
+                </p>
+              )}
+              {!isRamayana && (
+                <p className="verse-card__verification-note">{labels.sourceCompiled}</p>
+              )}
+            </div>
+          </details>
+        )}
+
+        {/* Ask only after the user has read the sourced material. */}
+        {isFull && (
+          <section className="verse-card__ask">
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.25rem', maxWidth: '400px' }}>
               {t('askVerseHelp')}
             </p>

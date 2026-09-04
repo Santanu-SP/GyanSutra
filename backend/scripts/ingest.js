@@ -39,6 +39,22 @@ const GITA_CHAPTERS = [
   { number: 18, titleSanskrit: 'मोक्षसंन्यासयोग', titleHindi: 'मोक्ष संन्यास योग', titleEnglish: 'The Yoga of Liberation through Renunciation', verseCount: 78 }
 ];
 
+function parseWordMeanings(rawValue, chapterNumber, verseNumber) {
+  const vocabularyOnly = String(rawValue || '')
+    .replace(/^English Commentary By [^\d]+/i, '')
+    .replace(new RegExp(`^\\s*${chapterNumber}\\.${verseNumber}\\.?\\s*`), '')
+    .split(/\.?\s*Commentary\b/i)[0];
+
+  return vocabularyOnly
+    .split('?')
+    .map((entry) => entry.trim().match(/^([\u0900-\u097F]+)\s+(.+)$/u))
+    .filter(Boolean)
+    .map((match) => ({
+      word: match[1].trim(),
+      meaning: match[2].trim().replace(/[.,;:]$/, ''),
+    }));
+}
+
 async function main() {
   console.log('╔══════════════════════════════════════════════╗');
   console.log('║   Gyan Sutra - API Ingestion Engine Live     ║');
@@ -74,13 +90,11 @@ async function main() {
         // Use existing word meanings (we don't need to re-parse unless it's the raw format)
         // Since the previous script parsed rawWordMeanings from API, and our local gita.json
         // has word_meanings as a string, let's parse it if needed, or just store it as string
-        const wordMeaningsStr = localVerse.word_meanings || '';
-        const parsedWordMeanings = wordMeaningsStr
-          ? wordMeaningsStr.split('?').map(item => {
-            const parts = item.split(' ');
-            return { word: parts[0]?.trim() || '', meaning: parts.slice(1).join(' ')?.trim() || '' };
-          }).filter(item => item.word && !item.word.includes('Commentary'))
-          : [];
+        const parsedWordMeanings = parseWordMeanings(
+          localVerse.word_meanings,
+          ch.number,
+          vNum,
+        );
 
         const embeddingText = `Chapter ${ch.number}, Verse ${vNum}\n${sanskritText}\n${transEng}\n${transHindi}`;
 
@@ -99,8 +113,14 @@ async function main() {
             wordMeanings: parsedWordMeanings,
             translationHindi: transHindi,
             translationEnglish: transEng,
+            translationSources: {
+              english: { author: 'Swami Sivananda', type: 'translation' },
+              hindi: { author: 'Swami Tejomayananda', type: 'translation' },
+            },
+            additionalTranslations: localVerse.additional_translations || [],
             detailedExplanations: localVerse.detailed_explanations || [], // <--- Injecting the new rich explanations here!
             sourceText: SOURCE.title,
+            verificationStatus: 'source-compiled',
             tags: [],
             embedding: vector ? FieldValue.vector(vector) : null,
           },
