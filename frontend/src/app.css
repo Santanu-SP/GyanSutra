@@ -6,6 +6,10 @@
 /* ── App root ───────────────────────────────────────────────────────── */
 .gs-app {
   min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text-primary);
   display: flex;
@@ -273,6 +277,9 @@
 /* ── App body ───────────────────────────────────────────────────────── */
 .gs-body {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
   transition: padding-right var(--transition-slow);
   /* Reserve space at bottom for mobile nav */
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
@@ -282,7 +289,9 @@
    at a stable physical size, as it would in a native Android application. */
 .gs-reading-content {
   width: calc(100% * var(--reading-scale-inverse, 1));
+  max-width: calc(100% * var(--reading-scale-inverse, 1));
   min-height: 1px;
+  overflow-x: clip;
   zoom: var(--reading-scale, 1);
   transform-origin: top left;
 }

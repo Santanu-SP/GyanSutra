@@ -4,6 +4,10 @@
 
 .verse-card {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
   border: var(--hairline);
   background: var(--bg-surface);
   padding: var(--space-8);
@@ -108,6 +112,8 @@
   color: var(--text-primary);
   margin-bottom: var(--space-4);
   font-weight: 400;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .verse-card--compact .verse-card__sanskrit {
@@ -176,6 +182,7 @@
   font-size: var(--text-base);
   color: var(--text-secondary);
   line-height: var(--leading-loose);
+  overflow-wrap: anywhere;
 }
 
 .verse-card__translation.devanagari {

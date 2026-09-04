@@ -49,6 +49,8 @@
   font-size: var(--text-2xl);
   font-weight: 400;
   color: var(--text-primary);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .chapter-reader__title-en {
@@ -85,6 +87,7 @@
 .chapter-reader__verse-area {
   margin-bottom: var(--space-6);
   min-height: 320px;
+  min-width: 0;
 }
 
 /* Navigation */
