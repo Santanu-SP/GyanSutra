@@ -6,6 +6,12 @@ Gyan Sutra is an open-source, highly extensible digital scripture engine. The pl
 
 Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommendation rails based on embedding cosine similarity, and an AI-driven spiritual guide called **Sarathi (सारथि)** that answers natural-language reflections using strict retrieval-grounded generation (RAG) with verifiable citations.
 
+Read-aloud follows the shloka, meaning, and optional explanation/context with
+breath pauses and language-aware voice selection. For expressive, free-to-run
+Indic Parler-TTS voices, configure the separate
+[narration worker](backend/narration/README.md). Without that worker, the app
+uses available device voices and reports the fallback.
+
 ---
 
 ## 🛠️ System Architecture

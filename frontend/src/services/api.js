@@ -11,6 +11,28 @@ const NATIVE_API_CACHE = 'gyansutra-native-api-v1';
 const NATIVE_CACHE_LIMIT = 150;
 const localizedVerseRequests = new Map();
 
+export async function fetchNarrationAudio(segment, signal) {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  if (signal.aborted) controller.abort();
+  signal.addEventListener('abort', abort, { once: true });
+  const timeout = setTimeout(abort, 90_000);
+  try {
+    const response = await fetch(`${BASE_URL}/api/narration`, {
+      method: 'POST', signal: controller.signal,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: segment.text, locale: segment.locale, style: segment.kind === 'verse' ? 'recitation' : 'meaning' }),
+    });
+    if (!response.ok || !response.headers.get('content-type')?.includes('audio/')) {
+      throw new Error('Natural narration unavailable');
+    }
+    return await response.blob();
+  } finally {
+    clearTimeout(timeout);
+    signal.removeEventListener('abort', abort);
+  }
+}
+
 async function readNativeCache(url) {
   if (!IS_ANDROID_BUILD || !('caches' in window)) return null;
   const cache = await window.caches.open(NATIVE_API_CACHE);

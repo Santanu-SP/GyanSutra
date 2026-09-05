@@ -105,6 +105,7 @@ app.use('/api/verses', versesRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/ask', askRouter);
 app.use('/api/recommendations', recommendationsRouter);
+app.use('/api/narration', require('./routes/narration'));
 
 app.use(sitemapRoute);
 app.use(robotsRoute);
