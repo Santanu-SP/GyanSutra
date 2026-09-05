@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test:narration": "node --test src/utils/narration.test.js src/services/narrationPlayer.test.js",
+    "test:narration": "node --test src/utils/narration.test.js src/utils/recitations.test.js src/services/narrationPlayer.test.js src/services/recitationAudio.test.js",
     "dev": "vite",
     "prebuild": "node scripts/generate-sitemap.js",
     "build": "vite build",

@@ -443,6 +443,9 @@ export default function IlluminatedVerseCard({
       {isFull && (
         <ReadAloudControls
           verseKey={id || `${chapterNumber}-${verseNumber}`}
+          book={isRamayana ? 'ramayana' : verse.source_id || verse.book || (id?.startsWith('bhagavad-gita_') ? 'bhagavad-gita' : undefined)}
+          chapterNumber={chapterNumber}
+          verseNumber={verseNumber}
           sanskrit={sanskrit}
           translation={translationText}
           explanation={readAloudExplanation}

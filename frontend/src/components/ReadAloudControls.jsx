@@ -4,6 +4,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 
 import { buildNarration, LANGUAGE_LOCALES, rankedVoices } from '../utils/narration';
 import { startNarrationSession } from '../services/readAloud';
+import { getVerseRecording, RAMAYANA_COLLECTION } from '../utils/recitations';
 import './ReadAloudControls.css';
 
 const COPY = {
@@ -66,6 +67,14 @@ const COPY = {
 const CONTENT_LANGUAGE_CODES = {
   english: 'en', hindi: 'hi', bengali: 'bn', marathi: 'mr', telugu: 'te', tamil: 'ta',
 };
+const RECITATION_COPY = {
+  en: { automatic: 'Best available device voice', voice: 'Meaning voice', recorded: 'Human recitation', device: 'Device voice', failed: 'Recording unavailable. Reading the shloka with a device voice.', credit: 'Recitation', collection: 'Human Ramayana recordings by sarga (Internet Archive)' },
+  hi: { automatic: 'उपलब्ध सर्वोत्तम डिवाइस आवाज़', voice: 'अर्थ की आवाज़', recorded: 'मानव स्वर में पाठ', device: 'डिवाइस की आवाज़', failed: 'रिकॉर्डिंग उपलब्ध नहीं है। डिवाइस की आवाज़ से श्लोक पढ़ा जा रहा है।', credit: 'पाठ', collection: 'सर्ग अनुसार रामायण का मानव स्वर में पाठ (Internet Archive)' },
+  bn: { automatic: 'সেরা উপলব্ধ ডিভাইস কণ্ঠ', voice: 'অর্থের কণ্ঠ', recorded: 'মানবকণ্ঠে আবৃত্তি', device: 'ডিভাইসের কণ্ঠ', failed: 'রেকর্ডিং পাওয়া যাচ্ছে না। ডিভাইসের কণ্ঠে শ্লোক পড়া হচ্ছে।', credit: 'আবৃত্তি', collection: 'সর্গ অনুযায়ী মানবকণ্ঠে রামায়ণ পাঠ (Internet Archive)' },
+  mr: { automatic: 'उपलब्ध सर्वोत्तम डिवाइस आवाज', voice: 'अर्थाचा आवाज', recorded: 'मानवी आवाजातील पठण', device: 'डिवाइसचा आवाज', failed: 'रेकॉर्डिंग उपलब्ध नाही. डिवाइसच्या आवाजात श्लोक वाचत आहे.', credit: 'पठण', collection: 'सर्गानुसार रामायणाचे मानवी पठण (Internet Archive)' },
+  te: { automatic: 'అందుబాటులో ఉన్న ఉత్తమ పరికరం స్వరం', voice: 'అర్థం చదివే స్వరం', recorded: 'మానవ స్వరంలో పఠనం', device: 'పరికరం స్వరం', failed: 'రికార్డింగ్ అందుబాటులో లేదు. పరికరం స్వరంతో శ్లోకం చదువుతోంది.', credit: 'పఠనం', collection: 'సర్గాల వారీగా మానవ స్వరంలో రామాయణ పఠనం (Internet Archive)' },
+  ta: { automatic: 'கிடைக்கும் சிறந்த சாதனக் குரல்', voice: 'பொருளை வாசிக்கும் குரல்', recorded: 'மனிதக் குரலில் பாராயணம்', device: 'சாதனத்தின் குரல்', failed: 'பதிவு கிடைக்கவில்லை. சாதனத்தின் குரலில் சுலோகம் வாசிக்கப்படுகிறது.', credit: 'பாராயணம்', collection: 'சர்க்கம் வாரியாக மனிதக் குரலில் இராமாயணப் பாராயணம் (Internet Archive)' },
+};
 const SPEEDS = [
   { value: 0.8, label: '0.8×' },
   { value: 0.95, label: '0.95×' },
@@ -74,6 +83,9 @@ const SPEEDS = [
 
 export default function ReadAloudControls({
   verseKey,
+  book,
+  chapterNumber,
+  verseNumber,
   sanskrit,
   translation,
   explanation,
@@ -83,6 +95,8 @@ export default function ReadAloudControls({
   disabled = false,
 }) {
   const labels = COPY[language] || COPY.en;
+  const audioLabels = RECITATION_COPY[language] || RECITATION_COPY.en;
+  const recording = getVerseRecording({ book, chapterNumber, verseNumber });
   const spokenLabels = COPY[CONTENT_LANGUAGE_CODES[contentLanguage]] || COPY.en;
   const preferredLocale = LANGUAGE_LOCALES[contentLanguage] || 'en-IN';
   const [status, setStatus] = useState('idle');
@@ -93,6 +107,7 @@ export default function ReadAloudControls({
   const [selectedVoice, setSelectedVoice] = useState('');
   const [progress, setProgress] = useState(null);
   const [fallback, setFallback] = useState(false);
+  const [audioSource, setAudioSource] = useState('device');
   const sessionRef = useRef(null);
 
   const matchingVoices = useMemo(() => rankedVoices(voices, preferredLocale), [preferredLocale, voices]);
@@ -124,7 +139,7 @@ export default function ReadAloudControls({
     setProgress(null);
     setFallback(false);
     return () => { sessionRef.current?.stop(); sessionRef.current = null; };
-  }, [verseKey, sanskrit, translation, explanation, context, contentLanguage, language, disabled]);
+  }, [verseKey, book, chapterNumber, verseNumber, sanskrit, translation, explanation, context, contentLanguage, language, disabled]);
 
   const listen = async () => {
     if (sessionRef.current) {
@@ -140,6 +155,7 @@ export default function ReadAloudControls({
     setError('');
     setFallback(false);
     setStatus('preparing');
+    setAudioSource(recording ? 'recording' : 'device');
     const session = startNarrationSession(() => {
       if (sessionRef.current === session) {
         sessionRef.current = null;
@@ -150,13 +166,14 @@ export default function ReadAloudControls({
     sessionRef.current = session;
     try {
       await session.play(segments, {
-        voices, selectedVoice, rate,
+        voices, selectedVoice, rate, recording,
+        onSource: setAudioSource,
         onSegment: (segment, index, total, phase) => {
           if (sessionRef.current !== session) return;
           setStatus(phase);
           setProgress({ kind: segment.kind, index: index + 1, total });
         },
-        onFallback: () => setFallback(true),
+        onFallback: (reason) => setFallback(reason),
       });
       if (sessionRef.current === session) session.stop();
     } catch (failure) {
@@ -215,9 +232,9 @@ export default function ReadAloudControls({
 
         {matchingVoices.length > 0 && (
           <label className="read-aloud__field read-aloud__field--voice">
-            <span>{labels.voice}</span>
+            <span>{audioLabels.voice}</span>
             <select value={selectedVoice} onChange={(event) => setSelectedVoice(event.target.value)} disabled={active}>
-              <option value="">{labels.deviceDefault}</option>
+              <option value="">{audioLabels.automatic}</option>
               {matchingVoices.map((voice) => (
                 <option key={`${voice.voiceURI}-${voice.index}`} value={voice.voiceURI}>{voice.name}</option>
               ))}
@@ -228,9 +245,24 @@ export default function ReadAloudControls({
 
       <p className="read-aloud__status" aria-live="polite">
         {statusMessage || labels.sequence}
-        {active && progress && ` · ${labels[progress.kind]} · ${progress.index}/${progress.total}`}
-        {active && fallback && ` ${labels.fallback}`}
+        {active && progress && ` · ${labels[progress.kind]} · ${audioSource === 'recording' ? audioLabels.recorded : audioLabels.device}`}
+        {active && fallback && ` ${fallback === 'recording' ? audioLabels.failed : labels.fallback}`}
       </p>
+
+      {recording && (
+        <p className="read-aloud__credit">
+          {audioLabels.credit}: <a href={recording.sourceURL} target="_blank" rel="noopener noreferrer">{recording.artist}</a>
+          {' · '}<a href={recording.licenseURL} target="_blank" rel="noopener noreferrer">{recording.license}</a>
+          {' · '}{audioLabels.voice}: {audioLabels.device}
+        </p>
+      )}
+      {book === 'ramayana' && (
+        <p className="read-aloud__credit">
+          <a href={RAMAYANA_COLLECTION.sourceURL} target="_blank" rel="noopener noreferrer"
+            onClick={() => sessionRef.current?.stop()}>{audioLabels.collection}</a>
+          {' · '}{RAMAYANA_COLLECTION.artist}
+        </p>
+      )}
 
       {status === 'error' && Capacitor.getPlatform() === 'android' && (
         <button type="button" className="read-aloud__install" onClick={installVoice}>

@@ -4,7 +4,7 @@ import { deviceVoice } from '../utils/narration.js';
 
 const abortError = () => new DOMException('Reading stopped', 'AbortError');
 
-export function createNarrationPlayer({ TextToSpeech, fetchNarrationAudio, Audio: AudioElement, online }) {
+export function createNarrationPlayer({ TextToSpeech, fetchNarrationAudio, fetchRecitationAudio, Audio: AudioElement, online }) {
   let currentSession;
   return function startNarrationSession(onInterrupt) {
     currentSession?.stop();
@@ -31,13 +31,59 @@ export function createNarrationPlayer({ TextToSpeech, fetchNarrationAudio, Audio
         }
         onInterrupt();
       },
-      async play(segments, { voices, selectedVoice, rate, onSegment, onFallback }) {
+      async play(segments, { voices, selectedVoice, rate, onSegment, onFallback,
+        recording, mode = 'recorded', onSource = () => {} }) {
         await primed;
         if (signal.aborted) throw abortError();
         await TextToSpeech.stop().catch(() => {});
-        let useNeural = !selectedVoice && online();
-        if (!selectedVoice && !useNeural) onFallback();
+        let useNeural = mode === 'neural' && !selectedVoice && online();
+        if (mode === 'neural' && !selectedVoice && !useNeural) onFallback('neural');
         let currentVoices = voices;
+        const playBlob = async (blob) => {
+          if (signal.aborted) throw abortError();
+          if (sourceURL) URL.revokeObjectURL(sourceURL);
+          sourceURL = URL.createObjectURL(blob);
+          audio.src = sourceURL;
+          audio.playbackRate = rate;
+          audio.preservesPitch = true;
+          let timer;
+          try {
+            await abortable(new Promise((resolve, reject) => {
+              timer = setTimeout(() => reject(new Error('Audio did not start')), 15_000);
+              audio.onplaying = () => clearTimeout(timer);
+              audio.onended = resolve;
+              audio.onerror = () => reject(new Error('Audio playback failed'));
+              audio.play().catch(reject);
+            }), signal);
+          } finally {
+            clearTimeout(timer);
+            audio.onended = null;
+            audio.onerror = null;
+            audio.onplaying = null;
+          }
+        };
+        // A whole, unedited recording replaces the complete Sanskrit section.
+        // Never replay its individual verse chunks after successful playback.
+        if (recording && segments[0]?.kind === 'verse') {
+          onSegment(segments[0], 0, segments.length, 'preparing');
+          let blob;
+          try { blob = await abortable(fetchRecitationAudio(recording, signal), signal); }
+          catch {
+            if (signal.aborted) throw abortError();
+            onFallback('recording');
+          }
+          if (blob) {
+            onSource('recording');
+            onSegment(segments[0], 0, segments.length, 'playing');
+            // Playback failure stops the reading; a partly heard shloka must not
+            // restart unexpectedly in another voice.
+            await playBlob(blob);
+            const verseParts = segments.filter((part) => part.kind === 'verse');
+            const lastVerse = verseParts[verseParts.length - 1];
+            segments = segments.filter((part) => part.kind !== 'verse');
+            if (segments.length) await pause(lastVerse.pause / rate, signal);
+          }
+        }
         // Prepare one segment ahead while the current one plays. Always settle
         // the promise so Stop cannot leave an unhandled fetch rejection.
         const prepare = (segment) => fetchNarrationAudio(segment, signal)
@@ -57,25 +103,16 @@ export function createNarrationPlayer({ TextToSpeech, fetchNarrationAudio, Audio
             } catch {
               if (signal.aborted) throw abortError();
               useNeural = false;
-              onFallback();
+              onFallback('neural');
             }
           }
           if (signal.aborted) throw abortError();
           onSegment(segment, index, segments.length, 'playing');
           if (blob) {
-            if (sourceURL) URL.revokeObjectURL(sourceURL);
-            sourceURL = URL.createObjectURL(blob);
-            audio.src = sourceURL;
-            audio.playbackRate = rate;
-            audio.preservesPitch = true;
-            await abortable(new Promise((resolve, reject) => {
-              audio.onended = resolve;
-              audio.onerror = () => reject(new Error('Audio playback failed'));
-              audio.play().catch(reject);
-            }), signal);
-            audio.onended = null;
-            audio.onerror = null;
+            onSource('neural');
+            await playBlob(blob);
           } else {
+            onSource('device');
             // Retry enumeration at playback time; web voices often arrive after mount.
             if (!currentVoices.length) {
               const result = await TextToSpeech.getSupportedVoices().catch(() => ({ voices: [] }));

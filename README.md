@@ -6,11 +6,11 @@ Gyan Sutra is an open-source, highly extensible digital scripture engine. The pl
 
 Gyan Sutra features chapter-by-chapter reading, semantic/neural search, recommendation rails based on embedding cosine similarity, and an AI-driven spiritual guide called **Sarathi (सारथि)** that answers natural-language reflections using strict retrieval-grounded generation (RAG) with verifiable citations.
 
-Read-aloud follows the shloka, meaning, and optional explanation/context with
-breath pauses and language-aware voice selection. For expressive, free-to-run
-Indic Parler-TTS voices, configure the separate
-[narration worker](backend/narration/README.md). Without that worker, the app
-uses available device voices and reports the fallback.
+Read-aloud plays human Sanskrit recordings for all 701 Gita verses, followed by
+the meaning and optional explanation/context using a device voice. Recent
+recordings are cached for offline reuse. Ramayana uses device narration with
+links to human sarga recordings. No voice server is needed by default. See
+[audio sources, licenses and optional voice alternatives](backend/narration/README.md).
 
 ---
 
